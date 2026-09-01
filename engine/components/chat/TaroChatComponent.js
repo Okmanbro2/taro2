@@ -76,10 +76,13 @@ var TaroChatComponent = TaroEventingClass.extend({
 			// set character limit to 100 characters
 			if (message.length > 80) message = message.substr(0, 80);
 
+			console.log('[CHAT DEBUG] sendChatMessage called. message:', message, 'player:', player, 'banChat:', player && player._stats && player._stats.banChat);
+
 			// don't send chat message if user is ban or unverified.
 			if (taro.env != 'local' && player && player._stats.banChat) {
-				// don't send message
+				console.log('[CHAT DEBUG] DROPPED client-side: player is banChat and taro.env is not local. taro.env =', taro.env);
 			} else {
+				console.log('[CHAT DEBUG] sending taroChatMsg to server, roomId 1');
 				taro.network.send('taroChatMsg', { text: message, roomId: '1' });
 			}
 			$('#message').blur();
