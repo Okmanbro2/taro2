@@ -2,7 +2,7 @@
 var NetIo = {};
 
 /**
- * Define the debug options object.
+ * Define the debug options object
  * @type {Object}
  * @private
  */
