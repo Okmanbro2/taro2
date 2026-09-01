@@ -412,7 +412,7 @@ var Server = TaroClass.extend({
 
 			return res.render('index.ejs', options);
 		});
-		self.httpServer = app.listen(port, () => console.log(`Express listening on port ${port}!`));
+		this.httpServer = app.listen(port, () => console.log(`Express listening on port ${port}!`));
 	},
 
 	// run a specific game in this server
