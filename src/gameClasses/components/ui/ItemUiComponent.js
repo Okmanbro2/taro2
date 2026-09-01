@@ -549,7 +549,10 @@ var ItemUiComponent = TaroEntity.extend({
 		var ownerPlayer = taro.client.myPlayer;
 		var ownerUnit = ownerPlayer.getSelectedUnit();
 		if (stats.description) {
-			info += `<p class="mb-1"><span class="item-description">${taro.clientSanitizer(stats.description)} </span></p>`;
+			// Item descriptions are admin/creator-authored rich text (colors, <b>, <h3>, etc,
+			// written in the game editor) - not untrusted player input - so they're inserted
+			// raw here, same as the rest of this function's creator-authored fields.
+			info += `<p class="mb-1"><span class="item-description">${stats.description} </span></p>`;
 		}
 
 		if (stats.controls.equipRequirement) {
