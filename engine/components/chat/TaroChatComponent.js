@@ -158,8 +158,12 @@ var TaroChatComponent = TaroEventingClass.extend({
 					});
 			}
 
-			// append new message mobile
-			$('#mobile-chat-box #chat-history').each(function () {
+			// append new message
+			// NOTE: was '#mobile-chat-box #chat-history' — that wrapper element doesn't exist
+			// in this repo's templates (src/templates/chat.ejs only defines #chat-box > #chat-history),
+			// so messages were being built but never inserted into the page. Fixed to target the
+			// chat history element that's actually shipped.
+			$('#chat-history').each(function () {
 				messageCount = $(this).find('div').length;
 				if (messageCount > 50) {
 					$(this).find('div:first-child').remove();
