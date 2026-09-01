@@ -26,9 +26,12 @@ var TaroChatClient = {
 	_onMessageFromServer: function (data) {
 		var self = taro.chat;
 
+		console.log('[CHAT DEBUG] _onMessageFromServer received:', JSON.stringify(data));
+
 		// message from a player
 		if (data && data.from) {
 			var player = taro.game.getPlayerByClientId(data.from);
+			console.log('[CHAT DEBUG] client-side player lookup for message sender:', player ? player._stats.name : 'NOT FOUND');
 
 			var isPlayerMuted =
 				taro.client.myPlayer &&
@@ -61,13 +64,15 @@ var TaroChatClient = {
 	_onJoinedRoom: function (data) {
 		var self = taro.chat;
 
+		console.log('[CHAT DEBUG] _onJoinedRoom (client) received:', JSON.stringify(data));
+
 		// Emit the event and if it wasn't cancelled (by returning true) then
 		// process this ourselves
 		if (!self.emit('joinedRoom', [data])) {
 			if (data.joined === true) {
-				// console.log('Server says we have joined room:', data.roomId);
+				console.log('[CHAT DEBUG] confirmed joined room:', data.roomId);
 			} else {
-				// console.log('Server says we failed to join room:', data.roomId);
+				console.log('[CHAT DEBUG] failed to join room:', data.roomId);
 			}
 		}
 	},
