@@ -316,6 +316,19 @@ canvas {
   z-index: 120000;
 }
 
+/* Shop item popover (see ShopComponent.getItemPopoverHtml): the content div is
+   built with class="modal-bg-color text-white", which assumes a dark popover
+   background. That background was never actually applied (the .popover({style})
+   option isn't a real Bootstrap option), so it fell back to Bootstrap's default
+   white popover, making the white text invisible. This restores the intended
+   dark background so the text is visible again. */
+.popover .modal-bg-color {
+  background-color: #272e37e5;
+  color: #fff;
+  padding: 8px;
+  border-radius: 4px;
+}
+
 #counter {
   display: flex;
   justify-content: center;
