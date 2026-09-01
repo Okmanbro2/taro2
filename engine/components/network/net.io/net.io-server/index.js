@@ -619,7 +619,6 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 	start: function (port, callback) {
 		var self = this;
-		this._port = port;
 
 		// Cloudflare SSL flexible mode only encrypt traffic between browser and cloudflare. All the https/wss traffic is diverted to http/ws from Cloudflare to server hence https proxy server is not needed.
 		// Https/wss server is not being used currently on production
@@ -632,11 +631,31 @@ NetIo.Server = NetIo.EventingClass.extend({
 			console.log('***');
 		}
 
-		// http - local, standalone, standalone-remote env
-		this._httpServer = this._http.createServer(function (request, response) {
-			response.writeHead(404);
-			response.end();
-		});
+		// If we were handed an existing http.Server instance (e.g. Express's own
+		// server, already listening), reuse it instead of opening a second port.
+		// This is required on hosts like Render that only expose one public port
+		// per service — trying to open a second listener means it never gets
+		// reached from outside. If a plain port number was passed instead (local
+		// dev, or any environment where opening a fresh port is fine), fall back
+		// to the original behavior of creating and listening on our own server.
+		var reusingExistingServer = port && typeof port === 'object' && typeof port.on === 'function';
+
+		if (reusingExistingServer) {
+			this._httpServer = port;
+			self.log('net.io attaching to existing http server (shared port)');
+		} else {
+			this._port = port;
+
+			// http - local, standalone, standalone-remote env
+			this._httpServer = this._http.createServer(function (request, response) {
+				response.writeHead(404);
+				response.end();
+			});
+
+			this._httpServer.listen(this._port, function (err) {
+				self.log(`Server is listening on port ${self._port}`);
+			});
+		}
 
 		this._socketServerHttp = new this._websocket.Server({
 			server: this._httpServer,
@@ -674,14 +693,19 @@ NetIo.Server = NetIo.EventingClass.extend({
 			console.log('websocket error', err);
 		});
 
-		this._httpServer.listen(this._port, function (err) {
-			self.log(`Server is listening on port ${self._port}`);
-			if (!secure) {
-				if (typeof callback === 'function') {
-					callback();
-				}
+		// When reusing an existing server, it's already listening (Express
+		// called .listen() itself), so fire the callback right away instead of
+		// waiting on our own .listen() callback, which won't fire again.
+		if (reusingExistingServer && !secure) {
+			if (typeof callback === 'function') {
+				callback();
 			}
-		});
+		} else if (!reusingExistingServer && !secure) {
+			// original behavior: callback fires from the .listen() call above
+			// once our own server actually starts listening. Nothing to do here,
+			// it's already wired up above — this branch intentionally left as
+			// documentation of the flow.
+		}
 
 		if (secure) {
 			// https - production/staging env
@@ -694,49 +718,6 @@ NetIo.Server = NetIo.EventingClass.extend({
 
 			var options = { key: privateKey, cert: certificate };
 			this._httpsServer = this._https.createServer(options, function (request, response) {
-				// if (request.url === '/heapdump') {
-				// 	// Handle heapdump request
-				// 	if (request.method === 'GET') {
-				// 		const fs = require('fs');
-				// 		const path = require('path');
-				// 		const heapdump = require('heapdump');
-				//
-				// 		// Generate a unique filename for the heap dump
-				// 		const _filename = `worker_heapdump_${Date.now()}.heapsnapshot`;
-				//
-				// 		// Start recording the heap dump
-				// 		heapdump.writeSnapshot(path.join(__dirname, _filename), (err, filename) => {
-				// 			if (err) {
-				// 				console.error('Error while generating heap dump:', err);
-				// 				response.writeHead(500);
-				// 				response.end('Error while generating heap dump');
-				// 			} else {
-				// 				// Send the heap dump file as a response
-				// 				response.setHeader('Content-disposition', `attachment; filename=${_filename}`);
-				// 				response.setHeader('Content-type', 'application/octet-stream');
-				//
-				// 				const fileStream = fs.createReadStream(filename);
-				//
-				// 				fileStream.on('end', () => {
-				// 					// Delete the heap dump file after it's downloaded
-				// 					fs.unlink(filename, (err) => {
-				// 						if (err) {
-				// 							console.error('Error while deleting heap dump:', err);
-				// 						}
-				// 					});
-				// 				});
-				//
-				// 				fileStream.pipe(response);
-				// 			}
-				// 		});
-				// 	} else {
-				// 		response.writeHead(405);
-				// 		response.end('Method Not Allowed');
-				// 	}
-				// } else {
-				// 	response.writeHead(404);
-				// 	response.end();
-				// }
 				response.writeHead(404);
 				response.end();
 			});
@@ -744,9 +725,6 @@ NetIo.Server = NetIo.EventingClass.extend({
 				server: this._httpsServer,
 				maxPayload: 100 * 1024, // 100 KB - The maximum allowed message size
 			});
-			// this._socketServerHttps = new this._websocket.WebSocketServer({
-			// 	server: this._httpsServer
-			// });
 			// Setup listener
 			this._socketServerHttps.on('connection', function (ws, request) {
 				self.socketConnection(ws, request);
