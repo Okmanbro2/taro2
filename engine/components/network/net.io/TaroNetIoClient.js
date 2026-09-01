@@ -54,7 +54,8 @@ var TaroNetIoClient = {
 						if (self._state < 2) {
 							if (window.isStandalone) {
 								console.log('connecting to a standalone server');
-								url = `ws://${window.location.hostname}:2001`;
+							    var wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+							    url = `${wsProtocol}//${window.location.host}`;
 							} else {
 								url = server.url;
 							}
