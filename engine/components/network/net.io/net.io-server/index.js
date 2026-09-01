@@ -696,10 +696,16 @@ NetIo.Server = NetIo.EventingClass.extend({
 		// When reusing an existing server, it's already listening (Express
 		// called .listen() itself), so fire the callback right away instead of
 		// waiting on our own .listen() callback, which won't fire again.
+		
 		if (reusingExistingServer && !secure) {
-			if (typeof callback === 'function') {
-				callback();
-			}
+		    if (typeof callback === 'function') {
+		        // Defer to the next tick so timing matches the original async
+		        // http.Server.listen() callback — firing synchronously here runs
+		        // before the rest of the server's constructor chain (e.g. the
+		        // taro.server assignment) has finished, which is what caused
+		        // the "taro.server is undefined" crash.
+		        process.nextTick(callback);
+		    }
 		} else if (!reusingExistingServer && !secure) {
 			// original behavior: callback fires from the .listen() call above
 			// once our own server actually starts listening. Nothing to do here,
