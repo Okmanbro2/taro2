@@ -469,7 +469,11 @@ var ItemUiComponent = TaroEntity.extend({
 		});
 
 		// console.log(itemStats)
-		var itemHtml = taro.clientSanitizer(self.getItemPopOverContent(itemStats));
+		// NOTE: getItemPopOverContent() returns trusted, engine-built markup (divs/spans/classes)
+		// with the *individual* user-authored text fields sanitized at their insertion points.
+		// Do not re-run clientSanitizer on the whole assembled string here - that HTML-escapes
+		// the wrapper tags themselves, which then get rendered as literal text instead of markup.
+		var itemHtml = self.getItemPopOverContent(itemStats);
 		// for (attr in itemStats)
 		// {
 		// 	var itemValue = itemStats[attr];
@@ -545,7 +549,7 @@ var ItemUiComponent = TaroEntity.extend({
 		var ownerPlayer = taro.client.myPlayer;
 		var ownerUnit = ownerPlayer.getSelectedUnit();
 		if (stats.description) {
-			info += `<p class="mb-1"><span class="item-description">${stats.description} </span></p>`;
+			info += `<p class="mb-1"><span class="item-description">${taro.clientSanitizer(stats.description)} </span></p>`;
 		}
 
 		if (stats.controls.equipRequirement) {
