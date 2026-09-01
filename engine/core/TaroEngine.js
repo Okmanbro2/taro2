@@ -109,11 +109,23 @@ var TaroEngine = TaroEntity.extend({
 			this.clientSanitizer = (str) => {
 				if (window.sanitizeString) {
 					return window.sanitizeString(str);
-				} else if (taro.env === 'local') {
-					return str;
-				} else {
-					return '';
 				}
+				if (typeof str !== 'string') {
+					return str;
+				}
+				// `window.sanitizeString` is normally injected by the modd.io platform
+				// wrapper and isn't present in self-hosted builds. Previously this fell
+				// back to returning '' outside of taro.env === 'local', which silently
+				// blanked every sanitized string in the UI (item names, descriptions,
+				// chat text, etc). Escape HTML metacharacters instead so text still
+				// displays, while still guarding against injected markup/script tags.
+				return str.replace(/[&<>"']/g, (ch) => ({
+					'&': '&amp;',
+					'<': '&lt;',
+					'>': '&gt;',
+					'"': '&quot;',
+					"'": '&#39;',
+				})[ch]);
 			};
 			// Enable UI element (virtual DOM) support
 			this.addComponent(TaroUiManagerComponent);
