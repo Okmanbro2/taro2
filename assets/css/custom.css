@@ -176,6 +176,12 @@ canvas {
   padding-top: 10px;
 }
 
+.leaderboard-arrow {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
 @media only screen and (max-width: 1000px) {
   #scoreboard {
     height: 100px;
@@ -601,6 +607,93 @@ canvas {
   position: absolute;
   left: 40%;
   bottom: 5px;
+}
+
+/* shop item grid — classes referenced in ShopComponent.js but previously undefined */
+.shop-grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+
+.shop-grid-container .item-shop-button {
+  width: 100%;
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.shop-grid-container .item-shop-button:hover {
+  transform: scale(1.03);
+}
+
+.grey-bordered {
+  border: 1px solid #6b7280;
+}
+
+.bottom-radius {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.can-purchase-item {
+  background-color: rgba(40, 167, 69, 0.25);
+}
+
+.can-purchase-item:hover {
+  background-color: rgba(40, 167, 69, 0.45);
+}
+
+.unpurchasble-item {
+  background-color: rgba(220, 53, 69, 0.25);
+  cursor: not-allowed;
+}
+
+.unpurchasble-item:hover {
+  transform: none;
+}
+
+/* skins shop grid — classes referenced in renderSkinsButtons but previously undefined */
+.shop-grid-items {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100px;
+  height: 100px;
+  margin: 5px;
+  border: 1px solid #6b7280;
+  border-radius: 8px;
+  background-color: #1f2937;
+  overflow: hidden;
+}
+
+.shop-grid-items > div:first-child {
+  flex: 1;
+}
+
+.shop-grid-items .is-mobile {
+  width: 100%;
+  height: 100%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.blue-border {
+  border-color: #3b82f6;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.skin-purchased,
+.skin-unpurchased {
+  cursor: pointer;
 }
 
 .slideup-menu-animation {
