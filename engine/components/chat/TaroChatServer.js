@@ -54,6 +54,8 @@ var TaroChatServer = {
 	 * @param {String} from The id of the user that sent the message.
 	 */
 	sendToRoom: function (roomId, message, to, from, additionalOpts = {}) {
+		console.log('[CHAT DEBUG] sendToRoom called. roomId:', roomId, 'message:', message, 'from:', from, 'global.isDev:', global.isDev);
+
 		if (!to && !from) {
 			taro.devLog('sending chatt message inside sendChatRoom', message);
 		}
@@ -73,11 +75,14 @@ var TaroChatServer = {
 
 		// send the system message (from the action 'sendChatMessage')
 		if (sender == undefined) {
+			console.log('[CHAT DEBUG] sender is undefined for clientId', from, '- sending as system message');
 			taro.network.send('taroChatMsg', msg, to);
 			return;
 		} else if (sender && sender._stats) {
+			console.log('[CHAT DEBUG] sender found. banChat:', sender._stats.banChat, 'userId:', sender._stats.userId);
 			// prevent sending messages from banned/unverified users
 			if (!global.isDev && (sender._stats.banChat || !sender._stats.userId)) {
+				console.log('[CHAT DEBUG] DROPPED: sender is banned or missing userId, and global.isDev is falsy');
 				return;
 			} else if (this.isSpamming(from, message)) {
 				// mute spammers
@@ -107,29 +112,23 @@ var TaroChatServer = {
 			var room = self._rooms[roomId];
 
 			if (message !== undefined) {
-				// if (msg.text && msg.text.length > 80) {
-				// 	msg.text = msg.text.substr(0, 80);
-				// }
-
 				if (to) {
 					// Send message to individual user
 					if (room.users.indexOf(to) > -1) {
 						taro.network.send('taroChatMsg', msg, to);
-
-						// console.log('Sending to one user...', msg, to);
 					} else {
-						self.log(`Cannot send to user because specified user is not in room: ${to}`);
+						console.log('[CHAT DEBUG] DROPPED: target user not in room:', to);
 					}
 				} else {
 					// Send this message to all users in the room
-					// console.log('Sending to all users...', msg);
+					console.log('[CHAT DEBUG] BROADCASTING to all users in room:', roomId, msg);
 					taro.network.send('taroChatMsg', msg);
 				}
 			} else {
-				self.log('Cannot send message to room with blank message!');
+				console.log('[CHAT DEBUG] DROPPED: blank message');
 			}
 		} else {
-			self.log(`Cannot send message to room with id "${roomId}" because it does not exist!`);
+			console.log('[CHAT DEBUG] DROPPED: room does not exist in sendToRoom:', roomId);
 		}
 	},
 
@@ -188,8 +187,11 @@ var TaroChatServer = {
 		var self = taro.chat;
 		var room;
 
+		console.log('[CHAT DEBUG] _onMessageFromClient received:', JSON.stringify(msg), 'from clientId:', clientId);
+
 		// prevent non-string or non-unicode (e.g. emoji) from being broadcasted as it can disconnect all connected clients
 		if (typeof msg.text != 'string' || self.regexUnicode.test(msg.text) == true) {
+			console.log('[CHAT DEBUG] DROPPED: msg.text is not a string, or failed regexUnicode test');
 			return;
 		}
 
@@ -212,6 +214,7 @@ var TaroChatServer = {
 		// process this ourselves
 		if (!self.emit('messageFromClient', [msg, clientId])) {
 			var player = taro.game.getPlayerByClientId(clientId);
+			console.log('[CHAT DEBUG] player lookup by clientId:', player ? player._stats.name : 'NOT FOUND');
 			if (player) {
 				var playerName = player._stats && self.xssFilters.inHTMLData(player._stats.name);
 				taro.devLog(`Message from client: (${playerName}): ${msg.text}`);
@@ -225,53 +228,57 @@ var TaroChatServer = {
 			if ((msg.roomId && typeof msg.roomId == 'string') || typeof msg.roomId == 'number') {
 				room = self._rooms[msg.roomId];
 				if (room) {
+					console.log('[CHAT DEBUG] room found:', msg.roomId, 'room.users:', JSON.stringify(room.users), 'is clientId in room?', room.users.indexOf(clientId) > -1);
 					if (room.users.indexOf(clientId) > -1) {
 						var text = msg.text;
 						if (text) {
-							// console.log('Sending message to room...');
+							console.log('[CHAT DEBUG] calling sendToRoom now');
 							self.sendToRoom(msg.roomId, msg.text, msg.to, clientId);
 						} else {
-							// console.log('Cannot send message because message text is empty!', msg);
+							console.log('[CHAT DEBUG] DROPPED: message text was empty');
 						}
 					} else {
 						// The user is not in the room specified
-						taro.devLog('User tried to send message to room they are not joined in!', msg);
+						console.log('[CHAT DEBUG] DROPPED: clientId is NOT in room.users for this room', clientId);
 					}
 				} else {
 					// Room id specified does not exist
-					taro.devLog("User tried to send message to room that doesn't exist!", msg);
+					console.log('[CHAT DEBUG] DROPPED: room does not exist:', msg.roomId, 'known rooms:', Object.keys(self._rooms));
 				}
 			} else {
 				// No room id in the message
-				taro.devLog("User tried to send message to room but didn't specify room id!", msg);
+				console.log('[CHAT DEBUG] DROPPED: no roomId in message', JSON.stringify(msg));
 			}
+		} else {
+			console.log('[CHAT DEBUG] DROPPED: messageFromClient event was cancelled by a listener');
 		}
 	},
 
 	_onJoinRoomRequestFromClient: function (roomId, clientId) {
 		var self = taro.chat;
 
+		console.log('[CHAT DEBUG] _onJoinRoomRequestFromClient: clientId', clientId, 'wants to join room', roomId);
+
 		// Emit the event and if it wasn't cancelled (by returning true) then
 		// process this ourselves
 		if (!self.emit('clientJoinRoomRequest', [roomId, clientId])) {
 			var room = self._rooms[roomId];
 
-			self.log(`Client wants to join room: (${clientId})`, roomId);
-
-			// Check the room exists
 			if (room) {
 				// Check that the user isn't already part of the room user list
-				if (!room.users[clientId]) {
+				if (room.users.indexOf(clientId) === -1) {
 					// Add the user to the room
 					room.users.push(clientId);
+					console.log('[CHAT DEBUG] clientId', clientId, 'JOINED room', roomId, '- room.users now:', JSON.stringify(room.users));
 					taro.network.send('taroChatJoinRoom', { roomId: roomId, joined: true }, clientId);
-					// console.log('User "' + clientId + '" joined room ' + roomId);
 				} else {
-					// User is already in the room!
+					console.log('[CHAT DEBUG] clientId', clientId, 'already in room', roomId);
 				}
 			} else {
-				// Room does not exist!
+				console.log('[CHAT DEBUG] DROPPED join request: room does not exist:', roomId, 'known rooms:', Object.keys(self._rooms));
 			}
+		} else {
+			console.log('[CHAT DEBUG] DROPPED join request: clientJoinRoomRequest event was cancelled');
 		}
 	},
 
