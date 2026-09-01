@@ -1,16 +1,4 @@
-<div align="center">
-  <h2><a href="https://modd.io">Moddio Game Engine 2</a></h2>
-  <p>Moddio is a Multiplayer-First Game Engine. It has a built-in server-authoritative netcode, including snapshot interpolation and client-side reconciliation. It can support 50+ concurrent players or 300+ moving entities hosted on a $5/month VM. Join us on <a href="https://discord.gg/XRe8T7K">Discord</a>
-</div>
-
-<div align="center">
-  <img src="https://img.shields.io/github/contributors/moddio/moddio2?style=for-the-badge&color=f01313">
-  <img src="https://img.shields.io/github/last-commit/moddio/moddio2?style=for-the-badge&color=f01313">
-  <img src="https://img.shields.io/github/languages/code-size/moddio/moddio2?style=for-the-badge&color=f01313">
-</div>
-
-<h3><a href="http://modd.io/play/two-houses">Demo</a></h3>
-<br>
+PvZ Roam Forever
 
 ## What's included in the box.
 
@@ -69,24 +57,3 @@ You will be presented with a dropdown menu, where you can use the arrow keys to 
 ```bash
 npm run server --game=game.json
 ```
-
-## How to contribute
-
-Moddio is completely free and open source under the MIT license, and we are always looking for more contributors.
-To learn about how to become a contributor, please visit [how to contribute page](https://docs.modd.io/how-to-contribute)
-
-## Credits
-
-[Isogenic Game Engine](https://www.isogenicengine.com/)
-
-[Phaser](https://phaser.io/)
-
-[PlanckJS](https://github.com/piqnt/planck.js)
-
-[uWebsocket](https://github.com/uNetworking/uWebSockets)
-
-[Box2D](https://github.com/erincatto/box2d)
-
-[Kenney Assets](https://www.kenney.nl/)
-
-[Hero Icons](https://github.com/tailwindlabs/heroicons)
