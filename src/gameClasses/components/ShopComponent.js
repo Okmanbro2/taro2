@@ -302,18 +302,12 @@ var ShopComponent = TaroEntity.extend({
 				});
 			};
 
-			if (document.getElementById('modd-shop-modal')) {
-				initSkinShopListeners();
-				self.paginationForSkins();
-			} else {
-				let checkForModdShop = setInterval(() => {
-					if (document.getElementById('modd-shop-modal')) {
-						clearInterval(checkForModdShop);
-						initSkinShopListeners();
-						self.paginationForSkins();
-					}
-				}, 1000);
-			}
+			// listeners are attached immediately — previously this was gated behind
+			// `document.getElementById('modd-shop-modal')`, but that modal doesn't exist
+			// in this build, so the check always failed and these handlers (including
+			// the item-shop purchase click handler) never attached.
+			initSkinShopListeners();
+			self.paginationForSkins();
 		}
 	},
 
