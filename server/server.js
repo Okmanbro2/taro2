@@ -412,7 +412,7 @@ var Server = TaroClass.extend({
 
 			return res.render('index.ejs', options);
 		});
-		app.listen(port, () => console.log(`Express listening on port ${port}!`));
+		self.httpServer = app.listen(port, () => console.log(`Express listening on port ${port}!`));
 	},
 
 	// run a specific game in this server
@@ -440,7 +440,7 @@ var Server = TaroClass.extend({
 		// Add the networking component
 		taro.network.debug(self.isDebugging);
 		// Start the network server
-		taro.network.start(self.port, function (data) {
+		taro.network.start(self.httpServer, function (data) {
 			var promise;
 
 			if (gameJson) {
