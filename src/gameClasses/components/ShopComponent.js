@@ -915,7 +915,9 @@ var ShopComponent = TaroEntity.extend({
 		var ownerPlayer = taro.client.myPlayer;
 		var ownerUnit = taro.$(ownerPlayer._stats.selectedUnitId);
 		if (item.description) {
-			html += `<p style="overflow-y: auto; max-height: 200px;">${taro.clientSanitizer(item.description)}</P>`;
+			// Same as ItemUiComponent.getItemPopOverContent(): descriptions are creator-authored
+			// rich text (colors, <b>, <h3>, etc.) and are meant to render as HTML, not be escaped.
+			html += `<p style="overflow-y: auto; max-height: 200px;">${item.description}</P>`;
 		}
 		if (shopItem && typeof shopItem.requirement === 'object') {
 			var requirements = '';
