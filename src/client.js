@@ -669,9 +669,14 @@ const Client = TaroEventingClass.extend({
 
 			taro.client.defineNetworkEvents();
 
-			taro.network.send('taroChatJoinRoom', '1');
-
 			taro.addComponent(TaroChatComponent);
+
+			// NOTE: this must run *after* TaroChatComponent is added — that's what calls
+			// network.define('taroChatJoinRoom', ...), which registers the command so
+			// network.send() can actually look it up. Sending before the component is
+			// added means the client never joins room '1', so every chat message you
+			// send afterward gets silently rejected server-side.
+			taro.chat.joinRoom('1');
 			// taro.addComponent(VideoChatComponent); // shall we talk about the elephant in the room?
 
 			// old comment => 'check for all of the existing entities in the game
