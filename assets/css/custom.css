@@ -1118,7 +1118,7 @@ div#dev-console-table {
   font-family: 'Nunito', sans-serif;
 }
 
-/* ---------- Chat box: wood-plank panel ---------- */
+/* chatbox */
 #chat-box .tab-content {
   background: repeating-linear-gradient(
     180deg,
@@ -1144,7 +1144,7 @@ div#dev-console-table {
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
 }
 
-/* ---------- Leaderboard / scoreboard: sun-yellow panel ---------- */
+/* leaderboard/scoreboard */
 #scoreboard {
   background: var(--pvz-cream);
   border: 4px solid var(--pvz-sun-dark);
@@ -1190,4 +1190,17 @@ div#dev-console-table {
   color: var(--pvz-sun);
   font-family: 'Chewy', cursive;
   font-size: 1.1em;
+}
+
+#chat-box,
+#chat-box *,
+#leaderboard,
+#leaderboard *,
+#my-score-div,
+#my-score-div * {
+  font-family: 'Brianne\'s Hand', cursive;
+}
+
+.ui-text-top {
+  font-family: 'House of Terror', sans-serif;
 }
