@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Cabin');
+@import url('https://fonts.googleapis.com/css2?family=Chewy&family=Nunito:wght@400;700;800&display=swap');
 html {
   -webkit-user-select: none;
 }
@@ -1094,8 +1095,6 @@ div#dev-console-table {
 .ui-draggable-dragging {
   transform: scale(1.8);
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Chewy&family=Nunito:wght@400;700;800&display=swap');
 
 :root {
   --pvz-grass: #7cb342;
