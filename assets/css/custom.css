@@ -644,7 +644,7 @@ canvas {
   bottom: 5px;
 }
 
-/* shop item grid:  classes referenced in ShopComponent.js but previously undefined */
+/* shop item grid — classes referenced in ShopComponent.js but previously undefined */
 .shop-grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -688,7 +688,7 @@ canvas {
   transform: none;
 }
 
-/* skins shop grid: classes referenced in renderSkinsButtons but previously undefined */
+/* skins shop grid — classes referenced in renderSkinsButtons but previously undefined */
 .shop-grid-items {
   position: relative;
   display: flex;
@@ -793,6 +793,7 @@ canvas {
 
 .overlay-loading {
   position: fixed;
+  /* Sit on top of the page content */
   top: 0;
   left: 0;
   right: 0;
@@ -1017,7 +1018,7 @@ div#dev-console-table {
   cursor: pointer;
 }
 
-/* thing */
+/* attempt */
 #show-chat::before {
   content: "";
   position: absolute;
@@ -1053,7 +1054,7 @@ div#dev-console-table {
     padding: 5px;
   }
 
-  /* chat fix*/
+  /* chatfix2 */
   #show-chat {
     left: 10px;
     bottom: 10px;
@@ -1339,7 +1340,7 @@ div#dev-console-table {
   font-family: 'Brianne\'s Hand', cursive;
 }
 
-/* brianne hand */
+/* descriptions & tooltips */
 .popover,
 .popover * {
   font-family: 'Brianne\'s Hand', cursive !important;
@@ -1371,7 +1372,7 @@ div#dev-console-table {
   font-family: 'Brianne\'s Hand', cursive !important;
 }
 
-/* descriptions for items */
+/* description body text stays black */
 .popover .modal-bg-color p,
 .popover .modal-bg-color div,
 .popover .modal-bg-color span,
@@ -1380,7 +1381,7 @@ div#dev-console-table {
   color: #111 !important;
 }
 
-/* info and price */
+/* prices / positive item information keep the green accent */
 .popover .text-success,
 .popover .green,
 .popover .modal-bg-color .text-success,
@@ -1388,7 +1389,8 @@ div#dev-console-table {
   color: #59d65c !important;
 }
 
-/* shop contents */
+
+/* shop cards */
 .shop-grid-container .item-shop-button,
 .shop-grid-container .item-shop-button *,
 .shop-grid-items,
@@ -1402,7 +1404,7 @@ div#dev-console-table {
   font-family: 'Brianne\'s Hand', cursive !important;
 }
 
-/* Shop item names are dark/black against the wooden shop background. */
+/* shop items */
 .shop-grid-container .item-shop-button,
 .shop-grid-container .item-shop-button .item-name,
 .shop-grid-container .item-shop-button .shop-item-name,
@@ -1416,6 +1418,8 @@ div#dev-console-table {
 #modd-item-shop-modal .inventory-slot .shop-item-name {
   color: #111 !important;
 }
+
+/* text */
 
 .shop-grid-container .item-shop-button .text-dark,
 .shop-grid-container .item-shop-button .text-body,
@@ -1434,4 +1438,63 @@ div#dev-console-table {
 .ui-text-top,
 #ui-text-top-id {
   font-family: 'House of Terror', sans-serif;
+}
+
+/* shop shit final */
+
+.shop-grid-container .item-shop-button,
+.shop-grid-container .item-shop-button .item-name,
+.shop-grid-container .item-shop-button .shop-item-name,
+.shop-grid-items .item-name,
+.shop-grid-items .shop-item-name,
+#shop-modal .inventory-slot .item-name,
+#shop-modal .inventory-slot .shop-item-name,
+#modd-shop-modal .inventory-slot .item-name,
+#modd-shop-modal .inventory-slot .shop-item-name,
+#modd-item-shop-modal .inventory-slot .item-name,
+#modd-item-shop-modal .inventory-slot .shop-item-name {
+  color: #fff !important;
+  font-family: 'Brianne\'s Hand', cursive !important;
+  text-shadow:
+    -1px -1px 0 #111,
+     1px -1px 0 #111,
+    -1px  1px 0 #111,
+     1px  1px 0 #111;
+}
+
+.green,
+.text-success,
+.can-purchase-item .green,
+.can-purchase-item .text-success {
+  color: #4dff3a !important;
+}
+
+.red,
+.text-danger,
+.unpurchasble-item .red,
+.unpurchasble-item .text-danger {
+  color: #ff4d4d !important;
+}
+
+.shop-grid-container .item-shop-button .green,
+.shop-grid-container .item-shop-button .text-success,
+.shop-grid-container .item-shop-button .red,
+.shop-grid-container .item-shop-button .text-danger,
+.shop-grid-items .green,
+.shop-grid-items .text-success,
+.shop-grid-items .red,
+.shop-grid-items .text-danger,
+#shop-modal .inventory-slot .green,
+#shop-modal .inventory-slot .text-success,
+#shop-modal .inventory-slot .red,
+#shop-modal .inventory-slot .text-danger,
+#modd-shop-modal .inventory-slot .green,
+#modd-shop-modal .inventory-slot .text-success,
+#modd-shop-modal .inventory-slot .red,
+#modd-shop-modal .inventory-slot .text-danger,
+#modd-item-shop-modal .inventory-slot .green,
+#modd-item-shop-modal .inventory-slot .text-success,
+#modd-item-shop-modal .inventory-slot .red,
+#modd-item-shop-modal .inventory-slot .text-danger {
+  font-family: 'Brianne\'s Hand', cursive !important;
 }
