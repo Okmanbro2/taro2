@@ -1078,7 +1078,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 		return true;
 	},
 
-	/**
+		/**
 	 * Encodes the passed JSON data into a data packet.
 	 * @param data
 	 * @return {*}
@@ -1086,39 +1086,18 @@ NetIo.Server = NetIo.EventingClass.extend({
 	 */
 	_encode: function (data) {
 		try {
-			// var json = JSON.stringify(data);
 			var json = JSON.stringify(data);
-			// var obj = JSON.parse(json);
-			// var jsonLength = json.length;
-			// var timeStart = '';
-			// if(jsonLength > 100000){
-			//     timeStart = Date.now();
-			// }
 
-			json = taro.network._io._compress(json, { outputEncoding: 'StorageBinaryString' });
-
-			// NOTE: make sure than COMPRESSION_THRESHOLD is same on both client and server
-			// LOGIC:
-			//     1. if json string has less than COMPRESSION_THRESHOLD chars (e.g. 9999)
-			//        only then apply compression on it which will reduce the length of
-			//        resulting string to anything less than original length (e.g. 9998)
-			//     2. if json string has more than COMPRESSION_THRESHOLD chars (10001)
-			//        then compression will not be applied to it and send the stringified form only
-			//        as we have found that compressing large string take toll on CPU
-
-			// if (json.length < taro.network._io.COMPRESSION_THRESHOLD) {
-			//     json = taro.network._io._compress(json);
-			// }
-
-			// if (json.length > taro.network._io.COMPRESSION_THRESHOLD) {
-			// console.log(json.length)
-			// }
-			// if(jsonLength > 100000){
-			//     console.log(Date.now() - timeStart, jsonLength)
-			// }
+			// Skip compression for small payloads — compression itself costs
+			// CPU, and below this size the saved bytes aren't worth that cost.
+			// This was originally checked but had been left commented out,
+			// meaning every payload was being compressed unconditionally,
+			// adding avoidable event-loop-blocking work on every network tick.
+			if (json.length >= taro.network._io.COMPRESSION_THRESHOLD) {
+				json = taro.network._io._compress(json, { outputEncoding: 'StorageBinaryString' });
+			}
 
 			return json;
-			// return taro.network._io._msgpack.encode(obj);
 		} catch (e) {
 			console.log(e);
 		}
