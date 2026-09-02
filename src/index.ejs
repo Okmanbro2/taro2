@@ -1,8 +1,17 @@
 <html lang="en">
 
+<script>
+  const burbankFont = new FontFace('Burbank Big Condensed', 'url(/assets/fonts/Burbank_Big_Condensed_Bold.otf)');
+  burbankFont.load().then(function(loadedFont) {
+    document.fonts.add(loadedFont);
+  }).catch(function(err) {
+    console.warn('Burbank font failed to preload:', err);
+  });
+</script>
+
 <head>
-    <title>Taro</title>
-    <meta name="description" content="A multiplayer HTML5 game engine">
+    <title>Plants vs. Zombies: Roam 2</title>
+    <meta name="description" content="A Plants vs. Zombies fangame right on the browser!">
     <meta name="keywords" content="modd.io, taro, multiplayer">
 
     <!-- OpenGraph Metadata -->
