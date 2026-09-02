@@ -7,6 +7,24 @@ const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const currency = require('currency.js');
 
+// --- perf diagnostic: logs event loop lag + memory every 5s so it's visible ---
+const { monitorEventLoopDelay } = require('perf_hooks');
+const _eldHistogram = monitorEventLoopDelay({ resolution: 20 });
+_eldHistogram.enable();
+setInterval(() => {
+	const mem = process.memoryUsage();
+	console.log(
+		'[PERF]',
+		'eventLoopLag(ms) mean=' + (_eldHistogram.mean / 1e6).toFixed(1),
+		'max=' + (_eldHistogram.max / 1e6).toFixed(1),
+		'p99=' + (_eldHistogram.percentile(99) / 1e6).toFixed(1),
+		'| rss(MB)=' + (mem.rss / 1024 / 1024).toFixed(0),
+		'heapUsed(MB)=' + (mem.heapUsed / 1024 / 1024).toFixed(0)
+	);
+	_eldHistogram.reset();
+}, 5000);
+// --- end perf diagnostic ---
+
 // global imports
 _ = require('lodash');
 rfdc = require('rfdc');
