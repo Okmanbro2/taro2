@@ -127,7 +127,7 @@ var GameComponent = TaroEntity.extend({
 
 			const { isOwner, isInvitedUser, isUserMod, isUserAdmin, isModerationAllowed } = taro.workerComponent
 				? taro.workerComponent.getUserPermissions(data)
-				: { isOwner: true }; // if worker component is not available, assume the user is the owner (for local env)
+				: { isOwner: false }; // hell no
 
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
