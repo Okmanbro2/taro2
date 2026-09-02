@@ -62,7 +62,7 @@ NetIo.Client = NetIo.EventingClass.extend({
 		this.pingInterval = null;
 		this.reconnectedAt = null;
 
-		// this.COMPRESSION_THRESHOLD = 30000;
+		this.COMPRESSION_THRESHOLD = 10000;
 
 		// Set some default options
 		if (this._options.connectionRetry === undefined) {
@@ -488,7 +488,9 @@ NetIo.Client = NetIo.EventingClass.extend({
 	_decode: function (data) {
 		var self = this;
 
-		var jsonString = LZString.decompressFromUTF16(data.data);
+		var jsonString = data.data.length > self.COMPRESSION_THRESHOLD
+	    ? data.data
+	    : LZString.decompressFromUTF16(data.data);
 		// var jsonString = LZUTF8.decompress(data.data, {inputEncoding: "StorageBinaryString"});
 		// var jsonString = data.data;
 
