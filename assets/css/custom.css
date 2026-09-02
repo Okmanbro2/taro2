@@ -1004,9 +1004,41 @@ div#dev-console-table {
 
 #show-chat {
   position: absolute;
-  bottom: 0;
-  z-index: 1000;
-  margin: 15px;
+  left: 370px;
+  bottom: 10px;
+  z-index: 2500;
+  width: 42px;
+  height: 42px;
+  margin: 0;
+  padding: 0;
+  background: var(--pvz-grass-dark) !important;
+  border: 3px solid var(--pvz-grass-dark) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+/* Recreate the small chat bubble icon used by the original UI. */
+#show-chat::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 15px;
+  left: 8px;
+  top: 9px;
+  background: var(--pvz-cream);
+  border-radius: 4px;
+}
+
+#show-chat::after {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 22px;
+  width: 0;
+  height: 0;
+  border-top: 7px solid var(--pvz-cream);
+  border-right: 6px solid transparent;
 }
 
 .small-font {
@@ -1020,6 +1052,11 @@ div#dev-console-table {
 @media (max-width: 768px) {
   #change-server, #play-game-button .button-text {
     padding: 5px;
+  }
+
+  #show-chat {
+    left: 10px;
+    bottom: 10px;
   }
   .hidden-vertical-mobile {
     display: none;
@@ -1137,7 +1174,7 @@ div#dev-console-table {
 /* chatbox  */
 #chat-box .tab-content {
   background: var(--pvz-grass-transparent) !important;
-  border: 4px solid var(--pvz-grass-dark-transparent);
+  border: 3px solid var(--pvz-grass-dark-transparent);
   border-radius: 10px 10px 5px 5px !important;
   box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
   backdrop-filter: blur(1px);
@@ -1158,7 +1195,7 @@ div#dev-console-table {
 /* chat input field */
 #chat-message-input .input-group {
   background: var(--pvz-grass-transparent);
-  border: 4px solid var(--pvz-grass-dark-transparent);
+  border: 3px solid var(--pvz-grass-dark-transparent);
   border-radius: 10px;
   box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
   padding: 6px;
@@ -1218,7 +1255,7 @@ div#dev-console-table {
 /* leaderboard, scoreboard */
 #scoreboard {
   background: var(--pvz-grass-transparent);
-  border: 4px solid var(--pvz-grass-dark-transparent);
+  border: 3px solid var(--pvz-grass-dark-transparent);
   border-radius: 10px;
   box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
   padding: 10px;
@@ -1249,12 +1286,12 @@ div#dev-console-table {
 .scoreboard-player-is-myself .scoreboard-player-name {
   color: #99ff00;
   font-weight: 800;
-  text-shadow: 0 0 4px #99ff00, 0 0 10px rgba(153, 255, 0, 0.85), 0 0 18px rgba(153, 255, 0, 0.6);
+  text-shadow: 0 0 2px #99ff00, 0 0 5px rgba(153, 255, 0, 0.55);
 }
 
 .scoreboard-player-is-myself .scoreboard-player-score {
   color: #ccff66;
-  text-shadow: 0 0 4px rgba(153, 255, 0, 0.8);
+  text-shadow: 0 0 3px rgba(153, 255, 0, 0.45);
 }
 
 /* the "Leaderboard" title/toggle above the list */
@@ -1268,7 +1305,7 @@ div#dev-console-table {
 /* hud */
 #my-score-div {
   background: var(--pvz-grass-transparent);
-  border: 4px solid var(--pvz-grass-dark-transparent);
+  border: 3px solid var(--pvz-grass-dark-transparent);
   border-radius: 12px;
   box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
   backdrop-filter: blur(1px);
@@ -1284,7 +1321,7 @@ div#dev-console-table {
   color: var(--pvz-sun);
   font-family: 'Chewy', cursive;
   font-size: 1.1em;
-  text-shadow: 0 0 4px var(--pvz-sun), 0 0 10px rgba(255, 202, 40, 0.85), 0 0 18px rgba(255, 202, 40, 0.55);
+  text-shadow: 0 0 2px var(--pvz-sun), 0 0 5px rgba(255, 202, 40, 0.5);
 }
 
 #chat-box,
@@ -1302,6 +1339,59 @@ div#dev-console-table {
   font-family: 'Brianne\'s Hand', cursive;
 }
 
-.ui-text-top {
+/* item descriptions / tooltips / shop item popovers */
+.popover,
+.popover *,
+.item-tooltip,
+.item-tooltip * {
+  font-family: 'Brianne\'s Hand', cursive !important;
+}
+
+.popover .modal-bg-color,
+.item-tooltip {
+  background-color: var(--pvz-grass-transparent) !important;
+  color: var(--pvz-cream) !important;
+  border: 3px solid var(--pvz-grass-dark-transparent) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent) !important;
+}
+
+.popover .popover-header,
+.popover .modal-bg-color h1,
+.popover .modal-bg-color h2,
+.popover .modal-bg-color h3,
+.popover .modal-bg-color h4,
+.popover .modal-bg-color h5,
+.popover .modal-bg-color h6 {
+  color: var(--pvz-cream) !important;
+  font-family: 'Brianne\'s Hand', cursive !important;
+}
+
+.popover .popover-body,
+.popover .modal-bg-color,
+.popover .modal-bg-color p,
+.popover .modal-bg-color div,
+.popover .modal-bg-color span,
+.popover .modal-bg-color strong,
+.popover .modal-bg-color b {
+  color: var(--pvz-cream) !important;
+}
+
+.popover .text-success,
+.popover .green,
+.popover .modal-bg-color .text-success,
+.popover .modal-bg-color .green,
+.item-tooltip .text-success,
+.item-tooltip .green {
+  color: #59d65c !important;
+}
+
+.popover .modal-bg-color strong,
+.popover .modal-bg-color b {
+  color: var(--pvz-cream) !important;
+}
+
+.ui-text-top,
+#ui-text-top-id {
   font-family: 'House of Terror', sans-serif;
 }
