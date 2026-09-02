@@ -1093,7 +1093,7 @@ NetIo.Server = NetIo.EventingClass.extend({
 			// This was originally checked but had been left commented out,
 			// meaning every payload was being compressed unconditionally,
 			// adding avoidable event-loop-blocking work on every network tick.
-			if (json.length >= taro.network._io.COMPRESSION_THRESHOLD) {
+			if (json.length < taro.network._io.COMPRESSION_THRESHOLD) {
 				json = taro.network._io._compress(json, { outputEncoding: 'StorageBinaryString' });
 			}
 
