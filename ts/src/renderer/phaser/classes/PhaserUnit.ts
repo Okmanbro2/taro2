@@ -291,7 +291,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		));*/
 		label.visible = true;
 
-		label.setFontFamily('Verdana');
+		label.setFontFamily('Burbank Big Condensed');
 		label.setFontSize(16);
 		label.setFontStyle(data.bold ? 'bold' : 'normal');
 
