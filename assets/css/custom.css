@@ -10,15 +10,19 @@ html {
 
 @font-face {
   font-family: 'House of Terror';
-  src: url('/assets/fonts/HouseofTerror_Regular.ttf') format('truetype');
+  src: url('/assets/fonts/HouseofTerrorRegular.ttf') format('truetype');
 }
 
 @font-face {
   font-family: 'Burbank Big Condensed';
-  src: url('/assets/fonts/Burbank_Big_Condensed_Bold.otf') format('opentype');
+  src: url('/assets/fonts/BurbankBigCondensed_Bold.otf') format('opentype');
   font-weight: bold;
 }
 
+@font-face {
+  font-family: 'Brianne\'s Hand';
+  src: url('/assets/fonts/BriannesHand.ttf') format('truetype');
+}
 body {
   background-color: #000;
   width: 100%;
