@@ -1144,7 +1144,7 @@ div#dev-console-table {
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
 }
 
-/* leaderboard/scoreboard */
+/* leaderboard, scoreboard */
 #scoreboard {
   background: var(--pvz-cream);
   border: 4px solid var(--pvz-sun-dark);
@@ -1156,13 +1156,13 @@ div#dev-console-table {
 
 .scoreboard-player-name {
   font-family: 'Nunito', sans-serif;
-  font-weight: 800;
+  font-weight: 400;
   color: var(--pvz-wood-dark);
 }
 
 .scoreboard-player-score {
   color: var(--pvz-grass-dark);
-  font-weight: 800;
+  font-weight: 400;
 }
 
 /* the "Leaderboard" title/toggle above the list */
@@ -1183,7 +1183,7 @@ div#dev-console-table {
 
 #players-attribute-div span[id^="pt-attribute-"] {
   color: var(--pvz-cream);
-  font-weight: 700;
+  font-weight: 400;
 }
 
 #players-attribute-div span[id^="pt-attribute-value-"] {
@@ -1197,7 +1197,9 @@ div#dev-console-table {
 #leaderboard,
 #leaderboard *,
 #my-score-div,
-#my-score-div * {
+#my-score-div *,
+#unit-status,
+#unit-status * {
   font-family: 'Brianne\'s Hand', cursive;
 }
 
