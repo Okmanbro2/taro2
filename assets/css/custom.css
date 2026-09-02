@@ -644,7 +644,7 @@ canvas {
   bottom: 5px;
 }
 
-/* shop item grid — classes referenced in ShopComponent.js but previously undefined */
+/* shop item grid:  classes referenced in ShopComponent.js but previously undefined */
 .shop-grid-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -688,7 +688,7 @@ canvas {
   transform: none;
 }
 
-/* skins shop grid — classes referenced in renderSkinsButtons but previously undefined */
+/* skins shop grid: classes referenced in renderSkinsButtons but previously undefined */
 .shop-grid-items {
   position: relative;
   display: flex;
@@ -793,7 +793,6 @@ canvas {
 
 .overlay-loading {
   position: fixed;
-  /* Sit on top of the page content */
   top: 0;
   left: 0;
   right: 0;
@@ -1018,7 +1017,7 @@ div#dev-console-table {
   cursor: pointer;
 }
 
-/* Recreate the small chat bubble icon used by the original UI. */
+/* thing */
 #show-chat::before {
   content: "";
   position: absolute;
@@ -1054,6 +1053,7 @@ div#dev-console-table {
     padding: 5px;
   }
 
+  /* chat fix*/
   #show-chat {
     left: 10px;
     bottom: 10px;
@@ -1255,9 +1255,9 @@ div#dev-console-table {
 /* leaderboard, scoreboard */
 #scoreboard {
   background: var(--pvz-grass-transparent);
-  border: 3px solid var(--pvz-grass-dark-transparent);
+  border: 2px solid var(--pvz-grass-dark-transparent);
   border-radius: 10px;
-  box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
+  box-shadow: 0 2px 0 var(--pvz-grass-dark-transparent);
   padding: 10px;
   color: var(--pvz-cream);
   backdrop-filter: blur(1px);
@@ -1305,9 +1305,9 @@ div#dev-console-table {
 /* hud */
 #my-score-div {
   background: var(--pvz-grass-transparent);
-  border: 3px solid var(--pvz-grass-dark-transparent);
+  border: 2px solid var(--pvz-grass-dark-transparent);
   border-radius: 12px;
-  box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
+  box-shadow: 0 2px 0 var(--pvz-grass-dark-transparent);
   backdrop-filter: blur(1px);
 }
 
@@ -1339,21 +1339,25 @@ div#dev-console-table {
   font-family: 'Brianne\'s Hand', cursive;
 }
 
-/* item descriptions / tooltips / shop item popovers */
+/* brianne hand */
 .popover,
-.popover *,
-.item-tooltip,
-.item-tooltip * {
+.popover * {
   font-family: 'Brianne\'s Hand', cursive !important;
 }
 
+.popover,
+.popover .popover-body,
+.popover .popover-content,
 .popover .modal-bg-color,
-.item-tooltip {
-  background-color: var(--pvz-grass-transparent) !important;
-  color: var(--pvz-cream) !important;
-  border: 3px solid var(--pvz-grass-dark-transparent) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent) !important;
+.popover .text-white,
+.popover .text-light {
+  color: #111 !important;
+}
+
+.popover .popover-body,
+.popover .popover-content,
+.popover .modal-bg-color {
+  background-color: #fff !important;
 }
 
 .popover .popover-header,
@@ -1363,32 +1367,68 @@ div#dev-console-table {
 .popover .modal-bg-color h4,
 .popover .modal-bg-color h5,
 .popover .modal-bg-color h6 {
-  color: var(--pvz-cream) !important;
+  color: #111 !important;
   font-family: 'Brianne\'s Hand', cursive !important;
 }
 
-.popover .popover-body,
-.popover .modal-bg-color,
+/* descriptions for items */
 .popover .modal-bg-color p,
 .popover .modal-bg-color div,
 .popover .modal-bg-color span,
 .popover .modal-bg-color strong,
 .popover .modal-bg-color b {
-  color: var(--pvz-cream) !important;
+  color: #111 !important;
 }
 
+/* info and price */
 .popover .text-success,
 .popover .green,
 .popover .modal-bg-color .text-success,
-.popover .modal-bg-color .green,
-.item-tooltip .text-success,
-.item-tooltip .green {
+.popover .modal-bg-color .green {
   color: #59d65c !important;
 }
 
-.popover .modal-bg-color strong,
-.popover .modal-bg-color b {
-  color: var(--pvz-cream) !important;
+/* shop contents */
+.shop-grid-container .item-shop-button,
+.shop-grid-container .item-shop-button *,
+.shop-grid-items,
+.shop-grid-items *,
+#shop-modal .inventory-slot,
+#shop-modal .inventory-slot *,
+#modd-shop-modal .inventory-slot,
+#modd-shop-modal .inventory-slot *,
+#modd-item-shop-modal .inventory-slot,
+#modd-item-shop-modal .inventory-slot * {
+  font-family: 'Brianne\'s Hand', cursive !important;
+}
+
+/* Shop item names are dark/black against the wooden shop background. */
+.shop-grid-container .item-shop-button,
+.shop-grid-container .item-shop-button .item-name,
+.shop-grid-container .item-shop-button .shop-item-name,
+.shop-grid-items .item-name,
+.shop-grid-items .shop-item-name,
+#shop-modal .inventory-slot .item-name,
+#shop-modal .inventory-slot .shop-item-name,
+#modd-shop-modal .inventory-slot .item-name,
+#modd-shop-modal .inventory-slot .shop-item-name,
+#modd-item-shop-modal .inventory-slot .item-name,
+#modd-item-shop-modal .inventory-slot .shop-item-name {
+  color: #111 !important;
+}
+
+.shop-grid-container .item-shop-button .text-dark,
+.shop-grid-container .item-shop-button .text-body,
+.shop-grid-items .text-dark,
+.shop-grid-items .text-body,
+#shop-modal .inventory-slot .text-dark,
+#shop-modal .inventory-slot .text-body,
+.shop-grid-container .item-shop-button .text-white,
+.shop-grid-items .text-white,
+#shop-modal .inventory-slot .text-white,
+#modd-shop-modal .inventory-slot .text-white,
+#modd-item-shop-modal .inventory-slot .text-white {
+  color: #111 !important;
 }
 
 .ui-text-top,
