@@ -15,7 +15,7 @@ html {
 
 @font-face {
   font-family: 'Burbank Big Condensed';
-  src: url('/assets/fonts/BurbankBigCondensed_Bold.otf') format('opentype');
+  src: url('/assets/fonts/BurbankBigCondensedBold.otf') format('opentype');
   font-weight: bold;
 }
 
