@@ -1099,6 +1099,8 @@ div#dev-console-table {
 :root {
   --pvz-grass: #7cb342;
   --pvz-grass-dark: #558b2f;
+  --pvz-grass-transparent: rgba(124, 179, 66, 0.82);
+  --pvz-grass-dark-transparent: rgba(85, 139, 47, 0.88);
   --pvz-sun: #ffca28;
   --pvz-sun-dark: #f9a825;
   --pvz-wood: #a5732c;
@@ -1118,22 +1120,31 @@ div#dev-console-table {
   font-family: 'Nunito', sans-serif;
 }
 
-/* chatbox */
+/* chat box */
+#chat-box {
+  width: 360px;
+  max-width: 90vw;
+}
+
+#chat-history,
+#chat-history .msg,
+#chat-history .author {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+}
+
+/* chatbox  */
 #chat-box .tab-content {
-  background: repeating-linear-gradient(
-    180deg,
-    var(--pvz-wood-light) 0px,
-    var(--pvz-wood-light) 18px,
-    var(--pvz-wood) 18px,
-    var(--pvz-wood) 20px
-  ) !important;
-  border: 4px solid var(--pvz-wood-dark);
+  background: var(--pvz-grass-transparent) !important;
+  border: 4px solid var(--pvz-grass-dark-transparent);
   border-radius: 10px 10px 5px 5px !important;
-  box-shadow: 0 3px 0 var(--pvz-wood-dark);
+  box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
+  backdrop-filter: blur(1px);
 }
 
 #chat-tab-container a.nav-link.active {
-  background-color: var(--pvz-wood-dark) !important;
+  background-color: var(--pvz-grass-dark-transparent) !important;
   color: var(--pvz-cream) !important;
   font-family: 'Chewy', cursive;
   letter-spacing: 0.5px;
@@ -1144,25 +1155,106 @@ div#dev-console-table {
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
 }
 
+/* chat input field */
+#chat-message-input .input-group {
+  background: var(--pvz-grass-transparent);
+  border: 4px solid var(--pvz-grass-dark-transparent);
+  border-radius: 10px;
+  box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
+  padding: 6px;
+}
+
+#chat-message-input .form-control {
+  background: rgba(255, 248, 225, 0.85);
+  border: 2px solid var(--pvz-grass-dark-transparent);
+  color: var(--pvz-wood-dark);
+  font-family: 'Brianne\'s Hand', cursive;
+  font-size: 1.1rem;
+}
+
+#chat-message-input .form-control::placeholder {
+  font-family: 'Brianne\'s Hand', cursive;
+  color: var(--pvz-grass-dark);
+  opacity: 0.85;
+}
+
+#chat-message-input .input-group-append .btn {
+  background: var(--pvz-grass-dark-transparent);
+  border: 2px solid var(--pvz-grass-dark-transparent);
+  color: var(--pvz-cream);
+}
+
+/* shops */
+#modd-item-shop-modal .modal-content,
+#modd-shop-modal,
+#shop-modal .modal-content {
+  background: repeating-linear-gradient(
+    180deg,
+    var(--pvz-wood-light) 0px,
+    var(--pvz-wood-light) 18px,
+    var(--pvz-wood) 18px,
+    var(--pvz-wood) 20px
+  ) !important;
+  border: 4px solid var(--pvz-wood-dark);
+  border-radius: 10px;
+  box-shadow: 0 3px 0 var(--pvz-wood-dark);
+}
+
+#modd-item-shop-modal .modal-header,
+#modd-shop-modal .modal-header,
+#shop-modal .modal-header {
+  background-color: var(--pvz-wood-dark);
+  color: var(--pvz-cream);
+  border-bottom: 2px solid var(--pvz-wood-dark);
+}
+
+#modd-item-shop-modal .nav-link.active,
+#modd-shop-modal .nav-link.active,
+#shop-modal .nav-link.active {
+  background-color: var(--pvz-wood-dark) !important;
+  color: var(--pvz-cream) !important;
+}
+
 /* leaderboard, scoreboard */
 #scoreboard {
-  background: var(--pvz-cream);
-  border: 4px solid var(--pvz-sun-dark);
+  background: var(--pvz-grass-transparent);
+  border: 4px solid var(--pvz-grass-dark-transparent);
   border-radius: 10px;
-  box-shadow: 0 3px 0 var(--pvz-sun-dark);
+  box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
   padding: 10px;
-  color: var(--pvz-wood-dark);
+  color: var(--pvz-cream);
+  backdrop-filter: blur(1px);
+}
+
+/* leadboard shit */
+#scoreboard:empty {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 0;
+  min-height: 0;
 }
 
 .scoreboard-player-name {
-  font-family: 'Nunito', sans-serif;
   font-weight: 400;
-  color: var(--pvz-wood-dark);
+  color: #fff;
 }
 
 .scoreboard-player-score {
-  color: var(--pvz-grass-dark);
+  color: #fff;
   font-weight: 400;
+}
+
+/* highlight my own row on the leaderboard: bright lime with a glow, others stay white */
+.scoreboard-player-is-myself .scoreboard-player-name {
+  color: #99ff00;
+  font-weight: 800;
+  text-shadow: 0 0 4px #99ff00, 0 0 10px rgba(153, 255, 0, 0.85), 0 0 18px rgba(153, 255, 0, 0.6);
+}
+
+.scoreboard-player-is-myself .scoreboard-player-score {
+  color: #ccff66;
+  text-shadow: 0 0 4px rgba(153, 255, 0, 0.8);
 }
 
 /* the "Leaderboard" title/toggle above the list */
@@ -1175,10 +1267,11 @@ div#dev-console-table {
 
 /* hud */
 #my-score-div {
-  background: var(--pvz-grass);
-  border: 4px solid var(--pvz-grass-dark);
+  background: var(--pvz-grass-transparent);
+  border: 4px solid var(--pvz-grass-dark-transparent);
   border-radius: 12px;
-  box-shadow: 0 3px 0 var(--pvz-grass-dark);
+  box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
+  backdrop-filter: blur(1px);
 }
 
 #players-attribute-div span[id^="pt-attribute-"] {
@@ -1186,20 +1279,26 @@ div#dev-console-table {
   font-weight: 400;
 }
 
+/* yellow glow */
 #players-attribute-div span[id^="pt-attribute-value-"] {
   color: var(--pvz-sun);
   font-family: 'Chewy', cursive;
   font-size: 1.1em;
+  text-shadow: 0 0 4px var(--pvz-sun), 0 0 10px rgba(255, 202, 40, 0.85), 0 0 18px rgba(255, 202, 40, 0.55);
 }
 
 #chat-box,
 #chat-box *,
+#chat-input-field-div,
+#chat-input-field-div *,
 #leaderboard,
 #leaderboard *,
 #my-score-div,
 #my-score-div *,
 #unit-status,
-#unit-status * {
+#unit-status *,
+#stats,
+#stats * {
   font-family: 'Brianne\'s Hand', cursive;
 }
 
