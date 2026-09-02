@@ -8,6 +8,17 @@ html {
   src: url('/assets/fonts/arcade.ttf');
 }
 
+@font-face {
+  font-family: 'House of Terror';
+  src: url('/assets/fonts/HouseofTerror_Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Burbank Big Condensed';
+  src: url('/assets/fonts/Burbank_Big_Condensed_Bold.otf') format('opentype');
+  font-weight: bold;
+}
+
 body {
   background-color: #000;
   width: 100%;
@@ -391,11 +402,17 @@ canvas {
   margin: 0;
 }
 
-#headerTopPartner b {
-  font-size: 18px;
-  font-weight: normal;
-  color: #cdedff;
+#headerTopPartner {
+  color: #fff;
+  font-family: 'House of Terror', sans-serif;
+  font-size: 28px;
+  text-transform: uppercase;
+  font-weight: bold;
   line-height: 46px;
+  vertical-align: middle;
+  text-shadow: 1px 1px 1px #00476c;
+  float: left;
+  margin: 0;
 }
 
 .green {
@@ -1072,4 +1089,102 @@ div#dev-console-table {
 
 .ui-draggable-dragging {
   transform: scale(1.8);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Chewy&family=Nunito:wght@400;700;800&display=swap');
+
+:root {
+  --pvz-grass: #7cb342;
+  --pvz-grass-dark: #558b2f;
+  --pvz-sun: #ffca28;
+  --pvz-sun-dark: #f9a825;
+  --pvz-wood: #a5732c;
+  --pvz-wood-dark: #6d4c41;
+  --pvz-wood-light: #c9974b;
+  --pvz-cream: #fff8e1;
+}
+
+/* apply the friendly body font everywhere the UI already uses white text,
+   without touching layout/spacing rules already defined above */
+.game-ui,
+#my-score-div,
+#players-attribute-div,
+#chat-history,
+#scoreboard,
+#leaderboard {
+  font-family: 'Nunito', sans-serif;
+}
+
+/* ---------- Chat box: wood-plank panel ---------- */
+#chat-box .tab-content {
+  background: repeating-linear-gradient(
+    180deg,
+    var(--pvz-wood-light) 0px,
+    var(--pvz-wood-light) 18px,
+    var(--pvz-wood) 18px,
+    var(--pvz-wood) 20px
+  ) !important;
+  border: 4px solid var(--pvz-wood-dark);
+  border-radius: 10px 10px 5px 5px !important;
+  box-shadow: 0 3px 0 var(--pvz-wood-dark);
+}
+
+#chat-tab-container a.nav-link.active {
+  background-color: var(--pvz-wood-dark) !important;
+  color: var(--pvz-cream) !important;
+  font-family: 'Chewy', cursive;
+  letter-spacing: 0.5px;
+}
+
+#chat-history {
+  color: var(--pvz-cream);
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ---------- Leaderboard / scoreboard: sun-yellow panel ---------- */
+#scoreboard {
+  background: var(--pvz-cream);
+  border: 4px solid var(--pvz-sun-dark);
+  border-radius: 10px;
+  box-shadow: 0 3px 0 var(--pvz-sun-dark);
+  padding: 10px;
+  color: var(--pvz-wood-dark);
+}
+
+.scoreboard-player-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  color: var(--pvz-wood-dark);
+}
+
+.scoreboard-player-score {
+  color: var(--pvz-grass-dark);
+  font-weight: 800;
+}
+
+/* the "Leaderboard" title/toggle above the list */
+#leaderboard-toggle,
+.leaderboard-div > *:first-child {
+  font-family: 'Chewy', cursive;
+  color: var(--pvz-sun);
+  text-shadow: 1px 1px 0 var(--pvz-wood-dark);
+}
+
+/* hud */
+#my-score-div {
+  background: var(--pvz-grass);
+  border: 4px solid var(--pvz-grass-dark);
+  border-radius: 12px;
+  box-shadow: 0 3px 0 var(--pvz-grass-dark);
+}
+
+#players-attribute-div span[id^="pt-attribute-"] {
+  color: var(--pvz-cream);
+  font-weight: 700;
+}
+
+#players-attribute-div span[id^="pt-attribute-value-"] {
+  color: var(--pvz-sun);
+  font-family: 'Chewy', cursive;
+  font-size: 1.1em;
 }
