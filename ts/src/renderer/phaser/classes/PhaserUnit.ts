@@ -1,3 +1,26 @@
+const NAME_LABEL_FONT = 'Burbank Big Condensed';
+let nameLabelFontReady = false;
+const labelsAwaitingFont = new Set<Phaser.GameObjects.Text>();
+
+if (typeof document !== 'undefined' && (document as any).fonts && (document as any).fonts.load) {
+	(document as any).fonts
+		.load(`16px "${NAME_LABEL_FONT}"`)
+		.then(() => {
+			nameLabelFontReady = true;
+			labelsAwaitingFont.forEach((label) => {
+				if (label && label.active) {
+					// re-setting the same text forces Phaser to redraw the texture
+					// using whichever font is currently registered for the family
+					label.setText(label.text);
+				}
+			});
+			labelsAwaitingFont.clear();
+		})
+		.catch(() => {
+			// if the font fails to load, labels just stay on the fallback font
+		});
+}
+
 class PhaserUnit extends PhaserAnimatedEntity {
 	sprite: Phaser.GameObjects.Sprite & IRenderProps;
 	//label: Phaser.GameObjects.BitmapText;
@@ -291,7 +314,7 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		));*/
 		label.visible = true;
 
-		label.setFontFamily('Burbank Big Condensed');
+		label.setFontFamily(NAME_LABEL_FONT);
 		label.setFontSize(16);
 		label.setFontStyle(data.bold ? 'bold' : 'normal');
 
@@ -301,6 +324,12 @@ class PhaserUnit extends PhaserAnimatedEntity {
 		const strokeThickness = taro.game.data.settings.addStrokeToNameAndAttributes !== false ? 4 : 0;
 		label.setStroke('#000', strokeThickness);
 		label.setText(data.text || '');
+
+		if (!nameLabelFontReady) {
+			// this label was (or may have been) drawn before the font finished
+			// loading; queue it to be redrawn once it's actually ready
+			labelsAwaitingFont.add(label);
+		}
 
 		/*if (rt) {
 			const tempScale = label.scale;
