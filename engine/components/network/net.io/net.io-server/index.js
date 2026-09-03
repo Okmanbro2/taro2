@@ -804,14 +804,14 @@ NetIo.Server = NetIo.EventingClass.extend({
 			return;
 		}
 
+		let firebaseUserId = '';
 		try {
-			let decodedToken;
+		    let decodedToken;
 			if (process.env.ENV !== 'standalone' && taro.workerComponent) {
 				decodedToken = taro.workerComponent ? await taro.workerComponent.verifyToken(token) : {};
 			} else {
 				// standalone server: userId starts blank (guest) and only becomes a
 				// real value if the client sent a Firebase ID token that verifies.
-				let firebaseUserId = '';
 				if (token) {
 					try {
 						const decodedFirebaseToken = await firebaseAdmin.auth().verifyIdToken(token);
