@@ -1044,19 +1044,19 @@ var ActionComponent = TaroEntity.extend({
 								var data = unit.getPersistentData('unit');
 								persistedData.unit = data;
 
-								// save unit and player data both - dot-path keys so Firestore's
-								// merge:true only touches data.player/data.unit, not sibling
-								// fields (e.g. username) already on this doc. Player.js/Unit.js
-								// loadPersistentData() read these back from the same
-								// persistedData.data.player / .data.unit shape.
+								// save unit and player data both - savePersistedEntityData replaces
+								// the nested data.player / data.unit maps wholesale via real Firestore
+								// FieldPaths, without touching sibling fields already on this doc
+								// (e.g. username). Player.js/Unit.js loadPersistentData() read these
+								// back from that same persistedData.data.player / .data.unit shape.
 								taro.playerDataStore
-									.savePlayerData(userId, { 'data.player': persistedData.player, 'data.unit': persistedData.unit })
+									.savePersistedEntityData(userId, { player: persistedData.player, unit: persistedData.unit })
 									.catch((err) => {
 										self._script.errorLog(`savePlayerData failed: ${err.message}`, path);
 									});
 							} else {
 								// save player data only
-								taro.playerDataStore.savePlayerData(userId, { 'data.player': persistedData.player }).catch((err) => {
+								taro.playerDataStore.savePersistedEntityData(userId, { player: persistedData.player }).catch((err) => {
 									self._script.errorLog(`savePlayerData failed: ${err.message}`, path);
 								});
 
