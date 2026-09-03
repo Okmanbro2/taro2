@@ -324,6 +324,20 @@ var Server = TaroClass.extend({
 		// parse application/json
 		app.use(bodyParser.json());
 
+		app.post('/api/verify-token', async (req, res) => {
+			const { idToken } = req.body;
+			if (!idToken) {
+				return res.status(400).json({ error: 'missing idToken' });
+			}
+			try {
+				const decoded = await firebaseAdmin.auth().verifyIdToken(idToken);
+				return res.json({ uid: decoded.uid, email: decoded.email });
+			} catch (err) {
+				console.log('token verification failed:', err.message);
+				return res.status(401).json({ error: 'invalid token' });
+			}
+		});
+
 		app.set('view engine', 'ejs');
 		app.set('views', path.resolve('src'));
 		app.use('/engine', express.static(path.resolve('./engine/')));
