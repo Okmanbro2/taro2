@@ -533,6 +533,9 @@ const Client = TaroEventingClass.extend({
 			window.activatePlayGame = true; // is there a reason this line was repeated?
 
 			$(this.getCachedElementById('play-game-button-wrapper')).removeClass('d-none-important');
+			if (typeof window.showAuthWidget === 'function') {
+				window.showAuthWidget();
+			}
 			$('.modal-videochat-backdrop, .modal-videochat').removeClass('d-none'); // hmmm
 			$('.modal-videochat').show(); // no...yes?
 
