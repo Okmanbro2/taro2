@@ -429,8 +429,12 @@ const Client = TaroEventingClass.extend({
 
 		if (!gameData.isDeveloper) {
 			// .isDeveloper property seems to be outdated
-
-			gameData.isDeveloper = window.isStandalone;
+			// NOTE: this used to auto-grant dev tools to every connecting player whenever
+			// running standalone (window.isStandalone), which gave everyone the dev console
+			// regardless of who they were. Dev tools are now granted per-player once their
+			// server-verified isUserMod/isUserAdmin flag arrives - see gameClasses/Player.js,
+			// where taro.client.myPlayer is set.
+			gameData.isDeveloper = false;
 		}
 
 		let loadPhysicsStartTime = performance.now();
