@@ -125,9 +125,21 @@ var GameComponent = TaroEntity.extend({
 			taro.gameText.sendLatestText(data.clientId);
 			// taro.shopkeeper.updateShopInventory(taro.shopkeeper.inventory, data.clientId) // send latest ui information to the client
 
+			// standalone builds don't have taro.workerComponent (that's part of modd.io's
+			// private backend), so permissions fall back to this hardcoded owner list.
+			// guests (data.guestUserId set, no real account) never qualify.
+			const OWNER_USERNAMES = ['thw0k', 'footsoldier'];
+			const isWhitelistedOwner = !data.guestUserId && OWNER_USERNAMES.includes((data.name || '').toLowerCase());
+
 			const { isOwner, isInvitedUser, isUserMod, isUserAdmin, isModerationAllowed } = taro.workerComponent
 				? taro.workerComponent.getUserPermissions(data)
-				: { isOwner: false }; // hell no
+				: {
+						isOwner: isWhitelistedOwner,
+						isInvitedUser: false,
+						isUserMod: isWhitelistedOwner,
+						isUserAdmin: isWhitelistedOwner,
+						isModerationAllowed: isWhitelistedOwner,
+				  };
 
 			player._stats.isUserAdmin = isUserAdmin;
 			player._stats.isUserMod = isUserMod;
