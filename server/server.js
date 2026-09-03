@@ -325,6 +325,52 @@ var Server = TaroClass.extend({
 			}
 		});
 
+		// Verifies the "Authorization: Bearer <idToken>" header and attaches the
+		// verified uid as req.uid - never trust a uid sent in the request body,
+		// always take it from a verified token like this.
+		const requireAuth = async (req, res, next) => {
+			const authHeader = req.headers.authorization || '';
+			const idToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+			if (!idToken) {
+				return res.status(401).json({ error: 'missing Authorization bearer token' });
+			}
+			try {
+				const decoded = await firebaseAdmin.auth().verifyIdToken(idToken);
+				req.uid = decoded.uid;
+				next();
+			} catch (err) {
+				return res.status(401).json({ error: 'invalid token' });
+			}
+		};
+
+		// letters, numbers, underscores, 3-16 chars - keep in sync with the
+		// USERNAME_PATTERN in src/templates/auth.ejs
+		const USERNAME_PATTERN = /^[A-Za-z0-9_]{3,16}$/;
+
+		app.get('/api/username', requireAuth, async (req, res) => {
+			try {
+				const data = await getPlayerData(req.uid);
+				return res.json({ username: (data && data.username) || null });
+			} catch (err) {
+				console.log('get username failed:', err.message);
+				return res.status(500).json({ error: err.message });
+			}
+		});
+
+		app.post('/api/username', requireAuth, async (req, res) => {
+			const username = (req.body.username || '').trim();
+			if (!USERNAME_PATTERN.test(username)) {
+				return res.status(400).json({ error: 'Username must be 3-16 characters: letters, numbers, underscores only.' });
+			}
+			try {
+				await savePlayerData(req.uid, { username });
+				return res.json({ success: true, username });
+			} catch (err) {
+				console.log('save username failed:', err.message);
+				return res.status(500).json({ error: err.message });
+			}
+		});
+
 		// --- Firestore test routes: temporary, for confirming save/load works
 		// before wiring real player data into the game join flow ---
 		app.post('/api/test-save', async (req, res) => {
