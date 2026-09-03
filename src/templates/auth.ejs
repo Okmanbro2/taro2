@@ -1,0 +1,271 @@
+<style>
+	#auth-widget {
+		position: absolute;
+		top: 12px;
+		right: 12px;
+		z-index: 20;
+		width: 220px;
+		padding: 12px;
+		border-radius: 8px;
+		background-color: #272e37e5;
+		color: #fff;
+		font-family: inherit;
+		pointer-events: auto;
+	}
+
+	#auth-widget input.form-control {
+		margin-bottom: 6px;
+		font-size: 13px;
+		height: 32px;
+	}
+
+	#auth-widget .auth-tabs {
+		display: flex;
+		margin-bottom: 8px;
+		border-radius: 4px;
+		overflow: hidden;
+		border: 1px solid #6b7280;
+	}
+
+	#auth-widget .auth-tab {
+		flex: 1;
+		background: transparent;
+		color: #cfd3d8;
+		border: none;
+		padding: 4px 0;
+		font-size: 12px;
+		cursor: pointer;
+	}
+
+	#auth-widget .auth-tab.active {
+		background-color: #495057bd;
+		color: #fff;
+	}
+
+	#auth-widget #auth-submit-btn {
+		width: 100%;
+		font-size: 13px;
+	}
+
+	#auth-widget #auth-divider {
+		text-align: center;
+		font-size: 11px;
+		color: #9aa0a6;
+		margin: 8px 0;
+	}
+
+	#auth-widget #auth-google-btn {
+		width: 100%;
+		font-size: 13px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		background-color: #fff;
+		color: #3c4043;
+		border: 1px solid #dadce0;
+	}
+
+	#auth-widget #auth-google-btn img {
+		width: 16px;
+		height: 16px;
+	}
+
+	#auth-widget #auth-error {
+		margin-top: 6px;
+		color: #ff6c6c;
+		font-size: 12px;
+		display: none;
+	}
+
+	#auth-widget #auth-status {
+		font-size: 13px;
+	}
+
+	#auth-widget #auth-status-text {
+		display: block;
+		margin-bottom: 6px;
+		word-break: break-all;
+	}
+
+	#auth-widget #auth-logout-btn {
+		width: 100%;
+		font-size: 12px;
+	}
+
+	.d-none {
+		display: none !important;
+	}
+</style>
+
+<div id="auth-widget">
+	<div id="auth-forms">
+		<div class="auth-tabs">
+			<button type="button" id="auth-tab-login" class="auth-tab active">Log In</button>
+			<button type="button" id="auth-tab-signup" class="auth-tab">Sign Up</button>
+		</div>
+		<input type="email" id="auth-email" class="form-control" placeholder="Email" autocomplete="email" />
+		<input type="password" id="auth-password" class="form-control" placeholder="Password"
+			autocomplete="current-password" />
+		<button type="button" id="auth-submit-btn" class="btn btn-success">Log In</button>
+		<div id="auth-divider">or</div>
+		<button type="button" id="auth-google-btn" class="btn btn-light">
+			<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" />
+			Continue with Google
+		</button>
+		<div id="auth-error"></div>
+	</div>
+	<div id="auth-status" class="d-none">
+		<span id="auth-status-text"></span>
+		<button type="button" id="auth-logout-btn" class="btn btn-outline-light">Log Out</button>
+	</div>
+</div>
+
+<script>
+	(function () {
+		var mode = 'login'; // or 'signup'
+
+		var $forms = document.getElementById('auth-forms');
+		var $status = document.getElementById('auth-status');
+		var $statusText = document.getElementById('auth-status-text');
+		var $tabLogin = document.getElementById('auth-tab-login');
+		var $tabSignup = document.getElementById('auth-tab-signup');
+		var $email = document.getElementById('auth-email');
+		var $password = document.getElementById('auth-password');
+		var $submitBtn = document.getElementById('auth-submit-btn');
+		var $googleBtn = document.getElementById('auth-google-btn');
+		var $error = document.getElementById('auth-error');
+		var $logoutBtn = document.getElementById('auth-logout-btn');
+
+		// Friendly text for the Firebase Auth error codes we're likely to hit -
+		// falls back to err.message for anything not in this list.
+		var FIREBASE_ERROR_MESSAGES = {
+			'auth/invalid-email': 'That email address doesn\'t look right.',
+			'auth/email-already-in-use': 'An account with that email already exists. Try logging in instead.',
+			'auth/weak-password': 'Password should be at least 6 characters.',
+			'auth/missing-password': 'Please enter a password.',
+			// newer firebase SDKs return this generic code for both wrong password
+			// and unknown email, instead of the two separate codes below
+			'auth/invalid-credential': 'Incorrect email or password.',
+			'auth/user-not-found': 'No account found with that email.',
+			'auth/wrong-password': 'Incorrect password.',
+			'auth/too-many-requests': 'Too many attempts. Please wait a bit and try again.',
+			'auth/network-request-failed': 'Network error - check your connection and try again.',
+			'auth/popup-closed-by-user': 'Google sign-in was closed before finishing.',
+			'auth/popup-blocked': 'Your browser blocked the Google sign-in popup. Please allow popups and try again.',
+			'auth/cancelled-popup-request': 'Google sign-in was cancelled.',
+			'auth/unauthorized-domain':
+				'This site isn\'t authorized for Google sign-in yet (check Firebase Console -> Authentication -> Settings -> Authorized domains).',
+			'auth/account-exists-with-different-credential':
+				'An account already exists with this email using a different sign-in method.',
+		};
+
+		function showError(message) {
+			$error.textContent = message;
+			$error.style.display = 'block';
+		}
+
+		function clearError() {
+			$error.textContent = '';
+			$error.style.display = 'none';
+		}
+
+		function setMode(newMode) {
+			mode = newMode;
+			clearError();
+			if (mode === 'login') {
+				$tabLogin.classList.add('active');
+				$tabSignup.classList.remove('active');
+				$submitBtn.textContent = 'Log In';
+				$password.setAttribute('autocomplete', 'current-password');
+			} else {
+				$tabSignup.classList.add('active');
+				$tabLogin.classList.remove('active');
+				$submitBtn.textContent = 'Sign Up';
+				$password.setAttribute('autocomplete', 'new-password');
+			}
+		}
+
+		function setSubmitting(isSubmitting) {
+			$submitBtn.disabled = isSubmitting;
+			$submitBtn.textContent = isSubmitting ? 'Please wait...' : mode === 'login' ? 'Log In' : 'Sign Up';
+		}
+
+		function handleSubmit() {
+			clearError();
+
+			var email = $email.value.trim();
+			var password = $password.value;
+
+			if (!email || !password) {
+				showError('Please fill in both fields.');
+				return;
+			}
+
+			setSubmitting(true);
+
+			var authPromise =
+				mode === 'login'
+					? window.firebaseSignIn(window.firebaseAuth, email, password)
+					: window.firebaseCreateUser(window.firebaseAuth, email, password);
+
+			authPromise
+				.then(function () {
+					// onAuthStateChanged (in index.ejs) picks this up and swaps the UI
+					// over to the signed-in view - nothing else to do here.
+					$password.value = '';
+				})
+				.catch(function (err) {
+					console.log('firebase auth error:', err.code, err.message);
+					showError(FIREBASE_ERROR_MESSAGES[err.code] || err.message);
+				})
+				.finally(function () {
+					setSubmitting(false);
+				});
+		}
+
+		$tabLogin.addEventListener('click', function () {
+			setMode('login');
+		});
+		$tabSignup.addEventListener('click', function () {
+			setMode('signup');
+		});
+		$submitBtn.addEventListener('click', handleSubmit);
+		$password.addEventListener('keydown', function (e) {
+			if (e.key === 'Enter') {
+				handleSubmit();
+			}
+		});
+		$logoutBtn.addEventListener('click', function () {
+			window.firebaseSignOut(window.firebaseAuth);
+		});
+		$googleBtn.addEventListener('click', function () {
+			clearError();
+			$googleBtn.disabled = true;
+			window
+				.firebaseSignInWithGoogle()
+				.catch(function (err) {
+					console.log('firebase google sign-in error:', err.code, err.message);
+					showError(FIREBASE_ERROR_MESSAGES[err.code] || err.message);
+				})
+				.finally(function () {
+					$googleBtn.disabled = false;
+				});
+		});
+
+		// index.ejs's onAuthStateChanged handler calls this whenever the signed-in
+		// state changes (page load, login, signup, logout).
+		window.renderAuthUI = function (user) {
+			if (user) {
+				$forms.classList.add('d-none');
+				$status.classList.remove('d-none');
+				$statusText.textContent = 'Signed in as ' + user.email;
+			} else {
+				$status.classList.add('d-none');
+				$forms.classList.remove('d-none');
+				$email.value = '';
+				$password.value = '';
+			}
+		};
+	})();
+</script>
