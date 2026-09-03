@@ -316,6 +316,9 @@ var MenuUiComponent = TaroEntity.extend({
 					}
 				}
 				$('#play-game-button-wrapper').addClass('d-none-important');
+				if (typeof window.hideAuthWidget === 'function') {
+					window.hideAuthWidget();
+				}
 			});
 
 			$('#help-button').on('click', function () {
