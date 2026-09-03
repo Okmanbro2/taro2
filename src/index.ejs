@@ -41,14 +41,40 @@
 	  window.firebaseCreateUser = createUserWithEmailAndPassword;
 	  window.firebaseSignIn = signInWithEmailAndPassword;
 	
+	  // Firebase checks local persistence asynchronously, so on page load we don't
+	  // yet know whether someone's signed in. window.firebaseAuthReady resolves
+	  // exactly once, the first time Firebase tells us (with the user, or null) -
+	  // anything that needs to know "are we signed in?" before doing its own thing
+	  // (e.g. opening the game socket) should `await` this first.
+	  let resolveAuthReady;
+	  window.firebaseAuthReady = new Promise((resolve) => {
+	    resolveAuthReady = resolve;
+	  });
+	  let authReadyResolved = false;
+
+	  // Always call this instead of reading a token you stashed earlier - it
+	  // returns null if signed out, and transparently refreshes an expired
+	  // token if signed in, so it's always safe to call right before connecting.
+	  window.getFirebaseIdToken = async function () {
+	    if (!auth.currentUser) {
+	      return null;
+	    }
+	    return await auth.currentUser.getIdToken();
+	  };
+	
 	  onAuthStateChanged(auth, (user) => {
 	    if (user) {
 	      console.log('Firebase: signed in as', user.email);
 	    } else {
 	      console.log('Firebase: not signed in');
 	    }
+	    if (!authReadyResolved) {
+	      authReadyResolved = true;
+	      resolveAuthReady(user);
+	    }
 	  });
 	</script>
+
 
     <!-- OpenGraph Metadata -->
     <meta property="og:title" content="Taro">
