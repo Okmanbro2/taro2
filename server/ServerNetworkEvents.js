@@ -143,7 +143,10 @@ var ServerNetworkEvents = {
 				{
 					_id: data._id || undefined,
 					controlledBy: 'human',
-					name: generateRandomPlayerName(),
+					// logged-in players with a saved username play under that name;
+					// everyone else (guests, or logged-in players who haven't set one
+					// yet) gets the usual randomized name
+					name: (persistedData && persistedData.username) || generateRandomPlayerName(),
 					coins: (persistedData && persistedData.coins) ?? 0,
 					points: 0,
 					clientId: clientId,
