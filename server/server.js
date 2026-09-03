@@ -7,7 +7,7 @@ const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const currency = require('currency.js');
 const firebaseAdmin = require('./firebaseAdmin');
-const { getPlayerData, savePlayerData, claimUsername, UsernameTakenError } = require('./playerData');
+const { getPlayerData, savePlayerData, savePersistedEntityData, claimUsername, UsernameTakenError } = require('./playerData');
 
 // --- perf diagnostic: logs event loop lag + memory every 5s so it's visible yea ---
 const { monitorEventLoopDelay } = require('perf_hooks');
@@ -186,7 +186,7 @@ var Server = TaroClass.extend({
 		// exposes the local Firestore-backed player data store (server/playerData.js) on
 		// the shared `taro` global, so isomorphic gameClasses files (which can't use
 		// require()) can reach it - e.g. ActionComponent's 'savePlayerData' script action.
-		taro.playerDataStore = { getPlayerData, savePlayerData };
+		taro.playerDataStore = { getPlayerData, savePlayerData, savePersistedEntityData };
 
 		self.keysToRemoveBeforeSend = [
 			'abilities',
