@@ -14,6 +14,42 @@
     <meta name="description" content="A Plants vs. Zombies fangame right on the browser!">
     <meta name="keywords" content="modd.io, taro, multiplayer">
 
+	<script type="module">
+	  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+	  import {
+	    getAuth,
+	    createUserWithEmailAndPassword,
+	    signInWithEmailAndPassword,
+	    onAuthStateChanged
+	  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+	
+	  const firebaseConfig = {
+	    apiKey: "AIzaSyDYBctcyZqAEW0pN9uOF37PMu-yoXmb0cc",
+	    authDomain: "pvz-roam.firebaseapp.com",
+	    projectId: "pvz-roam",
+	    storageBucket: "pvz-roam.firebasestorage.app",
+	    messagingSenderId: "982409156504",
+	    appId: "1:982409156504:web:bfcd621cfd64ad90abfded"
+	  };
+	
+	  const app = initializeApp(firebaseConfig);
+	  const auth = getAuth(app);
+	
+	  // expose these globally so our other game scripts (loaded as plain
+	  // non-module scripts) can call into Firebase auth
+	  window.firebaseAuth = auth;
+	  window.firebaseCreateUser = createUserWithEmailAndPassword;
+	  window.firebaseSignIn = signInWithEmailAndPassword;
+	
+	  onAuthStateChanged(auth, (user) => {
+	    if (user) {
+	      console.log('Firebase: signed in as', user.email);
+	    } else {
+	      console.log('Firebase: not signed in');
+	    }
+	  });
+	</script>
+
     <!-- OpenGraph Metadata -->
     <meta property="og:title" content="Taro">
     <meta property="og:description" content="A multiplayer HTML5 game engine">
