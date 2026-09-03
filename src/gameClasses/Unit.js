@@ -2372,7 +2372,11 @@ var Unit = TaroEntityPhysics.extend({
 			(taro.physics && taro.isClient && taro.client.selectedUnit == this && this._stats.controls?.cspMode) // client-side prediction is enabled (cspMode either 1 or 2)
 		) {
 			if (this._stats.buffs && this._stats.buffs.length > 0) {
-				for (let i = 0; i < this._stats.buffs.length; i++) {
+				// iterate backwards: removeAttributeBuff() splices the array mid-loop, which
+				// shifts every later element down one slot. Iterating forward meant whatever
+				// buff slid into the just-removed index got skipped for that tick. Going
+				// backwards means a splice only ever affects indices we've already checked.
+				for (let i = this._stats.buffs.length - 1; i >= 0; i--) {
 					var buff = this._stats.buffs[i];
 					if (buff.timeLimit < Date.now()) {
 						this.removeAttributeBuff(buff.attrId, buff.value, i);
