@@ -3602,6 +3602,23 @@ var ActionComponent = TaroEntity.extend({
 						var value = self._script.param.getValue(action.value, vars);
 						var entity = self._script.param.getValue(action.entity, vars);
 
+						// TEMP DEBUG - remove once the speed/slow bug is found
+						if (attrId === 'speed') {
+							console.log('[setEntityAttribute DEBUG]', {
+								attrId,
+								value,
+								entityCategory: entity?._category,
+								entityName: entity?._stats?.name,
+								currentAttrValue: entity?._stats?.attributes?.[attrId]?.value,
+								guardPassed:
+									!!entity &&
+									self.entityCategories.indexOf(entity?._category) > -1 &&
+									!!entity?._stats?.attributes &&
+									entity?._stats?.attributes?.[attrId] != undefined &&
+									value != undefined,
+							});
+						}
+
 						if (
 							entity &&
 							self.entityCategories.indexOf(entity._category) > -1 &&
