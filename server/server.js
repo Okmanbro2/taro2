@@ -183,6 +183,11 @@ var Server = TaroClass.extend({
 		};
 		taro.rateLimiter = new RateLimiterMemory(rateLimiterOptions);
 
+		// exposes the local Firestore-backed player data store (server/playerData.js) on
+		// the shared `taro` global, so isomorphic gameClasses files (which can't use
+		// require()) can reach it - e.g. ActionComponent's 'savePlayerData' script action.
+		taro.playerDataStore = { getPlayerData, savePlayerData };
+
 		self.keysToRemoveBeforeSend = [
 			'abilities',
 			'animations',
