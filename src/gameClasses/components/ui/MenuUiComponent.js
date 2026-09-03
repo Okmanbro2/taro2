@@ -143,15 +143,20 @@ var MenuUiComponent = TaroEntity.extend({
 
 			$('#toggle-dev-panels').on('click', function () {
 				// only let players the server verified as owner/admin/mod (see
-				// GameComponent.createPlayer) open the in-game level editor - this used to
-				// also open for anyone whenever window.isStandalone was true, i.e. everyone
-				// on a standalone server.
+				// GameComponent.createPlayer) open dev tools - this used to also open for
+				// anyone whenever window.isStandalone was true, i.e. everyone on a standalone
+				// server.
 				var isVerifiedDeveloper =
 					taro.client.myPlayer && (taro.client.myPlayer._stats.isUserAdmin || taro.client.myPlayer._stats.isUserMod);
 				if (!taro.game.data.isGameDeveloper && !isVerifiedDeveloper) {
 					return;
 				}
-				if (['1', '4', '5'].includes(window.gameDetails?.tier) || isVerifiedDeveloper) {
+				// the ['1','4','5'] tier branch loads modd.io/indie.fun's own hosted level
+				// editor bundle - only reachable from modd.io/indie.fun's own domain, so it's
+				// left as-is for actual modd.io-hosted games. On a standalone server that fetch
+				// just redirects cross-origin and dies (CORS), so verified developers here get
+				// the built-in, self-contained dev console instead.
+				if (['1', '4', '5'].includes(window.gameDetails?.tier)) {
 					// console.log("taro developermode: ", taro.developerMode);
 					taro.developerMode.enter();
 
