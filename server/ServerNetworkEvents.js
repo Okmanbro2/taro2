@@ -84,7 +84,7 @@ var ServerNetworkEvents = {
 			player.remove();
 		}
 
-		if (userId || guestUserId) {
+		if ((userId || guestUserId) && taro.workerComponent) {
 			taro.workerComponent.saveLastPlayedTime(userId, guestUserId, kickUserRequestId);
 		}
 	},
