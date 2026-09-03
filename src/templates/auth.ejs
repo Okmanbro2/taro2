@@ -1,7 +1,9 @@
 <style>
 	#auth-widget {
 		position: absolute;
-		top: 12px;
+		/* pushed down from top:12px so it clears the #stats ping/fps counter,
+		   which shares the top-right corner - see gui.ejs */
+		top: 40px;
 		right: 12px;
 		z-index: 20;
 		width: 220px;
@@ -78,13 +80,27 @@
 		display: none;
 	}
 
+	#auth-widget #auth-hint {
+		margin-bottom: 6px;
+		color: #cfd3d8;
+		font-size: 12px;
+	}
+
 	#auth-widget #auth-status {
 		font-size: 13px;
 	}
 
-	#auth-widget #auth-status-text {
+	#auth-widget #auth-status-username {
+		display: block;
+		font-weight: bold;
+		word-break: break-all;
+	}
+
+	#auth-widget #auth-status-email {
 		display: block;
 		margin-bottom: 6px;
+		color: #9aa0a6;
+		font-size: 11px;
 		word-break: break-all;
 	}
 
@@ -98,12 +114,18 @@
 	}
 </style>
 
-<div id="auth-widget">
+<!-- Hidden by default (d-none-important) - shown/hidden together with
+     #play-game-button-wrapper by client.js and MenuUiComponent.js, so this
+     only ever appears on the pre-game menu screen, never during gameplay. -->
+<div id="auth-widget" class="d-none-important">
+	<!-- signed out: login / signup / google -->
 	<div id="auth-forms">
 		<div class="auth-tabs">
 			<button type="button" id="auth-tab-login" class="auth-tab active">Log In</button>
 			<button type="button" id="auth-tab-signup" class="auth-tab">Sign Up</button>
 		</div>
+		<input type="text" id="auth-username" class="form-control d-none" placeholder="Username" autocomplete="username"
+			maxlength="16" />
 		<input type="email" id="auth-email" class="form-control" placeholder="Email" autocomplete="email" />
 		<input type="password" id="auth-password" class="form-control" placeholder="Password"
 			autocomplete="current-password" />
@@ -115,8 +137,20 @@
 		</button>
 		<div id="auth-error"></div>
 	</div>
+
+	<!-- signed in, but no username saved yet (e.g. first Google sign-in) -->
+	<div id="auth-needs-username" class="d-none">
+		<div id="auth-hint">Pick a username:</div>
+		<input type="text" id="auth-new-username" class="form-control" placeholder="Username" autocomplete="username"
+			maxlength="16" />
+		<button type="button" id="auth-save-username-btn" class="btn btn-success">Save Username</button>
+		<div id="auth-error"></div>
+	</div>
+
+	<!-- signed in, username set -->
 	<div id="auth-status" class="d-none">
-		<span id="auth-status-text"></span>
+		<span id="auth-status-username"></span>
+		<span id="auth-status-email"></span>
 		<button type="button" id="auth-logout-btn" class="btn btn-outline-light">Log Out</button>
 	</div>
 </div>
@@ -125,17 +159,27 @@
 	(function () {
 		var mode = 'login'; // or 'signup'
 
+		var $widget = document.getElementById('auth-widget');
 		var $forms = document.getElementById('auth-forms');
+		var $needsUsername = document.getElementById('auth-needs-username');
 		var $status = document.getElementById('auth-status');
-		var $statusText = document.getElementById('auth-status-text');
+		var $statusUsername = document.getElementById('auth-status-username');
+		var $statusEmail = document.getElementById('auth-status-email');
 		var $tabLogin = document.getElementById('auth-tab-login');
 		var $tabSignup = document.getElementById('auth-tab-signup');
+		var $username = document.getElementById('auth-username');
 		var $email = document.getElementById('auth-email');
 		var $password = document.getElementById('auth-password');
 		var $submitBtn = document.getElementById('auth-submit-btn');
 		var $googleBtn = document.getElementById('auth-google-btn');
 		var $error = document.getElementById('auth-error');
 		var $logoutBtn = document.getElementById('auth-logout-btn');
+		var $newUsername = document.getElementById('auth-new-username');
+		var $saveUsernameBtn = document.getElementById('auth-save-username-btn');
+
+		// same rule enforced server-side in server/server.js's /api/username route -
+		// keep these in sync
+		var USERNAME_PATTERN = /^[A-Za-z0-9_]{3,16}$/;
 
 		// Friendly text for the Firebase Auth error codes we're likely to hit -
 		// falls back to err.message for anything not in this list.
@@ -170,17 +214,25 @@
 			$error.style.display = 'none';
 		}
 
+		function showView(view) {
+			$forms.classList.toggle('d-none', view !== 'forms');
+			$needsUsername.classList.toggle('d-none', view !== 'needs-username');
+			$status.classList.toggle('d-none', view !== 'status');
+		}
+
 		function setMode(newMode) {
 			mode = newMode;
 			clearError();
 			if (mode === 'login') {
 				$tabLogin.classList.add('active');
 				$tabSignup.classList.remove('active');
+				$username.classList.add('d-none');
 				$submitBtn.textContent = 'Log In';
 				$password.setAttribute('autocomplete', 'current-password');
 			} else {
 				$tabSignup.classList.add('active');
 				$tabLogin.classList.remove('active');
+				$username.classList.remove('d-none');
 				$submitBtn.textContent = 'Sign Up';
 				$password.setAttribute('autocomplete', 'new-password');
 			}
@@ -191,14 +243,41 @@
 			$submitBtn.textContent = isSubmitting ? 'Please wait...' : mode === 'login' ? 'Log In' : 'Sign Up';
 		}
 
+		// Calls one of our own /api/username routes with the signed-in user's
+		// Firebase ID token attached, so the server can trust the uid.
+		function callUsernameApi(method, body) {
+			return window.firebaseAuth.currentUser.getIdToken().then(function (idToken) {
+				return fetch('/api/username', {
+					method: method,
+					headers: {
+						'Content-Type': 'application/json',
+						Authorization: 'Bearer ' + idToken,
+					},
+					body: body ? JSON.stringify(body) : undefined,
+				}).then(function (res) {
+					return res.json().then(function (json) {
+						if (!res.ok) {
+							throw new Error(json.error || 'request failed');
+						}
+						return json;
+					});
+				});
+			});
+		}
+
 		function handleSubmit() {
 			clearError();
 
 			var email = $email.value.trim();
 			var password = $password.value;
+			var username = $username.value.trim();
 
 			if (!email || !password) {
 				showError('Please fill in both fields.');
+				return;
+			}
+			if (mode === 'signup' && !USERNAME_PATTERN.test(username)) {
+				showError('Username must be 3-16 characters: letters, numbers, underscores only.');
 				return;
 			}
 
@@ -211,9 +290,15 @@
 
 			authPromise
 				.then(function () {
-					// onAuthStateChanged (in index.ejs) picks this up and swaps the UI
-					// over to the signed-in view - nothing else to do here.
 					$password.value = '';
+					if (mode === 'signup') {
+						// save the chosen username right away, so this player never sees
+						// the "pick a username" prompt after signing up here
+						return callUsernameApi('POST', { username: username }).then(function () {
+							return renderAuthUI(window.firebaseAuth.currentUser);
+						});
+					}
+					return renderAuthUI(window.firebaseAuth.currentUser);
 				})
 				.catch(function (err) {
 					console.log('firebase auth error:', err.code, err.message);
@@ -221,6 +306,31 @@
 				})
 				.finally(function () {
 					setSubmitting(false);
+				});
+		}
+
+		function handleSaveUsername() {
+			var $err = $needsUsername.querySelector('#auth-error');
+			$err.style.display = 'none';
+
+			var username = $newUsername.value.trim();
+			if (!USERNAME_PATTERN.test(username)) {
+				$err.textContent = 'Username must be 3-16 characters: letters, numbers, underscores only.';
+				$err.style.display = 'block';
+				return;
+			}
+
+			$saveUsernameBtn.disabled = true;
+			callUsernameApi('POST', { username: username })
+				.then(function () {
+					return renderAuthUI(window.firebaseAuth.currentUser);
+				})
+				.catch(function (err) {
+					$err.textContent = err.message;
+					$err.style.display = 'block';
+				})
+				.finally(function () {
+					$saveUsernameBtn.disabled = false;
 				});
 		}
 
@@ -236,6 +346,12 @@
 				handleSubmit();
 			}
 		});
+		$newUsername.addEventListener('keydown', function (e) {
+			if (e.key === 'Enter') {
+				handleSaveUsername();
+			}
+		});
+		$saveUsernameBtn.addEventListener('click', handleSaveUsername);
 		$logoutBtn.addEventListener('click', function () {
 			window.firebaseSignOut(window.firebaseAuth);
 		});
@@ -254,18 +370,46 @@
 		});
 
 		// index.ejs's onAuthStateChanged handler calls this whenever the signed-in
-		// state changes (page load, login, signup, logout).
+		// state changes (page load, login, signup, logout, Google popup). Also
+		// called directly above after signup / saving a username, so the UI
+		// updates immediately instead of waiting on the next auth-state event.
 		window.renderAuthUI = function (user) {
-			if (user) {
-				$forms.classList.add('d-none');
-				$status.classList.remove('d-none');
-				$statusText.textContent = 'Signed in as ' + user.email;
-			} else {
-				$status.classList.add('d-none');
-				$forms.classList.remove('d-none');
+			if (!user) {
+				showView('forms');
 				$email.value = '';
 				$password.value = '';
+				$username.value = '';
+				return Promise.resolve();
 			}
+
+			return callUsernameApi('GET')
+				.then(function (json) {
+					if (json.username) {
+						$statusUsername.textContent = json.username;
+						$statusEmail.textContent = user.email || '';
+						showView('status');
+					} else {
+						$newUsername.value = '';
+						showView('needs-username');
+					}
+				})
+				.catch(function (err) {
+					console.log('renderAuthUI: failed to load username:', err.message);
+					// still signed in, just show what we know rather than get stuck
+					$statusUsername.textContent = user.displayName || user.email || 'Player';
+					$statusEmail.textContent = user.email || '';
+					showView('status');
+				});
+		};
+
+		// menu-only visibility: shown/hidden together with #play-game-button-wrapper
+		// (see client.js and MenuUiComponent.js) - exposed here so those files don't
+		// need to know this widget's internal structure.
+		window.showAuthWidget = function () {
+			$widget.classList.remove('d-none-important');
+		};
+		window.hideAuthWidget = function () {
+			$widget.classList.add('d-none-important');
 		};
 	})();
 </script>
