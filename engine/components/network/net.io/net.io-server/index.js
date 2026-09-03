@@ -5,7 +5,6 @@ var NetIo = {};
 // socketConnection() below). Guests send an empty token and skip this entirely.
 const firebaseAdmin = require('../../../../../server/firebaseAdmin');
 
-
 /**
  * Define the debug options object
  * @type {Object}
@@ -846,7 +845,11 @@ NetIo.Server = NetIo.EventingClass.extend({
 			let assignedId = self.newIdHex();
 
 			// if the token has been used already, close the connection.
-			const isUsedToken = taro.server.usedConnectionJwts[token];
+			// skip this for verified Firebase users - their token is a real,
+			// short-lived identity credential meant to be reused across a session
+			// (page refreshes, rejoins), not a one-time connection ticket the way
+			// the old random guest tokens were.
+			const isUsedToken = !firebaseUserId && taro.server.usedConnectionJwts[token];
 
 			if (isUsedToken) {
 				if (request.headers['sec-websocket-protocol'].split(', ')[1] == 'reconnect') {
