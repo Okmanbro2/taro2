@@ -142,10 +142,16 @@ var MenuUiComponent = TaroEntity.extend({
 			});
 
 			$('#toggle-dev-panels').on('click', function () {
-				if (!taro.game.data.isGameDeveloper && !window.isStandalone) {
+				// only let players the server verified as owner/admin/mod (see
+				// GameComponent.createPlayer) open the in-game level editor - this used to
+				// also open for anyone whenever window.isStandalone was true, i.e. everyone
+				// on a standalone server.
+				var isVerifiedDeveloper =
+					taro.client.myPlayer && (taro.client.myPlayer._stats.isUserAdmin || taro.client.myPlayer._stats.isUserMod);
+				if (!taro.game.data.isGameDeveloper && !isVerifiedDeveloper) {
 					return;
 				}
-				if (['1', '4', '5'].includes(window.gameDetails?.tier) || window.isStandalone) {
+				if (['1', '4', '5'].includes(window.gameDetails?.tier) || isVerifiedDeveloper) {
 					// console.log("taro developermode: ", taro.developerMode);
 					taro.developerMode.enter();
 
