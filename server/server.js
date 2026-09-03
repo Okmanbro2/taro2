@@ -7,7 +7,7 @@ const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const currency = require('currency.js');
 const firebaseAdmin = require('./firebaseAdmin');
-const { getPlayerData, savePlayerData } = require('./playerData');
+const { getPlayerData, savePlayerData, claimUsername, UsernameTakenError } = require('./playerData');
 
 // --- perf diagnostic: logs event loop lag + memory every 5s so it's visible yea ---
 const { monitorEventLoopDelay } = require('perf_hooks');
@@ -363,9 +363,14 @@ var Server = TaroClass.extend({
 				return res.status(400).json({ error: 'Username must be 3-16 characters: letters, numbers, underscores only.' });
 			}
 			try {
-				await savePlayerData(req.uid, { username });
+				await claimUsername(req.uid, username);
 				return res.json({ success: true, username });
 			} catch (err) {
+				if (err instanceof UsernameTakenError) {
+					// 409 Conflict - the request was well-formed, it just collided
+					// with existing state (someone else's claim on this username)
+					return res.status(409).json({ error: err.message });
+				}
 				console.log('save username failed:', err.message);
 				return res.status(500).json({ error: err.message });
 			}
