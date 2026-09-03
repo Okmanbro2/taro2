@@ -1036,21 +1036,29 @@ var ActionComponent = TaroEntity.extend({
 
 							var unit = player.getSelectedUnit();
 
+							if (!taro.isServer || !taro.playerDataStore) {
+								throw new Error('Fail saving player data: playerDataStore not available (server.js sets taro.playerDataStore)');
+							}
+
 							if (unit && player && userId && unit.persistentDataLoaded) {
 								var data = unit.getPersistentData('unit');
 								persistedData.unit = data;
 
-								// save unit and player data both
-								taro.workerComponent.saveUserData(userId, persistedData, null, 'savePlayerData', isGuestUser);
+								// save unit and player data both - dot-path keys so Firestore's
+								// merge:true only touches data.player/data.unit, not sibling
+								// fields (e.g. username) already on this doc. Player.js/Unit.js
+								// loadPersistentData() read these back from the same
+								// persistedData.data.player / .data.unit shape.
+								taro.playerDataStore
+									.savePlayerData(userId, { 'data.player': persistedData.player, 'data.unit': persistedData.unit })
+									.catch((err) => {
+										self._script.errorLog(`savePlayerData failed: ${err.message}`, path);
+									});
 							} else {
 								// save player data only
-								taro.workerComponent.saveUserData(
-									userId,
-									persistedData.player,
-									'player',
-									'savePlayerData',
-									isGuestUser
-								);
+								taro.playerDataStore.savePlayerData(userId, { 'data.player': persistedData.player }).catch((err) => {
+									self._script.errorLog(`savePlayerData failed: ${err.message}`, path);
+								});
 
 								if (unit && !unit.persistentDataLoaded) {
 									throw new Error('Fail saving unit data bcz persisted data not loaded correctly');
