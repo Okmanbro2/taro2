@@ -57,6 +57,12 @@ var Player = TaroEntity.extend({
 						taro.addComponent(DevConsoleComponent);
 					}
 					$('#mod-this-game-menu-item').removeClass('d-none');
+					// the "Enter Dev Mode" button is hardcoded `display: none !important`
+					// in templates/dev-console.ejs and nothing else in the codebase ever
+					// reveals it (the only other calls to .show() on it are commented out) -
+					// .show() rewrites that same inline style property so it isn't blocked
+					// by its own !important.
+					$('#toggle-dev-panels').show();
 				}
 
 				if (typeof startVideoChat == 'function') {
