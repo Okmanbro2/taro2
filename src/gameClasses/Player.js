@@ -47,6 +47,18 @@ var Player = TaroEntity.extend({
 				// old comment => 'declare my player'
 				taro.client.myPlayer = self;
 
+				// grant developer tools (dev console, "mod this game" menu item) only to
+				// players the server actually verified as owner/admin/mod - see
+				// GameComponent.createPlayer(). This is the per-player replacement for the
+				// old window.isStandalone based auto-grant.
+				if (self._stats.isUserAdmin || self._stats.isUserMod) {
+					taro.game.data.isDeveloper = true;
+					if (!taro.ad) {
+						taro.addComponent(DevConsoleComponent);
+					}
+					$('#mod-this-game-menu-item').removeClass('d-none');
+				}
+
 				if (typeof startVideoChat == 'function') {
 					// the elephant is back
 					startVideoChat(self.id());
