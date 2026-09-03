@@ -13,7 +13,8 @@ if (!admin.apps.length) {
 	});
 }
 
-module.exports = admin;
+const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
-// module.exports = admin;
+
+module.exports = admin;
 module.exports.db = db;
