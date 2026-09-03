@@ -7,6 +7,7 @@ const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const currency = require('currency.js');
 const firebaseAdmin = require('./firebaseAdmin');
+const { getPlayerData, savePlayerData } = require('./playerData');
 
 // --- perf diagnostic: logs event loop lag + memory every 5s so it's visible yea ---
 const { monitorEventLoopDelay } = require('perf_hooks');
@@ -323,6 +324,30 @@ var Server = TaroClass.extend({
 				return res.status(401).json({ error: 'invalid token' });
 			}
 		});
+
+		// --- Firestore test routes: temporary, for confirming save/load works
+		// before wiring real player data into the game join flow ---
+		app.post('/api/test-save', async (req, res) => {
+			const { uid, data } = req.body;
+			try {
+				await savePlayerData(uid, data);
+				return res.json({ success: true });
+			} catch (err) {
+				console.log('save failed:', err.message);
+				return res.status(500).json({ error: err.message });
+			}
+		});
+
+		app.get('/api/test-load/:uid', async (req, res) => {
+			try {
+				const data = await getPlayerData(req.params.uid);
+				return res.json({ data });
+			} catch (err) {
+				console.log('load failed:', err.message);
+				return res.status(500).json({ error: err.message });
+			}
+		});
+		// --- end Firestore test routes ---
 
 		app.set('view engine', 'ejs');
 		app.set('views', path.resolve('src'));
