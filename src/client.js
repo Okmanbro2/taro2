@@ -638,8 +638,19 @@ const Client = TaroEventingClass.extend({
 		}
 	},
 
-	connectToServer: function () {
+	connectToServer: async function () {
 		var self = this;
+
+		// Wait until Firebase has told us whether anyone's signed in (this resolves
+		// almost instantly in practice, since connectToServer only runs after the
+		// user clicks Play, long after page load), then use a real ID token if
+		// we've got one. window.gsAuthToken is what net.io-client actually sends
+		// on the socket connection URL - overwriting it here is the hookup point.
+		// Empty string (not the old random fake value) explicitly means "guest".
+		await window.firebaseAuthReady;
+		window.gsAuthToken = (await window.getFirebaseIdToken()) || '';
+		console.log('connectToServer: gsAuthToken is', window.gsAuthToken ? 'a real Firebase token' : 'empty (guest)');
+
 		// if typeof args[1] == 'function', callback(args[0])
 		taro.network.start(taro.client.server, (clientServer) => {
 			// changed param from 'data' to clientServer
