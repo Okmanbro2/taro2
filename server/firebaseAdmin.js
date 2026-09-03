@@ -7,7 +7,7 @@ if (!admin.apps.length) {
 			clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
 			// Render stores this as a literal "\n"-escaped single line —
 			// convert it back into real newlines here, since that's what
-			// the actual PEM key format requires to parse correctly
+			// the actual PEM key format requires to parse correctly.
 			privateKey: (process.env.FIREBASE_PRIVATE_KEY || '').replace(/\\n/g, '\n'),
 		}),
 	});
