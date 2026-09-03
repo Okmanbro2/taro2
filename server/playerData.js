@@ -9,7 +9,7 @@ async function getPlayerData(uid) {
 }
 
 async function savePlayerData(uid, data) {
-	await db.collection('players').doc(uid).set(data, { merge: true });
+	await db.collection('players').doc(uid).set(data, { merge: true, ignoreUndefinedProperties: true });
 }
 
 // Thrown by claimUsername() when someone else already holds that username -
