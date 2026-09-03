@@ -1,3 +1,5 @@
+const { getPlayerData } = require('./playerData');
+
 // Pool of names randomly assigned to guest players in standalone mode.
 // Add/remove/edit entries as you like.
 const RANDOM_PLAYER_NAMES = [
@@ -87,7 +89,7 @@ var ServerNetworkEvents = {
 		}
 	},
 
-	_onJoinGame: function (data, clientId) {
+	_onJoinGame: async function (data, clientId) {
 		if (taro.workerComponent) {
 			// this is used for hosted version of moddio
 			// Step 1: Filter out players controlled by humans and extract their usernames
@@ -119,16 +121,37 @@ var ServerNetworkEvents = {
 				// client authentication failed
 			}
 		} else {
-			// this is for the standalone version of moddio
-			var player = taro.game?.createPlayer({
-				controlledBy: 'human',
-				name: generateRandomPlayerName(),
-				coins: 0,
-				points: 0,
-				clientId: clientId,
-				isAdBlockEnabled: data.isAdBlockEnabled,
-				isMobile: data.isMobile,
-			});
+			// this is for the standalone version of moddio.
+			// data._id is either '' (guest) or a Firebase uid that net.io-server's
+			// socketConnection() already verified - see that file if you need to
+			// double check how it gets here.
+			var persistedData = null;
+			if (data._id) {
+				try {
+					persistedData = await getPlayerData(data._id);
+					console.log('_onJoinGame: loaded Firestore data for uid', data._id, persistedData);
+				} catch (err) {
+					// don't block them from joining just because the load failed -
+					// they'll join with defaults, same as a brand new account would.
+					console.log('_onJoinGame: failed to load player data for uid', data._id, err.message);
+				}
+			}
+
+			// Add more persisted fields here as you build them out (e.g. a dev flag) -
+			// same pattern as coins: `(persistedData && persistedData.whatever) ?? <default>`.
+			var player = taro.game?.createPlayer(
+				{
+					_id: data._id || undefined,
+					controlledBy: 'human',
+					name: generateRandomPlayerName(),
+					coins: (persistedData && persistedData.coins) ?? 0,
+					points: 0,
+					clientId: clientId,
+					isAdBlockEnabled: data.isAdBlockEnabled,
+					isMobile: data.isMobile,
+				},
+				persistedData
+			);
 
 			if (player) {
 				player.joinGame();
