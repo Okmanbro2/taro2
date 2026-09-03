@@ -6,6 +6,21 @@ const fs = require('fs');
 const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const currency = require('currency.js');
+const firebaseAdmin = require('./firebaseAdmin');
+
+app.post('/api/verify-token', async (req, res) => {
+	const { idToken } = req.body;
+	if (!idToken) {
+		return res.status(400).json({ error: 'missing idToken' });
+	}
+	try {
+		const decoded = await firebaseAdmin.auth().verifyIdToken(idToken);
+		return res.json({ uid: decoded.uid, email: decoded.email });
+	} catch (err) {
+		console.log('token verification failed:', err.message);
+		return res.status(401).json({ error: 'invalid token' });
+	}
+});
 
 // --- perf diagnostic: logs event loop lag + memory every 5s so it's visible ---
 const { monitorEventLoopDelay } = require('perf_hooks');
