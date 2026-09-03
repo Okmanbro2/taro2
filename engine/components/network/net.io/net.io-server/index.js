@@ -1,6 +1,11 @@
 // Our namespace
 var NetIo = {};
 
+// Used to verify real Firebase ID tokens sent by signed-in players (see
+// socketConnection() below). Guests send an empty token and skip this entirely.
+const firebaseAdmin = require('../../../../../server/firebaseAdmin');
+
+
 /**
  * Define the debug options object
  * @type {Object}
@@ -805,9 +810,22 @@ NetIo.Server = NetIo.EventingClass.extend({
 			if (process.env.ENV !== 'standalone' && taro.workerComponent) {
 				decodedToken = taro.workerComponent ? await taro.workerComponent.verifyToken(token) : {};
 			} else {
-				// no token validation required for standalone server
+				// standalone server: userId starts blank (guest) and only becomes a
+				// real value if the client sent a Firebase ID token that verifies.
+				let firebaseUserId = '';
+				if (token) {
+					try {
+						const decodedFirebaseToken = await firebaseAdmin.auth().verifyIdToken(token);
+						firebaseUserId = decodedFirebaseToken.uid;
+						console.log('socketConnection: verified Firebase token for uid', firebaseUserId);
+					} catch (firebaseErr) {
+						// expired/invalid token, or a guest's empty string reaching here some
+						// other way - either way, fall back to guest rather than reject them.
+						console.log('socketConnection: Firebase token verification failed, treating as guest:', firebaseErr.message);
+					}
+				}
 				decodedToken = {
-					userId: '',
+					userId: firebaseUserId,
 					sessionId: '',
 					createdAt: Date.now(),
 					gameSlug: taro.game && taro.game.data && taro.game.data.defaultData && taro.game.data.defaultData.gameSlug,
