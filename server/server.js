@@ -22,7 +22,7 @@ app.post('/api/verify-token', async (req, res) => {
 	}
 });
 
-// --- perf diagnostic: logs event loop lag + memory every 5s so it's visible ---
+// --- perf diagnostic: logs event loop lag + memory every 5s so it's visible yea ---
 const { monitorEventLoopDelay } = require('perf_hooks');
 const _eldHistogram = monitorEventLoopDelay({ resolution: 20 });
 _eldHistogram.enable();
