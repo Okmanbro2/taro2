@@ -934,6 +934,12 @@ canvas {
   z-index: 9999;
 }
 
+@media (min-width: 900px) {
+  #play-game-button-wrapper {
+    padding-right: 280px;
+  }
+}
+
 #account-panel {
   z-index: 9999;
 }
@@ -1598,6 +1604,7 @@ div#dev-console-table {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	align-items: center;
 	gap: 10px;
 }
 
@@ -1606,14 +1613,15 @@ div#dev-console-table {
 	color: var(--pvz-cream);
 	text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
 	font-size: 2.4em;
+	text-align: center;
 	margin: 0;
 }
 
 .pvz-version-number {
-	font-family: 'Nunito', sans-serif;
+	font-family: 'Brianne\'s Hand', cursive;
 	font-weight: 800;
 	color: var(--pvz-sun);
-	font-size: 1em;
+	font-size: 1.1em;
 	text-align: center;
 	margin-bottom: 6px;
 }
@@ -1645,10 +1653,10 @@ div#dev-console-table {
 }
 
 .pvz-play-button {
-	font-family: 'Burbank Big Condensed', sans-serif;
+	font-family: 'Brianne\'s Hand', cursive;
 	font-size: 1.8em;
 	color: var(--pvz-cream);
-	background: var(--pvz-wood);
+	background: #7cb342;
 	border: 4px solid #5b8f32;
 	border-radius: 12px;
 	box-shadow: 0 5px 0 #5b8f32;
@@ -1698,14 +1706,29 @@ div#dev-console-table {
 
 .pvz-welcome-footer {
 	position: absolute;
-	right: 20px;
+	right: 50px;
 	bottom: 14px;
 	display: flex;
 	align-items: center;
-	gap: 6px;
+	gap: 10px;
 	color: rgba(255, 255, 255, 0.75);
 	font-family: 'Brianne\'s Hand', cursive;
 	font-size: 0.9em;
+}
+
+.pvz-footer-leaderboard-button {
+	width: 40px;
+	height: 40px;
+	font-size: 0.85em;
+}
+
+.pvz-footer-leaderboard-button i {
+	font-size: 1.3em;
+}
+
+#pvz-leaderboard-button {
+	background: var(--pvz-sun-dark);
+	border-color: #5b8f32;
 }
 
 @media (max-width: 720px) {
