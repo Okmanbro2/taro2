@@ -291,10 +291,8 @@ var PlayerUiComponent = TaroEntity.extend({
 		}
 
 		$('#custom-modal').addClass('d-flex');
-		$('#custom-modal').modal({
-			backdrop: config.isDismissible ? true : 'static',
-			keyboard: config.isDismissible,
-		});
+		$('#custom-modal').data('backdrop', config.isDismissible ? true : 'static');
+		$('#custom-modal').data('keyboard', config.isDismissible);
 
 		if (config.isDismissible) {
 			$('#custom-modal-cancel-container').show();
