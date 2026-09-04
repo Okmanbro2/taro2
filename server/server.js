@@ -7,7 +7,21 @@ const cluster = require('cluster');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 const currency = require('currency.js');
 const firebaseAdmin = require('./firebaseAdmin');
-const { getPlayerData, savePlayerData, savePersistedEntityData, claimUsername, UsernameTakenError } = require('./playerData');
+const {
+	getPlayerData,
+	savePlayerData,
+	savePersistedEntityData,
+	claimUsername,
+	UsernameTakenError,
+	getUidByUsername,
+	importModdData,
+	wipePlayerData,
+} = require('./playerData');
+
+// keep in sync with OWNER_USERNAMES in src/gameClasses/components/GameComponent.js -
+// these are the only two accounts allowed developer tools in-game, and (here)
+// the admin-only data-recovery endpoints below.
+const OWNER_USERNAMES = ['thw0k', 'footsoldier'];
 
 // --- perf diagnostic: logs event loop lag + memory every 5s so it's visible yea ---
 const { monitorEventLoopDelay } = require('perf_hooks');
@@ -348,6 +362,22 @@ var Server = TaroClass.extend({
 			}
 		};
 
+		// Chains after requireAuth - 403s unless the verified uid's claimed
+		// username is in OWNER_USERNAMES. Used to gate the admin data-recovery
+		// endpoints below to Thw0k/FootSoldier only, same as in-game dev tools.
+		const requireAdmin = async (req, res, next) => {
+			try {
+				const data = await getPlayerData(req.uid);
+				const username = ((data && data.username) || '').toLowerCase();
+				if (!OWNER_USERNAMES.includes(username)) {
+					return res.status(403).json({ error: 'not authorized' });
+				}
+				next();
+			} catch (err) {
+				return res.status(500).json({ error: err.message });
+			}
+		};
+
 		// letters, numbers, underscores, 3-16 chars - keep in sync with the
 		// USERNAME_PATTERN in src/templates/auth.ejs
 		const USERNAME_PATTERN = /^[A-Za-z0-9_]{3,16}$/;
@@ -377,6 +407,92 @@ var Server = TaroClass.extend({
 					return res.status(409).json({ error: err.message });
 				}
 				console.log('save username failed:', err.message);
+				return res.status(500).json({ error: err.message });
+			}
+		});
+
+		// Returns the caller's own full player doc (data.player.attributes/
+		// variables, username, moddImportedAt, etc.) - used by the account
+		// panel to display stats like Wins/Coins.
+		// Returns the caller's own full player doc (data.player.attributes/
+		// variables, username, moddImportedAt, etc.) - used by the account
+		// panel to display stats like Wins/Coins. Named playerDoc (not "data")
+		// in the response on purpose - the doc itself already has a top-level
+		// field literally called "data" (see savePersistedEntityData), so
+		// nesting it under a second "data" key would make callers write
+		// json.data.data.player, which is exactly the kind of double-nesting
+		// mistake this comment is here to prevent.
+		app.get('/api/player-data', requireAuth, async (req, res) => {
+			try {
+				const playerDoc = await getPlayerData(req.uid);
+				return res.json({ playerDoc: playerDoc || null });
+			} catch (err) {
+				return res.status(500).json({ error: err.message });
+			}
+		});
+
+		app.get('/api/is-admin', requireAuth, async (req, res) => {
+			try {
+				const data = await getPlayerData(req.uid);
+				const username = ((data && data.username) || '').toLowerCase();
+				return res.json({ isAdmin: OWNER_USERNAMES.includes(username) });
+			} catch (err) {
+				return res.status(500).json({ error: err.message });
+			}
+		});
+
+		// Self-service modd.io/indie.fun data import - one-time only (see
+		// importModdData's moddImportedAt check in playerData.js). `moddData` is
+		// the raw JSON a player copies from that game's "View Save Data" button.
+		app.post('/api/import-modd-data', requireAuth, async (req, res) => {
+			const { moddData } = req.body;
+			if (!moddData) {
+				return res.status(400).json({ error: 'missing moddData' });
+			}
+			try {
+				const result = await importModdData(req.uid, moddData, { force: false });
+				return res.json({ success: true, ...result });
+			} catch (err) {
+				if (err.code === 'ALREADY_IMPORTED') {
+					return res.status(409).json({ error: err.message });
+				}
+				console.log('import modd data failed:', err.message);
+				return res.status(400).json({ error: err.message });
+			}
+		});
+
+		// Admin-only re-run of the same import, targeting another player by
+		// username - for helping someone whose own one-time import went wrong.
+		// Reuses the exact same backup-then-merge path as the self-service
+		// route above (force: true just skips the "already imported" check).
+		app.post('/api/admin-import-modd-data', requireAuth, requireAdmin, async (req, res) => {
+			const { targetUsername, moddData } = req.body;
+			if (!targetUsername || !moddData) {
+				return res.status(400).json({ error: 'missing targetUsername or moddData' });
+			}
+			try {
+				const targetUid = await getUidByUsername(targetUsername);
+				if (!targetUid) {
+					return res.status(404).json({ error: `No account found with username "${targetUsername}".` });
+				}
+				const result = await importModdData(targetUid, moddData, { force: true });
+				return res.json({ success: true, ...result });
+			} catch (err) {
+				console.log('admin import modd data failed:', err.message);
+				return res.status(400).json({ error: err.message });
+			}
+		});
+
+		// Wipes the caller's own saved progress back to a blank slate. The
+		// client is expected to have the player re-enter their password and
+		// reauthenticate with Firebase immediately before calling this, so the
+		// bearer token here is always freshly confirmed - see auth.ejs.
+		app.post('/api/wipe-data', requireAuth, async (req, res) => {
+			try {
+				const result = await wipePlayerData(req.uid);
+				return res.json({ success: true, ...result });
+			} catch (err) {
+				console.log('wipe data failed:', err.message);
 				return res.status(500).json({ error: err.message });
 			}
 		});
