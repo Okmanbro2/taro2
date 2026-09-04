@@ -6,14 +6,16 @@ const { db } = admin;
 const fs = require('fs');
 const path = require('path');
 
+// data import bullshit down here
+//
 // game.json's data.data.attributeTypes is the single source of truth for
 // every attribute id's name/min/max in the actual running game - the same
-// registry the client reads as taro.game.data.attributeTypes. used for two
+// registry the client reads as taro.game.data.attributeTypes. Used for two
 // things below: (1) validating anything a player pastes into the modd.io/
 // indie.fun import box, since that's the one place in the whole app where
 // raw player-supplied JSON gets treated as trusted persisted data, and (2)
 // turning cryptic attribute ids (e.g. "KAohfBnN6V") into display names (e.g.
-// "Coins") for the discord import log.
+// "Coins") for the Discord import log.
 let attributeTypesById = {};
 try {
 	const gameJsonPath = path.join(__dirname, '..', 'src', 'game.json');
@@ -29,14 +31,14 @@ try {
 // pasting {"value": 999999999} into the import box. for attributes where an
 // unrealistic value would actually be a competitive/economy advantage, set a
 // real ceiling here based on what's actually achievable through normal play.
-// anything not listed here just falls back to the schema's own max, which is
+// Anything not listed here just falls back to the schema's own max, which is
 // effectively no cap - so add to this list whenever a new ownable/earnable
 // stat is added to the game and matters for fairness.
 const IMPORT_VALUE_CAPS = {
-	KAohfBnN6V: 75000, // Coins
-	fKYSjs9Zw4: 100, // Wins
-	NbZXJa87MY: 100, // Tacos
-	// "*owned?" / "*won?" flags are just 0/1 toggles in the schema already
+	KAohfBnN6V: 50000, // Coins
+	fKYSjs9Zw4: 5000, // Wins
+	NbZXJa87MY: 5000, // Tacos
+	// "*Owned?" / "*Won?" flags are just 0/1 toggles in the schema already
 	// (min:0, max:1), so they don't need an entry here - the schema clamp
 	// alone is sufficient for booleans, only numeric currency-like stats
 	// need a hand-picked ceiling.
@@ -77,7 +79,7 @@ async function postDiscordWebhook(content) {
 // what was already saved against what's about to be written - AFTER
 // sanitization/clamping, so the log always reflects the real applied values,
 // not whatever the player's raw pasted JSON claimed. only attributes whose
-// value actually changed are included. discord caps message length at 2000
+// value actually changed are included. Discord caps message length at 2000
 // chars, so this stops adding lines (with a "+N more" note) well before that
 // becomes a problem on an export with a lot of attributes.
 function formatAttributeChanges(existingAttributes, incomingAttributes) {
@@ -237,7 +239,7 @@ async function backupPlayerData(uid, reason) {
 //
 // IMPORTANT: this is the one place in the app where a player's own raw JSON
 // gets treated as trusted persisted data, so it can't just be passed
-// through. Two separate problems get fixed here, not one:
+// through. two separate problems get fixed here, not one:
 //
 // 1. obviously, someone could just hand-edit "value" to whatever they want.
 // 2. less obviously: loadPersistentData() in TaroEntity.js applies whatever
@@ -247,12 +249,27 @@ async function backupPlayerData(uid, reason) {
 //    checked against attacker-supplied bounds. rebuilding min/max here from
 //    the game's own trusted schema (instead of copying whatever the pasted
 //    JSON claims) closes that off regardless of what the export contains.
-function transformModdPlayerExport(moddExport) {
+function transformModdPlayerExport(moddExport, { bypassValidation = false } = {}) {
 	if (!moddExport || typeof moddExport !== 'object' || !moddExport.player) {
 		throw new Error("That doesn't look like a modd.io/indie.fun save export - expected a top-level \"player\" key.");
 	}
 
 	const incomingAttributes = moddExport.player.attributes || {};
+
+	// admin override path (see /api/admin-import-modd-data in server.js,
+	// which is what sets force: true -> bypassValidation: true below): none
+	// of the whitelist/clamp/schema rebuild logic applies here. this tool
+	// exists specifically so an admin can put in whatever value is needed to
+	// fix someone's account, including values a normal player import would
+	// never be allowed to set - so it passes the pasted data through as-is.
+	if (bypassValidation) {
+		return {
+			attributes: incomingAttributes,
+			variables: moddExport.player.variables || {},
+			skipped: [],
+		};
+	}
+
 	const attributes = {};
 	const skipped = [];
 
@@ -262,7 +279,7 @@ function transformModdPlayerExport(moddExport) {
 		if (!schema) {
 			// not a real attribute in this game - either a typo, a leftover
 			// from an older version of the game, or someone hand-crafting
-			// JSON. either way, there's nothing to validate it against, so
+			// JSON. Either way, there's nothing to validate it against, so
 			// it's dropped rather than trusted.
 			skipped.push({ attrId, reason: 'unknown attribute' });
 			continue;
@@ -326,7 +343,7 @@ async function importModdData(uid, moddExport, { force = false } = {}) {
 		throw err;
 	}
 
-	const incoming = transformModdPlayerExport(moddExport);
+	const incoming = transformModdPlayerExport(moddExport, { bypassValidation: force });
 	const existingPlayer = (current && current.data && current.data.player) || {};
 
 	const mergedPlayer = {
