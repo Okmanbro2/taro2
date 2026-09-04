@@ -1,9 +1,94 @@
-<!-- play button -->
-<div id="play-game-button-wrapper" class="h-100 w-100 d-flex justify-content-center position-absolute align-items-center d-none-important">
-    <button id="play-game-button" type="button" class="btn btn-success" data-style="rotate-side-down" data-perspective data-horizontal>
-        <div class="bg-success rounded">
-            <i class="fa fa-gamepad pr-2 py-3" aria-hidden="true"></i>
-            Play Game
-        </div>
-    </button>
+<!-- welcome / play menu -->
+<div id="play-game-button-wrapper" class="h-100 w-100 d-flex justify-content-center align-items-center position-absolute d-none-important">
+	<div class="pvz-welcome-card">
+
+		<div class="pvz-welcome-left">
+			<div class="pvz-logo-block" aria-label="Plants vs. Zombies: Roam">
+				<span class="pvz-logo-plants">Plants</span>
+				<span class="pvz-logo-vs">vs.</span>
+				<span class="pvz-logo-zombies">Zombies</span>
+				<span class="pvz-logo-roam">Roam: 2</span>
+			</div>
+
+			<div class="pvz-changelog-panel">
+				<h3 class="pvz-changelog-title">Changelog</h3>
+				<div id="pvz-changelog-list" class="pvz-changelog-list">
+					<!-- populated from /assets/data/changelog.json by the script below -->
+				</div>
+			</div>
+		</div>
+
+		<div class="pvz-welcome-right">
+			<h1 class="pvz-welcome-heading">Welcome to Plants vs. Zombies: Roam 2!</h1>
+			<div id="pvz-version-number" class="pvz-version-number"><!-- filled from changelog.json --></div>
+
+			<p class="pvz-welcome-description">
+				Plants vs. Zombies: Roam 2 puts you in the shoes of the plants. Defend your lawn against 50 flags
+				of zombies and face Zomboss at the end! Want more action? Gamemodes and Mini-games allow for
+				more fun! From classics like Vase breaker to Last Stand, to custom made modes like Brutal and
+				Crazy, the game has lots to offer.
+			</p>
+
+			<p class="pvz-welcome-cta">What are you waiting for?!</p>
+
+			<div class="pvz-button-row">
+				<button id="play-game-button" type="button" class="pvz-play-button" data-style="rotate-side-down" data-perspective data-horizontal>
+					PLAY NOW!!!
+				</button>
+
+				<div class="pvz-icon-button-group">
+					<a href="javascript:void(0)" id="pvz-discord-button" class="pvz-icon-button" title="Discord server coming soon">
+						<i class="fab fa-discord" aria-hidden="true"></i>
+						<span>Discord</span>
+					</a>
+					<button type="button" id="pvz-leaderboard-button" class="pvz-icon-button" title="Leaderboard coming soon">
+						<i class="fa fa-trophy" aria-hidden="true"></i>
+						<span>Leaderboard</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="pvz-welcome-footer">
+			<i class="fa fa-trophy" aria-hidden="true"></i>
+			<span id="pvz-footer-credit">2026 thw0kyple, footsoldier</span>
+		</div>
+	</div>
 </div>
+
+<script>
+	(function () {
+		fetch('/assets/data/changelog.json')
+			.then(function (res) { return res.json(); })
+			.then(function (data) {
+				var versionEl = document.getElementById('pvz-version-number');
+				if (versionEl && data.version) {
+					versionEl.textContent = 'Version ' + data.version;
+				}
+
+				var listEl = document.getElementById('pvz-changelog-list');
+				if (listEl && Array.isArray(data.entries)) {
+					listEl.innerHTML = '';
+					data.entries.forEach(function (entry) {
+						var entryDiv = document.createElement('div');
+						entryDiv.className = 'pvz-changelog-entry';
+
+						var titleEl = document.createElement('h4');
+						titleEl.className = 'pvz-changelog-entry-title';
+						titleEl.textContent = entry.title || '';
+
+						var descEl = document.createElement('p');
+						descEl.className = 'pvz-changelog-entry-desc';
+						descEl.textContent = entry.description || '';
+
+						entryDiv.appendChild(titleEl);
+						entryDiv.appendChild(descEl);
+						listEl.appendChild(entryDiv);
+					});
+				}
+			})
+			.catch(function (err) {
+				console.warn('Could not load changelog.json:', err);
+			});
+	})();
+</script>
