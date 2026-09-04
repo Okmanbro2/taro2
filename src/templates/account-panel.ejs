@@ -225,8 +225,12 @@
 			}
 			$importBtn.disabled = true;
 			authedFetch('/api/import-modd-data', { method: 'POST', body: JSON.stringify({ moddData: moddData }) })
-				.then(function () {
-					showMsg($importMsg, 'Imported! Rejoin the game to see your restored data.', false);
+				.then(function (result) {
+					var message = 'Imported! Rejoin the game to see your restored data.';
+					if (result.skipped && result.skipped.length > 0) {
+						message += ' Note: ' + result.skipped.length + ' value(s) were adjusted or skipped (unknown or out-of-range data) - contact @thw0k or @.footsoldier if that looks wrong.';
+					}
+					showMsg($importMsg, message, false);
 					loadStats();
 				})
 				.catch(function (err) {
