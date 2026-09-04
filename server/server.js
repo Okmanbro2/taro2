@@ -326,6 +326,23 @@ var Server = TaroClass.extend({
 		const app = express();
 		const port = process.env.PORT || 80;
 
+		// Stamped once when this process boots. Render deploys by starting a
+		// new container, health-checking it, then killing the old one - so
+		// this value changes on every deploy without needing any extra CI
+		// wiring. RENDER_GIT_COMMIT is set automatically by Render on
+		// services deployed from a git repo; the Date.now() fallback keeps
+		// this working when running locally (where that env var doesn't
+		// exist) or on any other host.
+		//
+		// This exists so clients can detect "the server I'm talking to isn't
+		// the one whose HTML/CSS/JS I originally loaded anymore" and reload
+		// themselves - see /api/server-version below and the poller in
+		// index.ejs. A plain WebSocket reconnect after a deploy would NOT do
+		// this on its own: the browser tab keeps running whatever
+		// custom.css/menu.ejs/client.js it already downloaded, even after
+		// reconnecting to a brand new server process.
+		this.bootVersion = process.env.RENDER_GIT_COMMIT || String(Date.now());
+
 		app.use(bodyParser.urlencoded({ extended: false }));
 		// parse application/json
 		app.use(bodyParser.json());
@@ -559,6 +576,15 @@ var Server = TaroClass.extend({
 			app.use('/ts', express.static(path.resolve('./ts/')));
 		}
 
+		// Polled by the client (see index.ejs) to detect a new deploy - see
+		// the bootVersion comment above for why this can't just rely on
+		// WebSocket reconnection. Deliberately unauthenticated/public: it's
+		// not player-specific data, and gating it behind auth would mean
+		// logged-out visitors never get prompted to refresh either.
+		app.get('/api/server-version', (req, res) => {
+			res.json({ version: this.bootVersion });
+		});
+
 		app.get('/', (req, res) => {
 			const token = Math.random().toString(36).substring(2, 14); // random token for standalone
 			const guestUserToken = Math.random().toString(36).substring(2, 14); // random token for standalone
@@ -624,6 +650,7 @@ var Server = TaroClass.extend({
 				},
 				domain: req.get('host'),
 				version: Math.floor(Math.random() * 10000000 + 1),
+				bootVersion: this.bootVersion,
 				constants: {
 					appName: 'Modd.io   ',
 					appUrl: 'http://www.modd.io/',
