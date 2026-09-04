@@ -1498,3 +1498,241 @@ div#dev-console-table {
 #modd-item-shop-modal .inventory-slot .text-danger {
   font-family: 'Brianne\'s Hand', cursive !important;
 }
+
+/* ============================================================
+   home page
+   ============================================================ */
+
+.pvz-welcome-card {
+	position: relative;
+	width: min(1100px, 92vw);
+	max-height: 88vh;
+	overflow: hidden;
+	display: grid;
+	grid-template-columns: 340px 1fr;
+	gap: 24px;
+	background: var(--pvz-grass);
+	border: 6px solid var(--pvz-wood-dark);
+	border-radius: 18px;
+	box-shadow: 0 8px 0 var(--pvz-wood-dark), 0 20px 40px rgba(0, 0, 0, 0.4);
+	padding: 28px;
+	font-family: 'Nunito', sans-serif;
+}
+
+.pvz-welcome-left {
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
+}
+
+.pvz-logo-block {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	background: radial-gradient(circle, rgba(124, 179, 66, 0.55) 0%, rgba(124, 179, 66, 0) 70%),
+		var(--pvz-wood-light);
+	border: 4px solid var(--pvz-wood-dark);
+	border-radius: 16px;
+	padding: 18px 10px;
+	line-height: 0.95;
+	text-align: center;
+}
+
+.pvz-logo-block span {
+	font-family: 'Burbank Big Condensed', sans-serif;
+	font-weight: bold;
+	display: block;
+	-webkit-text-stroke: 2px rgba(0, 0, 0, 0.5);
+	text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.pvz-logo-plants {
+	color: #8bc34a;
+	font-size: 2.6em;
+}
+
+.pvz-logo-vs {
+	color: #b0b0b0;
+	font-size: 1.2em;
+	margin: -0.1em 0;
+}
+
+.pvz-logo-zombies {
+	color: #9c27b0;
+	font-size: 2.6em;
+}
+
+.pvz-logo-roam {
+	color: #e53935;
+	font-size: 2.6em;
+}
+
+.pvz-changelog-panel {
+	background: var(--pvz-grass-dark);
+	border: 3px solid var(--pvz-wood-dark);
+	border-radius: 12px;
+	padding: 14px 16px;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+
+.pvz-changelog-title {
+	font-family: 'House of Terror', sans-serif;
+	color: var(--pvz-cream);
+	text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+	margin-bottom: 10px;
+	font-size: 1.4em;
+}
+
+.pvz-changelog-list {
+	overflow-y: auto;
+	flex: 1;
+	padding-right: 6px;
+}
+
+.pvz-changelog-entry {
+	margin-bottom: 14px;
+}
+
+.pvz-changelog-entry-title {
+	font-family: 'House of Terror', sans-serif;
+	color: var(--pvz-sun);
+	font-size: 1em;
+	margin-bottom: 4px;
+}
+
+.pvz-changelog-entry-desc {
+	color: var(--pvz-cream);
+	font-size: 0.85em;
+	line-height: 1.35;
+	margin: 0;
+}
+
+.pvz-welcome-right {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 10px;
+}
+
+.pvz-welcome-heading {
+	font-family: 'Brianne\'s Hand', cursive;
+	color: var(--pvz-cream);
+	text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+	font-size: 2.4em;
+	margin: 0;
+}
+
+.pvz-version-number {
+	font-family: 'Nunito', sans-serif;
+	font-weight: 800;
+	color: var(--pvz-sun);
+	font-size: 1em;
+	margin-bottom: 6px;
+}
+
+.pvz-welcome-description {
+	color: var(--pvz-cream);
+	font-size: 1em;
+	line-height: 1.5;
+	max-width: 60ch;
+}
+
+.pvz-welcome-cta {
+	font-family: 'House of Terror', sans-serif;
+	color: var(--pvz-sun);
+	text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+	font-size: 1.3em;
+	margin: 6px 0 4px;
+}
+
+.pvz-button-row {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	flex-wrap: wrap;
+}
+
+.pvz-play-button {
+	font-family: 'Burbank Big Condensed', sans-serif;
+	font-size: 1.8em;
+	color: var(--pvz-cream);
+	background: var(--pvz-wood);
+	border: 4px solid var(--pvz-wood-dark);
+	border-radius: 12px;
+	box-shadow: 0 5px 0 var(--pvz-wood-dark);
+	padding: 10px 34px;
+	cursor: pointer;
+	transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.pvz-play-button:hover {
+	transform: translateY(2px);
+	box-shadow: 0 3px 0 var(--pvz-wood-dark);
+}
+
+.pvz-play-button:active {
+	transform: translateY(5px);
+	box-shadow: 0 0 0 var(--pvz-wood-dark);
+}
+
+.pvz-icon-button-group {
+	display: flex;
+	gap: 10px;
+}
+
+.pvz-icon-button {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 2px;
+	width: 84px;
+	padding: 8px 6px;
+	border-radius: 10px;
+	border: 3px solid var(--pvz-wood-dark);
+	color: var(--pvz-cream);
+	font-family: 'Nunito', sans-serif;
+	font-size: 0.75em;
+	font-weight: 700;
+	text-decoration: none;
+	cursor: pointer;
+	background: var(--pvz-wood-light);
+}
+
+.pvz-icon-button i {
+	font-size: 1.4em;
+	margin-bottom: 2px;
+}
+
+#pvz-discord-button {
+	background: #5865f2;
+	border-color: #3a41a3;
+}
+
+#pvz-leaderboard-button {
+	background: var(--pvz-sun-dark);
+	border-color: var(--pvz-wood-dark);
+}
+
+.pvz-welcome-footer {
+	position: absolute;
+	right: 20px;
+	bottom: 14px;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	color: rgba(255, 255, 255, 0.75);
+	font-size: 0.8em;
+}
+
+@media (max-width: 720px) {
+	.pvz-welcome-card {
+		grid-template-columns: 1fr;
+		max-height: 92vh;
+		overflow-y: auto;
+	}
+}
