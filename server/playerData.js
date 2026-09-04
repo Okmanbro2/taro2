@@ -64,7 +64,7 @@ class UsernameTakenError extends Error {
 	}
 }
 
-// Atomically gives `username` to `uid`, and releases whatever username `uid`
+// atomically gives `username` to `uid`, and releases whatever username `uid`
 // previously held (if any). The `usernames` collection is a "claim table" -
 // its document IDs (lowercased usernames) are what actually enforce
 // uniqueness, since Firestore guarantees two documents can never share an ID.
@@ -98,4 +98,100 @@ async function claimUsername(uid, username) {
 	});
 }
 
-module.exports = { getPlayerData, savePlayerData, savePersistedEntityData, claimUsername, UsernameTakenError };
+// looks up a player's uid from their claimed username (the `usernames`
+// collection - see claimUsername above). Used by the admin import helper,
+// where an admin targets a player by username rather than a raw Firebase uid.
+async function getUidByUsername(username) {
+	const doc = await db.collection('usernames').doc(username.toLowerCase()).get();
+	return doc.exists ? doc.data().uid : null;
+}
+
+// snapshots whatever's currently saved for uid into
+// players/{uid}/backups/{timestamp} before a destructive operation (modd
+// import, wipe) touches it, so a mistake is always recoverable and nothing
+// is ever silently thrown away. Returns the backup doc's id.
+async function backupPlayerData(uid, reason) {
+	const current = await getPlayerData(uid);
+	const backupId = String(Date.now());
+	await db
+		.collection('players')
+		.doc(uid)
+		.collection('backups')
+		.doc(backupId)
+		.set({ reason, snapshotOf: current || null, backedUpAt: Date.now() });
+	return backupId;
+}
+
+// converts a raw modd.io/indie.fun "Platform Data" export (the JSON a player
+// gets from that game's "View Save Data" button on their own account page)
+// into the { attributes, variables } shape this engine already reads/writes
+// under players/{uid}.data.player - see getPersistentData/loadPersistentData
+// in engine/core/TaroEntity.js. Only the `.player` block is migrated - the
+// `.unit` block (health, speed, inventory) is intentionally dropped, since
+// that's session state that isn't meant to be persisted long-term anyway.
+function transformModdPlayerExport(moddExport) {
+	if (!moddExport || typeof moddExport !== 'object' || !moddExport.player) {
+		throw new Error("That doesn't look like a modd.io/indie.fun save export - expected a top-level \"player\" key.");
+	}
+	return {
+		attributes: moddExport.player.attributes || {},
+		variables: moddExport.player.variables || {},
+	};
+}
+
+// imports a modd.io/indie.fun export into uid's Firestore player data.
+// per-key (attribute id / variable name), the modd.io value wins over
+// whatever's already saved - but only after backupPlayerData() snapshots the
+// pre-import state, so nothing is ever unrecoverably lost. Blocked from
+// running a second time on the same account unless `force` is set (used by
+// the admin import helper to redo an import for someone who ran into
+// trouble - see /api/admin-import-modd-data in server.js).
+async function importModdData(uid, moddExport, { force = false } = {}) {
+	const current = await getPlayerData(uid);
+	if (current && current.moddImportedAt && !force) {
+		const err = new Error('This account has already imported its modd.io/indie.fun data.');
+		err.code = 'ALREADY_IMPORTED';
+		throw err;
+	}
+
+	const incoming = transformModdPlayerExport(moddExport);
+	const existingPlayer = (current && current.data && current.data.player) || {};
+
+	const mergedPlayer = {
+		attributes: { ...(existingPlayer.attributes || {}), ...incoming.attributes },
+		variables: { ...(existingPlayer.variables || {}), ...incoming.variables },
+		quests: existingPlayer.quests,
+	};
+
+	const backupId = await backupPlayerData(uid, force ? 'admin-modd-import' : 'modd-import');
+	await savePersistedEntityData(uid, { player: mergedPlayer });
+	await db.collection('players').doc(uid).set({ moddImportedAt: Date.now() }, { merge: true });
+
+	return { backupId };
+}
+
+// resets uid's saved progress to a blank slate - backs the old data up first
+// (same safety net as importModdData) and clears moddImportedAt, so the
+// account is free to run the modd.io import again afterward if the player
+// wants to.
+async function wipePlayerData(uid) {
+	const backupId = await backupPlayerData(uid, 'wipe');
+	await savePersistedEntityData(uid, { player: { attributes: {}, variables: {}, quests: undefined } });
+	await db
+		.collection('players')
+		.doc(uid)
+		.set({ moddImportedAt: admin.firestore.FieldValue.delete() }, { merge: true });
+	return { backupId };
+}
+
+module.exports = {
+	getPlayerData,
+	savePlayerData,
+	savePersistedEntityData,
+	claimUsername,
+	UsernameTakenError,
+	getUidByUsername,
+	backupPlayerData,
+	importModdData,
+	wipePlayerData,
+};
