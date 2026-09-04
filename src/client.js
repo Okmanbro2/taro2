@@ -536,6 +536,7 @@ const Client = TaroEventingClass.extend({
 
 			window.activatePlayGame = true; // is there a reason this line was repeated?
 
+			window.dispatchEvent(new CustomEvent('taroGameReadyToPlay'));
 			$(this.getCachedElementById('play-game-button-wrapper')).removeClass('d-none-important');
 			if (typeof window.showAuthWidget === 'function') {
 				window.showAuthWidget();
