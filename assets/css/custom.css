@@ -930,6 +930,18 @@ canvas {
   background-image: url("/assets/images/patron_button.png");
 }
 
+#play-game-button-wrapper {
+  z-index: 9999;
+}
+
+#account-panel {
+  z-index: 9999;
+}
+
+#auth-widget {
+  z-index: 9999;
+}
+
 /* dev console accordion handles */
 
 div[id$="-div-accordion"] {
