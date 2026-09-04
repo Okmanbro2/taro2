@@ -1,0 +1,312 @@
+<style>
+	#account-panel {
+		position: absolute;
+		top: 40px;
+		right: 12px;
+		z-index: 21;
+		width: 340px;
+		max-height: 80vh;
+		overflow-y: auto;
+		padding: 14px;
+		border-radius: 8px;
+		background-color: #272e37e5;
+		color: #fff;
+		font-family: inherit;
+		pointer-events: auto;
+	}
+
+	#account-panel h5 {
+		margin: 10px 0 6px;
+		font-size: 14px;
+		border-bottom: 1px solid #6b7280;
+		padding-bottom: 4px;
+	}
+
+	#account-panel .ap-row {
+		display: flex;
+		justify-content: space-between;
+		font-size: 13px;
+		margin-bottom: 4px;
+	}
+
+	#account-panel .ap-row b {
+		color: #fff;
+	}
+
+	#account-panel button {
+		width: 100%;
+		font-size: 12px;
+		margin-bottom: 6px;
+	}
+
+	#account-panel textarea {
+		width: 100%;
+		height: 70px;
+		font-size: 11px;
+		margin-bottom: 6px;
+		background: #1c2127;
+		color: #cfd3d8;
+		border: 1px solid #6b7280;
+		border-radius: 4px;
+	}
+
+	#account-panel .ap-hint {
+		font-size: 11px;
+		color: #9aa0a6;
+		margin-bottom: 6px;
+	}
+
+	#account-panel .ap-msg {
+		font-size: 12px;
+		margin-bottom: 6px;
+		display: none;
+	}
+
+	#account-panel .ap-msg.ap-msg-error {
+		color: #ff6c6c;
+	}
+
+	#account-panel .ap-msg.ap-msg-success {
+		color: #7cd992;
+	}
+
+	#account-panel #ap-close-btn {
+		background: transparent;
+		border: 1px solid #6b7280;
+		color: #fff;
+	}
+</style>
+
+<!-- Hidden by default - opened via the auth-widget's "more" button (see
+     auth.ejs), only ever reachable from the pre-game menu, same as
+     auth-widget itself. -->
+<div id="account-panel" class="d-none">
+	<div class="ap-row">
+		<span id="ap-username" style="font-weight: bold"></span>
+		<button type="button" id="ap-close-btn" style="width: auto; margin: 0">less (or close)</button>
+	</div>
+
+	<h5>Stats</h5>
+	<div class="ap-row"><span>Wins</span><b id="ap-stat-wins">—</b></div>
+	<div class="ap-row"><span>Coins</span><b id="ap-stat-coins">—</b></div>
+
+	<h5>Technical</h5>
+	<div class="ap-hint">
+		Import your data from modd. <b>WARNING!</b> You can only do this once. Contact @thw0k on the PvZ Roam Discord
+		incase you mess up.
+	</div>
+	<textarea id="ap-import-textarea" placeholder="Paste your modd.io/indie.fun save data here (from that game's 'View Save Data' button)"></textarea>
+	<button type="button" id="ap-import-btn" class="btn btn-success">Import your data from modd</button>
+	<div id="ap-import-msg" class="ap-msg"></div>
+
+	<div class="ap-hint">
+		Wipe your data for a fresh start. Would need a confirmation first, password second, incase you change your mind.
+	</div>
+	<button type="button" id="ap-wipe-btn" class="btn btn-outline-light">wipe data</button>
+	<div id="ap-wipe-msg" class="ap-msg"></div>
+
+	<!-- only unhidden if /api/is-admin says so - see loadAccountPanel() below -->
+	<div id="ap-admin-section" class="d-none">
+		<h5>Admin: import data helper</h5>
+		<div class="ap-hint">Only visible for admins - used to help people that mess up when loading saves.</div>
+		<input type="text" id="ap-admin-target-username" class="form-control" placeholder="Target username"
+			style="margin-bottom: 6px; font-size: 12px" />
+		<textarea id="ap-admin-import-textarea" placeholder="Paste that player's modd.io/indie.fun save data here"></textarea>
+		<button type="button" id="ap-admin-import-btn" class="btn btn-outline-light">admin import data helper</button>
+		<div id="ap-admin-import-msg" class="ap-msg"></div>
+	</div>
+</div>
+
+<script>
+	(function () {
+		var $panel = document.getElementById('account-panel');
+		var $username = document.getElementById('ap-username');
+		var $statWins = document.getElementById('ap-stat-wins');
+		var $statCoins = document.getElementById('ap-stat-coins');
+		var $closeBtn = document.getElementById('ap-close-btn');
+
+		var $importTextarea = document.getElementById('ap-import-textarea');
+		var $importBtn = document.getElementById('ap-import-btn');
+		var $importMsg = document.getElementById('ap-import-msg');
+
+		var $wipeBtn = document.getElementById('ap-wipe-btn');
+		var $wipeMsg = document.getElementById('ap-wipe-msg');
+
+		var $adminSection = document.getElementById('ap-admin-section');
+		var $adminTargetUsername = document.getElementById('ap-admin-target-username');
+		var $adminImportTextarea = document.getElementById('ap-admin-import-textarea');
+		var $adminImportBtn = document.getElementById('ap-admin-import-btn');
+		var $adminImportMsg = document.getElementById('ap-admin-import-msg');
+
+		function showMsg($el, message, isError) {
+			$el.textContent = message;
+			$el.className = 'ap-msg ' + (isError ? 'ap-msg-error' : 'ap-msg-success');
+			$el.style.display = 'block';
+		}
+
+		function authedFetch(url, options) {
+			return window.getFirebaseIdToken().then(function (idToken) {
+				options = options || {};
+				options.headers = Object.assign({ 'Content-Type': 'application/json', Authorization: 'Bearer ' + idToken }, options.headers || {});
+				return fetch(url, options).then(function (res) {
+					return res.json().then(function (json) {
+						if (!res.ok) {
+							throw new Error(json.error || 'request failed');
+						}
+						return json;
+					});
+				});
+			});
+		}
+
+		// Looks a stat up by its in-game attribute NAME (e.g. "Wins", "Coins")
+		// rather than its opaque id, using the game's own attributeTypes -
+		// same data the client already has loaded to render the rest of the UI.
+		function findAttributeValueByName(attributes, name) {
+			if (!attributes || !window.taro || !taro.game || !taro.game.data || !taro.game.data.attributeTypes) {
+				return null;
+			}
+			for (var attrId in attributes) {
+				var attrType = taro.game.data.attributeTypes[attrId];
+				if (attrType && attrType.name && attrType.name.trim().toLowerCase() === name.toLowerCase()) {
+					return attributes[attrId].value;
+				}
+			}
+			return null;
+		}
+
+		function loadStats() {
+			authedFetch('/api/player-data')
+				.then(function (json) {
+					var attributes = json.playerDoc && json.playerDoc.data && json.playerDoc.data.player && json.playerDoc.data.player.attributes;
+					var wins = findAttributeValueByName(attributes, 'Wins');
+					var coins = findAttributeValueByName(attributes, 'Coins');
+					$statWins.textContent = wins === null || wins === undefined ? '—' : wins;
+					$statCoins.textContent = coins === null || coins === undefined ? '—' : coins;
+				})
+				.catch(function (err) {
+					console.log('account panel: failed to load stats:', err.message);
+				});
+		}
+
+		function checkAdmin() {
+			authedFetch('/api/is-admin')
+				.then(function (json) {
+					$adminSection.classList.toggle('d-none', !json.isAdmin);
+				})
+				.catch(function (err) {
+					console.log('account panel: failed to check admin status:', err.message);
+				});
+		}
+
+		function parseModdData(rawText) {
+			var trimmed = rawText.trim();
+			if (!trimmed) {
+				throw new Error('Paste your modd.io/indie.fun save data first.');
+			}
+			try {
+				return JSON.parse(trimmed);
+			} catch (e) {
+				throw new Error("That doesn't look like valid JSON - make sure you copied the whole thing.");
+			}
+		}
+
+		$importBtn.addEventListener('click', function () {
+			$importMsg.style.display = 'none';
+			var moddData;
+			try {
+				moddData = parseModdData($importTextarea.value);
+			} catch (e) {
+				showMsg($importMsg, e.message, true);
+				return;
+			}
+			if (!confirm('Import your modd.io/indie.fun data? This can only be done once.')) {
+				return;
+			}
+			$importBtn.disabled = true;
+			authedFetch('/api/import-modd-data', { method: 'POST', body: JSON.stringify({ moddData: moddData }) })
+				.then(function () {
+					showMsg($importMsg, 'Imported! Rejoin the game to see your restored data.', false);
+					loadStats();
+				})
+				.catch(function (err) {
+					showMsg($importMsg, err.message, true);
+				})
+				.finally(function () {
+					$importBtn.disabled = false;
+				});
+		});
+
+		$wipeBtn.addEventListener('click', function () {
+			$wipeMsg.style.display = 'none';
+			if (!confirm('Are you sure you want to wipe your data? This resets your progress to a fresh start.')) {
+				return;
+			}
+			var password = prompt('Enter your password to confirm:');
+			if (!password) {
+				return;
+			}
+			$wipeBtn.disabled = true;
+			window
+				.firebaseReauthenticate(password)
+				.then(function () {
+					return authedFetch('/api/wipe-data', { method: 'POST' });
+				})
+				.then(function () {
+					showMsg($wipeMsg, 'Data wiped. Rejoin the game for a fresh start.', false);
+					loadStats();
+				})
+				.catch(function (err) {
+					showMsg($wipeMsg, err.code ? 'Incorrect password.' : err.message, true);
+				})
+				.finally(function () {
+					$wipeBtn.disabled = false;
+				});
+		});
+
+		$adminImportBtn.addEventListener('click', function () {
+			$adminImportMsg.style.display = 'none';
+			var targetUsername = $adminTargetUsername.value.trim();
+			var moddData;
+			try {
+				moddData = parseModdData($adminImportTextarea.value);
+			} catch (e) {
+				showMsg($adminImportMsg, e.message, true);
+				return;
+			}
+			if (!targetUsername) {
+				showMsg($adminImportMsg, 'Enter the target username first.', true);
+				return;
+			}
+			if (!confirm('Import modd.io/indie.fun data for "' + targetUsername + '"? This overrides their existing data (a backup is kept).')) {
+				return;
+			}
+			$adminImportBtn.disabled = true;
+			authedFetch('/api/admin-import-modd-data', {
+				method: 'POST',
+				body: JSON.stringify({ targetUsername: targetUsername, moddData: moddData }),
+			})
+				.then(function () {
+					showMsg($adminImportMsg, 'Imported for ' + targetUsername + '.', false);
+				})
+				.catch(function (err) {
+					showMsg($adminImportMsg, err.message, true);
+				})
+				.finally(function () {
+					$adminImportBtn.disabled = false;
+				});
+		});
+
+		$closeBtn.addEventListener('click', function () {
+			$panel.classList.add('d-none');
+		});
+
+		// exposed for auth.ejs's "more" button
+		window.showAccountPanel = function () {
+			$username.textContent = document.getElementById('auth-status-username').textContent;
+			$panel.classList.remove('d-none');
+			loadStats();
+			checkAdmin();
+		};
+	})();
+</script>
