@@ -1524,10 +1524,12 @@ div#dev-console-table {
 .pvz-welcome-card {
 	position: relative;
 	width: min(1100px, 92vw);
+	height: 88vh;
 	max-height: 88vh;
 	overflow: hidden;
 	display: grid;
 	grid-template-columns: 340px 1fr;
+	grid-template-rows: minmax(0, 1fr);
 	gap: 24px;
 	background: var(--pvz-grass);
 	border: 6px solid #5b8f32;
@@ -1541,6 +1543,7 @@ div#dev-console-table {
 	display: flex;
 	flex-direction: column;
 	gap: 18px;
+	min-height: 0;
 }
 
 .pvz-logo-block {
@@ -1734,7 +1737,13 @@ div#dev-console-table {
 @media (max-width: 720px) {
 	.pvz-welcome-card {
 		grid-template-columns: 1fr;
+		grid-template-rows: none;
+		height: auto;
 		max-height: 92vh;
 		overflow-y: auto;
+	}
+
+	.pvz-welcome-left {
+		min-height: auto;
 	}
 }
