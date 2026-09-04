@@ -255,6 +255,43 @@
 </head>
 
 <body>
+    <script>
+        // Stamped from the server's own boot-time identifier at the moment
+        // this page was rendered (see bootVersion in server.js's '/' route
+        // handler). Compared against /api/server-version below to detect a
+        // new deploy - see the longer comment there for why a WebSocket
+        // reconnect alone can't be relied on for this.
+        window.__SERVER_BOOT_VERSION__ = <%- JSON.stringify(bootVersion) %>;
+
+        (function pollForNewDeploy() {
+            var POLL_INTERVAL_MS = 15000;
+
+            setInterval(function () {
+                fetch('/api/server-version')
+                    .then(function (res) {
+                        return res.json();
+                    })
+                    .then(function (data) {
+                        if (data.version && data.version !== window.__SERVER_BOOT_VERSION__) {
+                            // deliberately no confirmation/toast/delay here -
+                            // an instant reload was the explicit call, even
+                            // mid-match, so everyone ends up back on
+                            // whatever HTML/CSS/JS the new deploy actually
+                            // shipped rather than silently running stale
+                            // client code against a live-reconnected socket.
+                            location.reload();
+                        }
+                    })
+                    .catch(function () {
+                        // a failed poll (e.g. the old container already
+                        // mid-shutdown) isn't itself a signal to reload -
+                        // wait for a poll that actually succeeds and
+                        // confirms a version mismatch
+                    });
+            }, POLL_INTERVAL_MS);
+        })();
+    </script>
+    <%- include('templates/loading-screen'); -%>
     <div id="game-div" style="overflow: hidden">
         <div id="custom-ingame-ui-container"
             style="z-index: 1; position: absolute; width: 100%; height: 100%; pointer-events: none;"></div>
