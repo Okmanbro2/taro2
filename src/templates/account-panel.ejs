@@ -83,7 +83,7 @@
 <div id="account-panel" class="d-none">
 	<div class="ap-row">
 		<span id="ap-username" style="font-weight: bold"></span>
-		<button type="button" id="ap-close-btn" style="width: auto; margin: 0">less (or close)</button>
+		<button type="button" id="ap-close-btn" style="width: auto; margin: 0">Less/Close</button>
 	</div>
 
 	<h5>Stats</h5>
@@ -92,7 +92,7 @@
 
 	<h5>Technical</h5>
 	<div class="ap-hint">
-		Import your data from modd. <b>WARNING!</b> You can only do this once. Contact @thw0k on the PvZ Roam Discord
+		Import your data from modd. <b>WARNING!</b> You can only do this once. Contact @thw0k or @.footsoldier on the PvZ Roam Discord
 		incase you mess up.
 	</div>
 	<textarea id="ap-import-textarea" placeholder="Paste your modd.io/indie.fun save data here (from that game's 'View Save Data' button)"></textarea>
@@ -100,19 +100,19 @@
 	<div id="ap-import-msg" class="ap-msg"></div>
 
 	<div class="ap-hint">
-		Wipe your data for a fresh start. Would need a confirmation first, password second, incase you change your mind.
+		Wipe your data for a fresh start.
 	</div>
-	<button type="button" id="ap-wipe-btn" class="btn btn-outline-light">wipe data</button>
+	<button type="button" id="ap-wipe-btn" class="btn btn-outline-light">Wipe Data</button>
 	<div id="ap-wipe-msg" class="ap-msg"></div>
 
 	<!-- only unhidden if /api/is-admin says so - see loadAccountPanel() below -->
 	<div id="ap-admin-section" class="d-none">
-		<h5>Admin: import data helper</h5>
-		<div class="ap-hint">Only visible for admins - used to help people that mess up when loading saves.</div>
+		<h5>Administration: Data Overrider</h5>
+		<div class="ap-hint">Tool to override people's save files.</div>
 		<input type="text" id="ap-admin-target-username" class="form-control" placeholder="Target username"
 			style="margin-bottom: 6px; font-size: 12px" />
 		<textarea id="ap-admin-import-textarea" placeholder="Paste that player's modd.io/indie.fun save data here"></textarea>
-		<button type="button" id="ap-admin-import-btn" class="btn btn-outline-light">admin import data helper</button>
+		<button type="button" id="ap-admin-import-btn" class="btn btn-outline-light">Override Data</button>
 		<div id="ap-admin-import-msg" class="ap-msg"></div>
 	</div>
 </div>
