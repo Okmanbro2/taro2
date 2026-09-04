@@ -932,6 +932,11 @@ canvas {
 
 #play-game-button-wrapper {
   z-index: 9999;
+  pointer-events: none;
+}
+
+.pvz-welcome-card {
+  pointer-events: auto;
 }
 
 @media (min-width: 900px) {
