@@ -1,0 +1,131 @@
+<style>
+	#pvz-loading-screen {
+		position: fixed;
+		inset: 0;
+		z-index: 999999;
+		display: flex;
+		flex-direction: column;
+		justify-content: flex-end;
+		background-image: url('/assets/images/loadingbackground.png');
+		background-size: cover;
+		background-position: center;
+		padding: 40px 40px 60px;
+		opacity: 1;
+		transition: opacity 0.4s ease;
+	}
+
+	#pvz-loading-screen.pvz-loading-screen-hidden {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	#pvz-loading-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-end;
+		margin-bottom: 10px;
+	}
+
+	#pvz-loading-percent,
+	#pvz-loading-label {
+		font-family: 'Brianne\'s Hand', cursive;
+		font-size: 2em;
+		color: #fff;
+		-webkit-text-stroke: 2px rgba(0, 0, 0, 0.6);
+		text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+	}
+
+	#pvz-loading-bar-track {
+		width: 100%;
+		height: 26px;
+		background: rgba(255, 255, 255, 0.15);
+		border: 3px solid #d9d9d9;
+		border-radius: 14px;
+		box-shadow: 0 3px 0 rgba(0, 0, 0, 0.25), inset 0 2px 4px rgba(0, 0, 0, 0.2);
+		overflow: hidden;
+	}
+
+	#pvz-loading-bar-fill {
+		height: 100%;
+		width: 0%;
+		background: linear-gradient(180deg, #9dff5c 0%, #6fdc1a 60%, #5cb818 100%);
+		border-radius: 12px 0 0 12px;
+		transition: width 0.4s ease;
+	}
+
+	@media (max-width: 720px) {
+		#pvz-loading-screen {
+			padding: 24px 24px 40px;
+		}
+
+		#pvz-loading-percent,
+		#pvz-loading-label {
+			font-size: 1.4em;
+		}
+	}
+</style>
+
+<div id="pvz-loading-screen">
+	<div id="pvz-loading-row">
+		<span id="pvz-loading-percent">0%</span>
+		<span id="pvz-loading-label">Loading<span id="pvz-loading-dots"></span></span>
+	</div>
+	<div id="pvz-loading-bar-track">
+		<div id="pvz-loading-bar-fill"></div>
+	</div>
+</div>
+
+<script>
+	(function () {
+		var $screen = document.getElementById('pvz-loading-screen');
+		var $fill = document.getElementById('pvz-loading-bar-fill');
+		var $percent = document.getElementById('pvz-loading-percent');
+		var $dots = document.getElementById('pvz-loading-dots');
+		var progress = 0;
+
+		function setProgress(pct) {
+			// only ever moves forward - the three load stages below can fire
+			// in slightly different orders/timings depending on network
+			// conditions, this just stops the bar from ever visibly going
+			// backwards if a later stage's event somehow lands before an
+			// earlier one's.
+			if (pct <= progress) {
+				return;
+			}
+			progress = pct;
+			$fill.style.width = pct + '%';
+			$percent.textContent = pct + '%';
+		}
+
+		// ". => .. => ... " looping every 0.5s, per the mockup
+		var dotStates = ['.', '..', '...'];
+		var dotIndex = 0;
+		var dotsTimer = setInterval(function () {
+			$dots.textContent = dotStates[dotIndex];
+			dotIndex = (dotIndex + 1) % dotStates.length;
+		}, 500);
+
+		// taroMapLoaded / taroRendererLoaded are dispatched by client.js as
+		// two of the three things it waits on before showing the menu;
+		// taroGameReadyToPlay is dispatched right at that reveal point (see
+		// the change alongside play-game-button-wrapper's d-none-important
+		// removal) - together these are three real load milestones, not a
+		// fake/timed animation.
+		window.addEventListener('taroMapLoaded', function () {
+			setProgress(33);
+		});
+		window.addEventListener('taroRendererLoaded', function () {
+			setProgress(66);
+		});
+		window.addEventListener('taroGameReadyToPlay', function () {
+			setProgress(100);
+			clearInterval(dotsTimer);
+			setTimeout(function () {
+				$screen.classList.add('pvz-loading-screen-hidden');
+				setTimeout(function () {
+					$screen.remove();
+				}, 400); // matches the opacity transition duration above
+			}, 200); // brief pause so "100%" is actually visible for a beat
+		});
+	})();
+</script>
