@@ -936,7 +936,7 @@ canvas {
 
 @media (min-width: 900px) {
   #play-game-button-wrapper {
-    padding-right: 280px;
+    padding-right: 220px;
   }
 }
 
@@ -1727,7 +1727,7 @@ div#dev-console-table {
 }
 
 #pvz-leaderboard-button {
-	background: var(--pvz-sun-dark);
+	background: #7cb342;
 	border-color: #5b8f32;
 }
 
