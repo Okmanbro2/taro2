@@ -3,6 +3,111 @@
 // the same import rather than destructuring.
 const admin = require('./firebaseAdmin');
 const { db } = admin;
+const fs = require('fs');
+const path = require('path');
+
+// game.json's data.data.attributeTypes is the single source of truth for
+// every attribute id's name/min/max in the actual running game - the same
+// registry the client reads as taro.game.data.attributeTypes. used for two
+// things below: (1) validating anything a player pastes into the modd.io/
+// indie.fun import box, since that's the one place in the whole app where
+// raw player-supplied JSON gets treated as trusted persisted data, and (2)
+// turning cryptic attribute ids (e.g. "KAohfBnN6V") into display names (e.g.
+// "Coins") for the discord import log.
+let attributeTypesById = {};
+try {
+	const gameJsonPath = path.join(__dirname, '..', 'src', 'game.json');
+	const gameJson = JSON.parse(fs.readFileSync(gameJsonPath, 'utf8'));
+	attributeTypesById = (gameJson.data && gameJson.data.attributeTypes) || {};
+} catch (err) {
+	console.log('playerData: failed to load game.json attribute schema, imports will reject everything and the import log will show raw attribute ids:', err.message);
+}
+
+// most attribute maxes in the schema above are editor placeholder defaults
+// (e.g. Coins' max is the string "999999999999999999999999") - they exist to
+// stop the in-game UI from rendering garbage, not to stop someone from
+// pasting {"value": 999999999} into the import box. for attributes where an
+// unrealistic value would actually be a competitive/economy advantage, set a
+// real ceiling here based on what's actually achievable through normal play.
+// anything not listed here just falls back to the schema's own max, which is
+// effectively no cap - so add to this list whenever a new ownable/earnable
+// stat is added to the game and matters for fairness.
+const IMPORT_VALUE_CAPS = {
+	KAohfBnN6V: 75000, // Coins
+	fKYSjs9Zw4: 100, // Wins
+	NbZXJa87MY: 100, // Tacos
+	// "*owned?" / "*won?" flags are just 0/1 toggles in the schema already
+	// (min:0, max:1), so they don't need an entry here - the schema clamp
+	// alone is sufficient for booleans, only numeric currency-like stats
+	// need a hand-picked ceiling.
+};
+
+// attribute ids that should never come back through an import, because
+// they're intentionally session-only and get overwritten every time a
+// player joins regardless (see the "player joins" script's stage-based Sun
+// reset) - importing a stale Sun value would just get stomped anyway, so we
+// drop it here rather than let it sit in Firestore looking meaningful.
+const NON_PERSISTENT_ATTRIBUTE_IDS = new Set([
+	'dXSTbWLa7y', // Sun
+]);
+
+// separate webhook from the join/leave one in game.json (that one's driven
+// by the game engine's own script system and can't reach this code - imports
+// happen through the account panel's HTTP API, outside any running game
+// session).
+const DISCORD_IMPORT_WEBHOOK_URL = process.env.DISCORD_IMPORT_WEBHOOK_URL;
+
+async function postDiscordWebhook(content) {
+	if (!DISCORD_IMPORT_WEBHOOK_URL) {
+		return;
+	}
+	try {
+		await fetch(DISCORD_IMPORT_WEBHOOK_URL, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ content }),
+		});
+	} catch (err) {
+		// never let a webhook hiccup fail the actual import
+		console.log('discord import webhook failed:', err.message);
+	}
+}
+
+// builds the style lines for the import log, comparing
+// what was already saved against what's about to be written - AFTER
+// sanitization/clamping, so the log always reflects the real applied values,
+// not whatever the player's raw pasted JSON claimed. only attributes whose
+// value actually changed are included. discord caps message length at 2000
+// chars, so this stops adding lines (with a "+N more" note) well before that
+// becomes a problem on an export with a lot of attributes.
+function formatAttributeChanges(existingAttributes, incomingAttributes) {
+	const lines = [];
+	let omitted = 0;
+
+	for (const attrId in incomingAttributes) {
+		const previousValue = existingAttributes[attrId] && existingAttributes[attrId].value;
+		const newValue = incomingAttributes[attrId] && incomingAttributes[attrId].value;
+
+		if (previousValue === newValue) {
+			continue;
+		}
+
+		const name = (attributeTypesById[attrId] && attributeTypesById[attrId].name) || attrId;
+		const line = `${name}: ${previousValue === undefined ? '—' : previousValue} => ${newValue}`;
+
+		if (lines.length < 20) {
+			lines.push(line);
+		} else {
+			omitted++;
+		}
+	}
+
+	if (omitted > 0) {
+		lines.push(`+${omitted} more`);
+	}
+
+	return lines;
+}
 
 async function getPlayerData(uid) {
 	const doc = await db.collection('players').doc(uid).get();
@@ -55,7 +160,7 @@ async function savePersistedEntityData(uid, { player, unit } = {}) {
 	await db.collection('players').doc(uid).set(data, { mergeFields });
 }
 
-// Thrown by claimUsername() when someone else already holds that username -
+// thrown by claimUsername() when someone else already holds that username -
 // server.js catches this specifically to send back a 409 instead of a 500.
 class UsernameTakenError extends Error {
 	constructor(username) {
@@ -129,13 +234,80 @@ async function backupPlayerData(uid, reason) {
 // in engine/core/TaroEntity.js. Only the `.player` block is migrated - the
 // `.unit` block (health, speed, inventory) is intentionally dropped, since
 // that's session state that isn't meant to be persisted long-term anyway.
+//
+// IMPORTANT: this is the one place in the app where a player's own raw JSON
+// gets treated as trusted persisted data, so it can't just be passed
+// through. Two separate problems get fixed here, not one:
+//
+// 1. obviously, someone could just hand-edit "value" to whatever they want.
+// 2. less obviously: loadPersistentData() in TaroEntity.js applies whatever
+//    "min"/"max" the saved data claims BEFORE clamping "value" to that same
+//    min/max - so a pasted {"min":0,"max":999999999,"value":999999999}
+//    would sail straight through that clamp too, since the clamp is being
+//    checked against attacker-supplied bounds. rebuilding min/max here from
+//    the game's own trusted schema (instead of copying whatever the pasted
+//    JSON claims) closes that off regardless of what the export contains.
 function transformModdPlayerExport(moddExport) {
 	if (!moddExport || typeof moddExport !== 'object' || !moddExport.player) {
 		throw new Error("That doesn't look like a modd.io/indie.fun save export - expected a top-level \"player\" key.");
 	}
+
+	const incomingAttributes = moddExport.player.attributes || {};
+	const attributes = {};
+	const skipped = [];
+
+	for (const attrId in incomingAttributes) {
+		const schema = attributeTypesById[attrId];
+
+		if (!schema) {
+			// not a real attribute in this game - either a typo, a leftover
+			// from an older version of the game, or someone hand-crafting
+			// JSON. either way, there's nothing to validate it against, so
+			// it's dropped rather than trusted.
+			skipped.push({ attrId, reason: 'unknown attribute' });
+			continue;
+		}
+
+		if (NON_PERSISTENT_ATTRIBUTE_IDS.has(attrId)) {
+			continue; // silently dropped, not a rejection - this is expected
+		}
+
+		const rawValue = incomingAttributes[attrId] && incomingAttributes[attrId].value;
+		const numericValue = typeof rawValue === 'number' ? rawValue : parseFloat(rawValue);
+
+		if (!Number.isFinite(numericValue)) {
+			skipped.push({ attrId, reason: 'non-numeric value' });
+			continue;
+		}
+
+		// schema min/max always win - never the pasted data's own min/max.
+		// schema max is sometimes a string (e.g. Coins' "999999999999999999999999")
+		// since the editor stores it as free text, so this always runs it
+		// through Number() rather than trusting its type.
+		const schemaMin = Number(schema.min) || 0;
+		const schemaMax = Number(schema.max);
+		const cap = IMPORT_VALUE_CAPS[attrId];
+		const effectiveMax = cap !== undefined ? Math.min(cap, schemaMax) : schemaMax;
+
+		const clampedValue = Math.max(schemaMin, Math.min(numericValue, effectiveMax));
+
+		attributes[attrId] = {
+			name: schema.name,
+			min: schemaMin,
+			max: schemaMax,
+			regenerateSpeed: schema.regenerateSpeed || 0,
+			value: clampedValue,
+		};
+
+		if (clampedValue !== numericValue) {
+			skipped.push({ attrId, reason: `value ${numericValue} clamped to ${clampedValue}` });
+		}
+	}
+
 	return {
-		attributes: moddExport.player.attributes || {},
+		attributes,
 		variables: moddExport.player.variables || {},
+		skipped,
 	};
 }
 
@@ -167,7 +339,16 @@ async function importModdData(uid, moddExport, { force = false } = {}) {
 	await savePersistedEntityData(uid, { player: mergedPlayer });
 	await db.collection('players').doc(uid).set({ moddImportedAt: Date.now() }, { merge: true });
 
-	return { backupId };
+	const changeLines = formatAttributeChanges(existingPlayer.attributes || {}, incoming.attributes);
+	const username = (current && current.username) || uid;
+	if (changeLines.length > 0) {
+		const suffix = force ? ' (admin-triggered)' : '';
+		await postDiscordWebhook(`**${username}** imported data to their account${suffix}. Changed values:\n${changeLines.join('\n')}`);
+	} else {
+		await postDiscordWebhook(`**${username}** imported data to their account, but no attribute values changed.`);
+	}
+
+	return { backupId, skipped: incoming.skipped };
 }
 
 // resets uid's saved progress to a blank slate - backs the old data up first
