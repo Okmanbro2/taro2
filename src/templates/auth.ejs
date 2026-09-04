@@ -109,6 +109,16 @@
 		font-size: 12px;
 	}
 
+	#auth-widget #auth-status-buttons {
+		display: flex;
+		gap: 6px;
+	}
+
+	#auth-widget #auth-status-buttons > button {
+		flex: 1;
+		font-size: 12px;
+	}
+
 	.d-none {
 		display: none !important;
 	}
@@ -151,7 +161,10 @@
 	<div id="auth-status" class="d-none">
 		<span id="auth-status-username"></span>
 		<span id="auth-status-email"></span>
-		<button type="button" id="auth-logout-btn" class="btn btn-outline-light">Log Out</button>
+		<div id="auth-status-buttons">
+			<button type="button" id="auth-more-btn" class="btn btn-outline-light">more</button>
+			<button type="button" id="auth-logout-btn" class="btn btn-outline-light">Log Out</button>
+		</div>
 	</div>
 </div>
 
@@ -354,6 +367,10 @@
 		$saveUsernameBtn.addEventListener('click', handleSaveUsername);
 		$logoutBtn.addEventListener('click', function () {
 			window.firebaseSignOut(window.firebaseAuth);
+		});
+		document.getElementById('auth-more-btn').addEventListener('click', function () {
+			// defined in templates/account-panel.ejs
+			window.showAccountPanel();
 		});
 		$googleBtn.addEventListener('click', function () {
 			clearError();
