@@ -1,17 +1,13 @@
 {
-	"version": "3.3.0",
+	"version": "3.3.1",
 	"entries": [
 		{
-			"title": "Full Standalone Migration",
-			"description": "After a long wait, Roam is finally standalone! We didn't really like where INDIE.FUN was headed, soo .. yeah. Long Live PvZ Roam!"
+			"title": "Loading Screens Galore!",
+			"description": "Added a loading screen to fill the black emptiness."
 		},
 		{
-			"title": "New Account Database",
-			"description": "Added a new account system separate from the former. Make new accounts here! Non-logged in users aren't able to experience the luxuries of datasaving."
-		},
-		{
-			"title": "Modd/Indie Data Importing",
-			"description": "Added Data Importing to the 'More Info' tab on the account center on the top right. Have any issues? Contact me (@thw0k) or @.footsoldier on the Plants vs. Zombies: Roam Discord Server!"
+			"title": "Account Data Import Fixes",
+			"description": "Added security checks to data importing. Safety first, Gardeners!"
 		}
 	]
 }
