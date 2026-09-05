@@ -24,7 +24,7 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 			BitmapFontManager.font(scene, 'Arial', true, false, '#FFFFFF')
 		);*/
 		const text = (this.textObject = scene.add.text(0, 0, this.trimText(chatText), {
-			font: '600 24px Arial',
+			font: '600 24px "Brianne\'s Hand"',
 			color: '#ffffff',
 			align: 'center',
 		}));
