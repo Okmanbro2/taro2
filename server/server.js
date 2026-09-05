@@ -16,6 +16,7 @@ const {
 	getUidByUsername,
 	importModdData,
 	wipePlayerData,
+	getLeaderboard,
 } = require('./playerData');
 
 // keep in sync with OWNER_USERNAMES in src/gameClasses/components/GameComponent.js -
@@ -583,6 +584,19 @@ var Server = TaroClass.extend({
 		// logged-out visitors never get prompted to refresh either.
 		app.get('/api/server-version', (req, res) => {
 			res.json({ version: this.bootVersion });
+		});
+
+		// Public/unauthenticated on purpose - rankings aren't sensitive, and
+		// the leaderboard panel should work for logged-out visitors too.
+		// getLeaderboard() handles its own weekly caching (see playerData.js) -
+		// this route is just a thin pass-through.
+		app.get('/api/leaderboard', async (req, res) => {
+			try {
+				const leaderboard = await getLeaderboard();
+				res.json(leaderboard);
+			} catch (err) {
+				res.status(500).json({ error: err.message });
+			}
 		});
 
 		app.get('/', (req, res) => {
