@@ -815,8 +815,23 @@ NetIo.Server = NetIo.EventingClass.extend({
 				if (token) {
 					try {
 						const decodedFirebaseToken = await firebaseAdmin.auth().verifyIdToken(token);
-						firebaseUserId = decodedFirebaseToken.uid;
-						console.log('socketConnection: verified Firebase token for uid', firebaseUserId);
+						// Google sign-ins come back email_verified: true already (Google
+						// vouches for the address itself). Email/password accounts only get
+						// this once they click the link we send via sendEmailVerification()
+						// (see auth.ejs) - until then, treat them the same as a guest: they
+						// can still connect and play, they just don't get their persisted
+						// coins/uid tied to them. This is the check that actually matters -
+						// the client-side "please verify" screen in auth.ejs is just UX on
+						// top of it, and could be bypassed by anyone skipping that UI.
+						if (decodedFirebaseToken.email_verified) {
+							firebaseUserId = decodedFirebaseToken.uid;
+							console.log('socketConnection: verified Firebase token for uid', firebaseUserId);
+						} else {
+							console.log(
+								'socketConnection: Firebase token valid but email not verified, treating as guest:',
+								decodedFirebaseToken.uid
+							);
+						}
 					} catch (firebaseErr) {
 						// expired/invalid token, or a guest's empty string reaching here some
 						// other way - either way, fall back to guest rather than reject them.
