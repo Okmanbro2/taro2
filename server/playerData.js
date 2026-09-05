@@ -36,6 +36,7 @@ const IMPORT_VALUE_CAPS = {
 	KAohfBnN6V: 50000, // Coins
 	fKYSjs9Zw4: 5000, // Wins
 	NbZXJa87MY: 5000, // Tacos
+	GSYwTBl68S: 2, // spawnAIMax - schema's own max is 100, but real intended gameplay ceiling is 2
 	// "*Owned?" / "*Won?" flags are just 0/1 toggles in the schema already
 	// (min:0, max:1), so they don't need an entry here - the schema clamp
 	// alone is sufficient for booleans, only numeric currency-like stats
