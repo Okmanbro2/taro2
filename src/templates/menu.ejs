@@ -28,6 +28,11 @@
 
 			<p class="pvz-welcome-cta">What are you waiting for?!</p>
 
+			<div class="pvz-player-count">
+				<i class="fa fa-user" aria-hidden="true"></i>
+				<span id="pvz-player-count-text">–/–</span>
+			</div>
+
 			<div class="pvz-button-row">
 				<button id="play-game-button" type="button" class="pvz-play-button" data-style="rotate-side-down" data-perspective data-horizontal>
 					PLAY NOW!!!
@@ -51,6 +56,22 @@
 </div>
 
 <script>
+	function updatePlayerCount() {
+		fetch('/api/player-count')
+			.then(function (res) { return res.json(); })
+			.then(function (data) {
+				var el = document.getElementById('pvz-player-count-text');
+				if (el) {
+					el.textContent = data.current + '/' + data.max;
+				}
+			})
+			.catch(function (err) {
+				console.warn('Could not load player count:', err);
+			});
+	}
+	updatePlayerCount();
+	setInterval(updatePlayerCount, 2500); // refresh every 2.5 seconds while the menu is open 4 clear stuffz
+
 	(function () {
 		fetch('/assets/data/changelog.json')
 			.then(function (res) { return res.json(); })
