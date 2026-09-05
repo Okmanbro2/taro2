@@ -9,6 +9,15 @@
   });
 </script>
 
+<script>
+  const briannesHandFont = new FontFace('Brianne\'s Hand', 'url(/assets/fonts/BriannesHand.ttf)');
+  briannesHandFont.load().then(function(loadedFont) {
+    document.fonts.add(loadedFont);
+  }).catch(function(err) {
+    console.warn('Brianne\'s Hand font failed to preload:', err);
+  });
+</script>
+
 <head>
     <title>Plants vs. Zombies: Roam 2</title>
     <meta name="description" content="A Plants vs. Zombies fangame right on the browser!">
