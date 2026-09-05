@@ -2821,6 +2821,27 @@ var ParameterComponent = TaroEntity.extend({
 				return taro.$(id);
 			},
 
+			// converts a unit entity into its string id, so it can be stored
+			// (e.g. in a string array variable) and later resolved back with getUnitFromId
+			getUnitId: function (text, vars) {
+				var unit = self.getValue(text.unit, vars);
+				if (unit && unit._category == 'unit') {
+					return unit.id();
+				}
+			},
+
+			// inverse of getUnitId - resolves a previously-stored unit id string
+			// back into a live unit entity, or undefined if it no longer exists
+			getUnitFromId: function (text, vars) {
+				var id = self.getValue(text.string, vars);
+				if (id) {
+					var unit = taro.$(id);
+					if (unit && unit._category == 'unit') {
+						return unit;
+					}
+				}
+			},
+
 			getUnitTypeOfUnit: function (text, vars) {
 				var unit = self.getValue(text.entity, vars);
 
