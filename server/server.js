@@ -362,6 +362,12 @@ var Server = TaroClass.extend({
 			}
 		});
 
+		app.get('/api/player-count', (req, res) => {
+			const current = taro.server && taro.server.clients ? Object.keys(taro.server.clients).length : 0;
+			const max = (taro.server && taro.server.maxPlayersAllowed) || 32;
+			res.json({ current, max });
+		});
+
 		// Verifies the "Authorization: Bearer <idToken>" header and attaches the
 		// verified uid as req.uid - never trust a uid sent in the request body,
 		// always take it from a verified token like this.
