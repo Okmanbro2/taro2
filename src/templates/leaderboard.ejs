@@ -24,6 +24,7 @@
 		margin-top: 40px;
 		display: flex;
 		flex-direction: column;
+		overflow: hidden;
 		background: var(--pvz-grass);
 		border: 6px solid #5b8f32;
 		border-radius: 18px;
@@ -102,6 +103,7 @@
 	.pvz-leaderboard-column {
 		display: flex;
 		flex-direction: column;
+		min-width: 0;
 		min-height: 0;
 	}
 
@@ -116,13 +118,16 @@
 
 	.pvz-leaderboard-list {
 		overflow-y: auto;
+		overflow-x: hidden;
 		flex: 1;
+		min-width: 0;
 		padding-right: 4px;
 	}
 
 	.pvz-leaderboard-row {
 		display: flex;
 		align-items: baseline;
+		min-width: 0;
 		font-family: 'Brianne\'s Hand', cursive;
 		font-size: 1.05em;
 		color: var(--pvz-cream);
@@ -138,9 +143,12 @@
 
 	.pvz-leaderboard-dots {
 		flex: 1;
+		min-width: 0;
 		overflow: hidden;
-		margin: 0 4px;
-		opacity: 0.7;
+		margin: 0 6px;
+		font-family: 'Nunito', sans-serif;
+		letter-spacing: 3px;
+		opacity: 0.45;
 	}
 
 	.pvz-leaderboard-dots::after {
@@ -237,7 +245,7 @@
 
 				var $name = document.createElement('span');
 				$name.className = 'pvz-leaderboard-name';
-				$name.textContent = entry.username;
+				$name.textContent = '(#' + rank + ') ' + entry.username;
 
 				var $dots = document.createElement('span');
 				$dots.className = 'pvz-leaderboard-dots';
