@@ -1,0 +1,302 @@
+<style>
+	#pvz-leaderboard-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 100000;
+		display: flex;
+		justify-content: center;
+		background: rgba(0, 0, 0, 0.45);
+		backdrop-filter: blur(6px);
+		-webkit-backdrop-filter: blur(6px);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.35s ease;
+	}
+
+	#pvz-leaderboard-backdrop.pvz-leaderboard-open {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	#pvz-leaderboard-panel {
+		width: min(720px, 92vw);
+		max-height: 82vh;
+		margin-top: 40px;
+		display: flex;
+		flex-direction: column;
+		background: var(--pvz-grass);
+		border: 6px solid #5b8f32;
+		border-radius: 18px;
+		box-shadow: 0 8px 0 #5b8f32, 0 20px 40px rgba(0, 0, 0, 0.4);
+		padding: 20px 24px 24px;
+		font-family: 'Nunito', sans-serif;
+		transform: translateY(-140%);
+		transition: transform 0.4s ease;
+	}
+
+	#pvz-leaderboard-backdrop.pvz-leaderboard-open #pvz-leaderboard-panel {
+		transform: translateY(0);
+	}
+
+	#pvz-leaderboard-header {
+		position: relative;
+		text-align: center;
+		margin-bottom: 10px;
+	}
+
+	#pvz-leaderboard-title {
+		font-family: 'House of Terror', sans-serif;
+		color: var(--pvz-cream);
+		text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+		font-size: 2em;
+		margin: 0;
+	}
+
+	#pvz-leaderboard-subtitle {
+		font-family: 'House of Terror', sans-serif;
+		color: var(--pvz-cream);
+		opacity: 0.85;
+		font-size: 0.85em;
+		margin: 2px 0 0;
+	}
+
+	#pvz-leaderboard-close {
+		position: absolute;
+		top: -4px;
+		right: 0;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--pvz-grass-dark);
+		border: 3px solid #5b8f32;
+		border-radius: 10px;
+		color: #e53935;
+		font-family: 'Brianne\'s Hand', cursive;
+		font-size: 1.6em;
+		line-height: 1;
+		cursor: pointer;
+		text-decoration: none;
+	}
+
+	#pvz-leaderboard-rule {
+		border: none;
+		border-top: 2px solid rgba(255, 255, 255, 0.4);
+		margin: 8px 0 14px;
+	}
+
+	#pvz-leaderboard-columns {
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		gap: 0 18px;
+		flex: 1;
+		min-height: 0;
+	}
+
+	#pvz-leaderboard-divider {
+		width: 2px;
+		background: rgba(255, 255, 255, 0.35);
+	}
+
+	.pvz-leaderboard-column {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	.pvz-leaderboard-column-title {
+		font-family: 'House of Terror', sans-serif;
+		color: var(--pvz-cream);
+		text-align: center;
+		text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+		font-size: 1.3em;
+		margin: 0 0 8px;
+	}
+
+	.pvz-leaderboard-list {
+		overflow-y: auto;
+		flex: 1;
+		padding-right: 4px;
+	}
+
+	.pvz-leaderboard-row {
+		display: flex;
+		align-items: baseline;
+		font-family: 'Brianne\'s Hand', cursive;
+		font-size: 1.05em;
+		color: var(--pvz-cream);
+		padding: 3px 0;
+		white-space: nowrap;
+	}
+
+	.pvz-leaderboard-name {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: 55%;
+	}
+
+	.pvz-leaderboard-dots {
+		flex: 1;
+		overflow: hidden;
+		margin: 0 4px;
+		opacity: 0.7;
+	}
+
+	.pvz-leaderboard-dots::after {
+		content: '............................................................................................................................................................................';
+	}
+
+	.pvz-leaderboard-value {
+		flex-shrink: 0;
+	}
+
+	.pvz-leaderboard-row.pvz-rank-1 {
+		color: #ffd54f;
+	}
+
+	.pvz-leaderboard-row.pvz-rank-2 {
+		color: #c9b3e8;
+	}
+
+	.pvz-leaderboard-row.pvz-rank-3 {
+		color: #ff8a65;
+	}
+
+	.pvz-leaderboard-empty {
+		font-family: 'Nunito', sans-serif;
+		color: var(--pvz-cream);
+		opacity: 0.7;
+		text-align: center;
+		padding: 16px 0;
+	}
+
+	@media (max-width: 600px) {
+		#pvz-leaderboard-columns {
+			grid-template-columns: 1fr;
+			grid-template-rows: 1fr 1fr;
+			gap: 14px 0;
+		}
+
+		#pvz-leaderboard-divider {
+			display: none;
+		}
+	}
+</style>
+
+<div id="pvz-leaderboard-backdrop">
+	<div id="pvz-leaderboard-panel">
+		<div id="pvz-leaderboard-header">
+			<h2 id="pvz-leaderboard-title">Leaderboards</h2>
+			<p id="pvz-leaderboard-subtitle">(refreshes every week!)</p>
+			<a href="javascript:void(0)" id="pvz-leaderboard-close" aria-label="Close leaderboard">X</a>
+		</div>
+		<hr id="pvz-leaderboard-rule" />
+		<div id="pvz-leaderboard-columns">
+			<div class="pvz-leaderboard-column">
+				<h3 class="pvz-leaderboard-column-title">Wins</h3>
+				<div class="pvz-leaderboard-list" id="pvz-leaderboard-wins-list"></div>
+			</div>
+			<div id="pvz-leaderboard-divider"></div>
+			<div class="pvz-leaderboard-column">
+				<h3 class="pvz-leaderboard-column-title">Coins</h3>
+				<div class="pvz-leaderboard-list" id="pvz-leaderboard-coins-list"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	(function () {
+		var $backdrop = document.getElementById('pvz-leaderboard-backdrop');
+		var $panel = document.getElementById('pvz-leaderboard-panel');
+		var $closeBtn = document.getElementById('pvz-leaderboard-close');
+		var $openBtn = document.getElementById('pvz-leaderboard-button');
+		var $winsList = document.getElementById('pvz-leaderboard-wins-list');
+		var $coinsList = document.getElementById('pvz-leaderboard-coins-list');
+		var loaded = false;
+
+		function renderRows($list, entries, unitLabel) {
+			$list.innerHTML = '';
+
+			if (!entries || entries.length === 0) {
+				var $empty = document.createElement('div');
+				$empty.className = 'pvz-leaderboard-empty';
+				$empty.textContent = 'No data yet.';
+				$list.appendChild($empty);
+				return;
+			}
+
+			entries.forEach(function (entry, index) {
+				var rank = index + 1;
+				var $row = document.createElement('div');
+				$row.className = 'pvz-leaderboard-row';
+				if (rank <= 3) {
+					$row.classList.add('pvz-rank-' + rank);
+				}
+
+				var $name = document.createElement('span');
+				$name.className = 'pvz-leaderboard-name';
+				$name.textContent = entry.username;
+
+				var $dots = document.createElement('span');
+				$dots.className = 'pvz-leaderboard-dots';
+
+				var $value = document.createElement('span');
+				$value.className = 'pvz-leaderboard-value';
+				$value.textContent = entry.value + ' ' + unitLabel;
+
+				$row.appendChild($name);
+				$row.appendChild($dots);
+				$row.appendChild($value);
+				$list.appendChild($row);
+			});
+		}
+
+		function loadLeaderboard() {
+			if (loaded) {
+				return;
+			}
+			fetch('/api/leaderboard')
+				.then(function (res) {
+					return res.json();
+				})
+				.then(function (data) {
+					loaded = true;
+					renderRows($winsList, data.wins, 'Wins');
+					renderRows($coinsList, data.coins, 'Coins');
+				})
+				.catch(function () {
+					renderRows($winsList, [], 'Wins');
+					renderRows($coinsList, [], 'Coins');
+				});
+		}
+
+		function openLeaderboard() {
+			$backdrop.classList.add('pvz-leaderboard-open');
+			loadLeaderboard();
+		}
+
+		function closeLeaderboard() {
+			$backdrop.classList.remove('pvz-leaderboard-open');
+		}
+
+		if ($openBtn) {
+			$openBtn.addEventListener('click', openLeaderboard);
+		}
+		$closeBtn.addEventListener('click', closeLeaderboard);
+
+		// clicking the dark backdrop itself (not the panel) also closes it
+		$backdrop.addEventListener('click', function (event) {
+			if (event.target === $backdrop) {
+				closeLeaderboard();
+			}
+		});
+
+		// so a stray click inside the panel doesn't bubble up and trigger
+		// the backdrop's own click-to-close handler above
+		$panel.addEventListener('click', function (event) {
+			event.stopPropagation();
+		});
+	})();
+</script>
