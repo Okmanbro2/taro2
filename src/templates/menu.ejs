@@ -84,5 +84,51 @@
 			.catch(function (err) {
 				console.warn('Could not load changelog.json:', err);
 			});
+
+		// ---- menu music ----
+		var menuMusic = new Audio('/assets/audio/MenuMusic.mp3');
+		menuMusic.loop = true;
+		menuMusic.volume = 1;
+		var menuMusicStarted = false;
+
+		function tryStartMenuMusic() {
+			if (menuMusicStarted) {
+				return;
+			}
+			menuMusic.play().then(function () {
+				menuMusicStarted = true;
+			}).catch(function (err) {
+				console.log('Menu music waiting on user interaction to start:', err.message);
+			});
+		}
+
+		window.addEventListener('taroGameReadyToPlay', tryStartMenuMusic);
+		document.addEventListener('click', tryStartMenuMusic, { once: true });
+		document.addEventListener('keydown', tryStartMenuMusic, { once: true });
+
+		function fadeOutMenuMusic(durationMs) {
+			var startVolume = menuMusic.volume;
+			var startTime = performance.now();
+
+			function step(now) {
+				var elapsed = now - startTime;
+				var pct = Math.min(elapsed / durationMs, 1);
+				menuMusic.volume = startVolume * (1 - pct);
+				if (pct < 1) {
+					requestAnimationFrame(step);
+				} else {
+					menuMusic.pause();
+					menuMusic.currentTime = 0;
+				}
+			}
+			requestAnimationFrame(step);
+		}
+
+		var playButtonForMusic = document.getElementById('play-game-button');
+		if (playButtonForMusic) {
+			playButtonForMusic.addEventListener('click', function () {
+				fadeOutMenuMusic(1500);
+			});
+		}
 	})();
 </script>
