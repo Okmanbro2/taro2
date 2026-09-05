@@ -84,59 +84,5 @@
 			.catch(function (err) {
 				console.warn('Could not load changelog.json:', err);
 			});
-
-		// ---- menu music ----
-		var menuMusic = new Audio('/assets/audio/MenuMusic.mp3');
-		menuMusic.loop = true;
-		menuMusic.volume = 1;
-		var menuMusicStarted = false;
-		var menuMusicSuppressed = false;
-		
-		function tryStartMenuMusic() {
-			if (menuMusicStarted || menuMusicSuppressed) {
-				return;
-			}
-			menuMusic.play().then(function () {
-				menuMusicStarted = true;
-			}).catch(function (err) {
-				console.log('Menu music waiting on user interaction to start:', err.message);
-			});
-		}
-		
-		window.addEventListener('taroGameReadyToPlay', tryStartMenuMusic);
-		document.addEventListener('click', tryStartMenuMusic, { once: true });
-		document.addEventListener('keydown', tryStartMenuMusic, { once: true });
-		
-		function fadeOutMenuMusic(durationMs) {
-			if (!menuMusicStarted) {
-				return; // nothing playing, nothing to fade
-			}
-			var startVolume = menuMusic.volume;
-			var startTime = performance.now();
-		
-			function step(now) {
-				var elapsed = now - startTime;
-				var pct = Math.min(elapsed / durationMs, 1);
-				menuMusic.volume = startVolume * (1 - pct);
-				if (pct < 1) {
-					requestAnimationFrame(step);
-				} else {
-					menuMusic.pause();
-					menuMusic.currentTime = 0;
-				}
-			}
-			requestAnimationFrame(step);
-		}
-		
-		// event delegation on document, rather than attaching directly to the button
-		// element - this fires correctly even if the button is ever replaced or
-		// re-rendered later, since the check happens by id at click-time rather than
-		// depending on a specific DOM node reference captured once at page load
-		document.addEventListener('click', function (e) {
-			if (e.target.closest && e.target.closest('#play-game-button')) {
-				menuMusicSuppressed = true; // stop the fallback starter from firing after this
-				fadeOutMenuMusic(1500);
-			}
-		});
 	})();
 </script>
