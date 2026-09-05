@@ -75,12 +75,21 @@
 	  };
 	  // Firebase caches emailVerified on the client until you explicitly ask it
 	  // to recheck - this is what "I've verified, refresh" actually calls.
+	  // reload() alone only updates the local profile (emailVerified flips to
+	  // true) - it does NOT mint a new ID token, so the cached token queued up
+	  // to send still has email_verified: false baked into its signed payload
+	  // from before verification. Force-refreshing the token here (not just the
+	  // profile) is what makes the server actually recognize the account as
+	  // verified right away, instead of only after the old token naturally
+	  // expires up to an hour later.
 	  window.firebaseReloadUser = function () {
 	    var user = auth.currentUser;
 	    if (!user) {
 	      return Promise.reject(new Error('Not signed in.'));
 	    }
-	    return user.reload();
+	    return user.reload().then(function () {
+	      return user.getIdToken(/* forceRefresh */ true);
+	    });
 	  };
 	  // Re-proves the signed-in user's password before a destructive action
 	  // (wipe data) - throws (auth/wrong-password etc) if it doesn't match, so
