@@ -1752,3 +1752,17 @@ div#dev-console-table {
 		min-height: auto;
 	}
 }
+
+.pvz-player-count {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--pvz-cream);
+	font-family: 'Brianne\'s Hand', cursive;
+	font-size: 1.3em;
+	margin: 4px 0;
+}
+
+.pvz-player-count i {
+	font-size: 1.1em;
+}
