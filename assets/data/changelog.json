@@ -2,6 +2,10 @@
 	"version": "3.3.1",
 	"entries": [
 		{
+			"title": "Look! That's my name!",
+			"description": "Added in the Leaderboard feature. The leaderboard refreshes every week."
+		},
+		{
 			"title": "Loading Screens Galore!",
 			"description": "Added a loading screen to fill the black emptiness."
 		},
