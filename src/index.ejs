@@ -36,7 +36,8 @@
 	    GoogleAuthProvider,
 	    signInWithPopup,
 	    EmailAuthProvider,
-	    reauthenticateWithCredential
+	    reauthenticateWithCredential,
+	    sendEmailVerification
 	  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 	
 	  const firebaseConfig = {
@@ -62,6 +63,24 @@
 	  // GoogleAuthProvider themselves - just call window.firebaseSignInWithGoogle()
 	  window.firebaseSignInWithGoogle = function () {
 	    return signInWithPopup(auth, googleProvider);
+	  };
+	  // Sends (or re-sends) the verification link to whoever's currently signed
+	  // in. Firebase rate-limits this itself, so no need to debounce here.
+	  window.firebaseSendEmailVerification = function () {
+	    var user = auth.currentUser;
+	    if (!user) {
+	      return Promise.reject(new Error('Not signed in.'));
+	    }
+	    return sendEmailVerification(user);
+	  };
+	  // Firebase caches emailVerified on the client until you explicitly ask it
+	  // to recheck - this is what "I've verified, refresh" actually calls.
+	  window.firebaseReloadUser = function () {
+	    var user = auth.currentUser;
+	    if (!user) {
+	      return Promise.reject(new Error('Not signed in.'));
+	    }
+	    return user.reload();
 	  };
 	  // Re-proves the signed-in user's password before a destructive action
 	  // (wipe data) - throws (auth/wrong-password etc) if it doesn't match, so
