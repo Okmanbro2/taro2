@@ -148,6 +148,17 @@
 		<div id="auth-error"></div>
 	</div>
 
+	<!-- signed up with email/password, but hasn't clicked the verification link yet.
+	     Google sign-ins skip this entirely - Firebase already reports emailVerified:
+	     true for those, since Google verified the address itself. -->
+	<div id="auth-needs-verification" class="d-none">
+		<div id="auth-hint">Check your email (<span id="auth-verify-email"></span>) for a verification link.</div>
+		<button type="button" id="auth-resend-verification-btn" class="btn btn-outline-light">Resend Email</button>
+		<button type="button" id="auth-check-verified-btn" class="btn btn-success">I've Verified - Refresh</button>
+		<button type="button" id="auth-verify-logout-btn" class="btn btn-outline-light">Log Out</button>
+		<div id="auth-error"></div>
+	</div>
+
 	<!-- signed in, but no username saved yet (e.g. first Google sign-in) -->
 	<div id="auth-needs-username" class="d-none">
 		<div id="auth-hint">Pick a username:</div>
@@ -175,6 +186,11 @@
 		var $widget = document.getElementById('auth-widget');
 		var $forms = document.getElementById('auth-forms');
 		var $needsUsername = document.getElementById('auth-needs-username');
+		var $needsVerification = document.getElementById('auth-needs-verification');
+		var $verifyEmail = document.getElementById('auth-verify-email');
+		var $resendVerificationBtn = document.getElementById('auth-resend-verification-btn');
+		var $checkVerifiedBtn = document.getElementById('auth-check-verified-btn');
+		var $verifyLogoutBtn = document.getElementById('auth-verify-logout-btn');
 		var $status = document.getElementById('auth-status');
 		var $statusUsername = document.getElementById('auth-status-username');
 		var $statusEmail = document.getElementById('auth-status-email');
@@ -229,6 +245,7 @@
 
 		function showView(view) {
 			$forms.classList.toggle('d-none', view !== 'forms');
+			$needsVerification.classList.toggle('d-none', view !== 'needs-verification');
 			$needsUsername.classList.toggle('d-none', view !== 'needs-username');
 			$status.classList.toggle('d-none', view !== 'status');
 		}
@@ -305,6 +322,12 @@
 				.then(function () {
 					$password.value = '';
 					if (mode === 'signup') {
+						// fire the verification email - deliberately not awaited into the
+						// chain below, since a failure here (rare - Firebase's own send)
+						// shouldn't block account creation or the username step
+						window.firebaseSendEmailVerification().catch(function (err) {
+							console.log('failed to send verification email:', err.message);
+						});
 						// save the chosen username right away, so this player never sees
 						// the "pick a username" prompt after signing up here
 						return callUsernameApi('POST', { username: username }).then(function () {
@@ -368,6 +391,48 @@
 		$logoutBtn.addEventListener('click', function () {
 			window.firebaseSignOut(window.firebaseAuth);
 		});
+		$verifyLogoutBtn.addEventListener('click', function () {
+			window.firebaseSignOut(window.firebaseAuth);
+		});
+		$resendVerificationBtn.addEventListener('click', function () {
+			clearError();
+			$resendVerificationBtn.disabled = true;
+			window
+				.firebaseSendEmailVerification()
+				.then(function () {
+					showError('Verification email sent.');
+				})
+				.catch(function (err) {
+					console.log('resend verification error:', err.code, err.message);
+					showError(FIREBASE_ERROR_MESSAGES[err.code] || err.message);
+				})
+				.finally(function () {
+					$resendVerificationBtn.disabled = false;
+				});
+		});
+		$checkVerifiedBtn.addEventListener('click', function () {
+			clearError();
+			$checkVerifiedBtn.disabled = true;
+			window
+				.firebaseReloadUser()
+				.then(function () {
+					return renderAuthUI(window.firebaseAuth.currentUser);
+				})
+				.then(function () {
+					// still not verified after reload - let them know the click actually
+					// did something, rather than the view just silently staying the same
+					if (!window.firebaseAuth.currentUser.emailVerified) {
+						showError("Still not verified - click the link in the email first.");
+					}
+				})
+				.catch(function (err) {
+					console.log('check verified error:', err.code, err.message);
+					showError(FIREBASE_ERROR_MESSAGES[err.code] || err.message);
+				})
+				.finally(function () {
+					$checkVerifiedBtn.disabled = false;
+				});
+		});
 		document.getElementById('auth-more-btn').addEventListener('click', function () {
 			// defined in templates/account-panel.ejs
 			window.showAccountPanel();
@@ -396,6 +461,15 @@
 				$email.value = '';
 				$password.value = '';
 				$username.value = '';
+				return Promise.resolve();
+			}
+
+			// Google sign-ins always come back emailVerified: true (Google already
+			// verified the address itself), so this only ever gates email/password
+			// signups - exactly the ones we can't otherwise vouch for.
+			if (!user.emailVerified) {
+				$verifyEmail.textContent = user.email || '';
+				showView('needs-verification');
 				return Promise.resolve();
 			}
 
