@@ -36,8 +36,7 @@
 	    GoogleAuthProvider,
 	    signInWithPopup,
 	    EmailAuthProvider,
-	    reauthenticateWithCredential,
-	    sendEmailVerification
+	    reauthenticateWithCredential
 	  } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 	
 	  const firebaseConfig = {
@@ -63,33 +62,6 @@
 	  // GoogleAuthProvider themselves - just call window.firebaseSignInWithGoogle()
 	  window.firebaseSignInWithGoogle = function () {
 	    return signInWithPopup(auth, googleProvider);
-	  };
-	  // Sends (or re-sends) the verification link to whoever's currently signed
-	  // in. Firebase rate-limits this itself, so no need to debounce here.
-	  window.firebaseSendEmailVerification = function () {
-	    var user = auth.currentUser;
-	    if (!user) {
-	      return Promise.reject(new Error('Not signed in.'));
-	    }
-	    return sendEmailVerification(user);
-	  };
-	  // Firebase caches emailVerified on the client until you explicitly ask it
-	  // to recheck - this is what "I've verified, refresh" actually calls.
-	  // reload() alone only updates the local profile (emailVerified flips to
-	  // true) - it does NOT mint a new ID token, so the cached token queued up
-	  // to send still has email_verified: false baked into its signed payload
-	  // from before verification. Force-refreshing the token here (not just the
-	  // profile) is what makes the server actually recognize the account as
-	  // verified right away, instead of only after the old token naturally
-	  // expires up to an hour later.
-	  window.firebaseReloadUser = function () {
-	    var user = auth.currentUser;
-	    if (!user) {
-	      return Promise.reject(new Error('Not signed in.'));
-	    }
-	    return user.reload().then(function () {
-	      return user.getIdToken(/* forceRefresh */ true);
-	    });
 	  };
 	  // Re-proves the signed-in user's password before a destructive action
 	  // (wipe data) - throws (auth/wrong-password etc) if it doesn't match, so
