@@ -805,16 +805,6 @@ NetIo.Server = NetIo.EventingClass.extend({
 		}
 
 		let firebaseUserId = '';
-		// separate from firebaseUserId on purpose: this tracks "did we get a
-		// legitimately-issued Firebase token" regardless of its email_verified
-		// claim, because that's what actually matters for the used-token replay
-		// check below - a Firebase ID token is a reusable session credential
-		// (meant to be sent again on reconnects/refreshes within its ~1hr
-		// lifetime), never a one-time ticket, whether or not the account behind
-		// it happens to be verified yet. firebaseUserId alone conflating both
-		// meant an unverified account got wrongly treated as if it were replaying
-		// a used one-time guest token the moment it reconnected at all.
-		let hasValidFirebaseToken = false;
 		try {
 		    let decodedToken;
 			if (process.env.ENV !== 'standalone' && taro.workerComponent) {
@@ -825,24 +815,8 @@ NetIo.Server = NetIo.EventingClass.extend({
 				if (token) {
 					try {
 						const decodedFirebaseToken = await firebaseAdmin.auth().verifyIdToken(token);
-						hasValidFirebaseToken = true;
-						// Google sign-ins come back email_verified: true already (Google
-						// vouches for the address itself). Email/password accounts only get
-						// this once they click the link we send via sendEmailVerification()
-						// (see auth.ejs) - until then, treat them the same as a guest: they
-						// can still connect and play, they just don't get their persisted
-						// coins/uid tied to them. This is the check that actually matters -
-						// the client-side "please verify" screen in auth.ejs is just UX on
-						// top of it, and could be bypassed by anyone skipping that UI.
-						if (decodedFirebaseToken.email_verified) {
-							firebaseUserId = decodedFirebaseToken.uid;
-							console.log('socketConnection: verified Firebase token for uid', firebaseUserId);
-						} else {
-							console.log(
-								'socketConnection: Firebase token valid but email not verified, treating as guest:',
-								decodedFirebaseToken.uid
-							);
-						}
+						firebaseUserId = decodedFirebaseToken.uid;
+						console.log('socketConnection: verified Firebase token for uid', firebaseUserId);
 					} catch (firebaseErr) {
 						// expired/invalid token, or a guest's empty string reaching here some
 						// other way - either way, fall back to guest rather than reject them.
@@ -871,15 +845,11 @@ NetIo.Server = NetIo.EventingClass.extend({
 			let assignedId = self.newIdHex();
 
 			// if the token has been used already, close the connection.
-			// skip this for anyone holding a legitimately-issued Firebase token
-			// (verified or not) - it's a real, short-lived identity credential
-			// meant to be reused across a session (page refreshes, rejoins), not
-			// a one-time connection ticket the way the old random guest tokens
-			// were. Deliberately checked against hasValidFirebaseToken, not
-			// firebaseUserId - an unverified account's token is still a real
-			// Firebase session token, it just doesn't earn persisted-identity
-			// treatment yet (see above) - those are two different questions.
-			const isUsedToken = !hasValidFirebaseToken && taro.server.usedConnectionJwts[token];
+			// skip this for verified Firebase users - their token is a real,
+			// short-lived identity credential meant to be reused across a session
+			// (page refreshes, rejoins), not a one-time connection ticket the way
+			// the old random guest tokens were.
+			const isUsedToken = !firebaseUserId && taro.server.usedConnectionJwts[token];
 
 			if (isUsedToken) {
 				if (request.headers['sec-websocket-protocol'].split(', ')[1] == 'reconnect') {
