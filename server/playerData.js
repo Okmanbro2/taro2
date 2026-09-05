@@ -6,7 +6,7 @@ const { db } = admin;
 const fs = require('fs');
 const path = require('path');
 
-// stuuufff
+// stuuuff
 //
 // game.json's data.data.attributeTypes is the single source of truth for
 // every attribute id's name/min/max in the actual running game - the same
@@ -179,14 +179,14 @@ async function backupPlayerData(uid, reason) {
 //
 // IMPORTANT: this is the one place in the app where a player's own raw JSON
 // gets treated as trusted persisted data, so it can't just be passed
-// through. two separate problems get fixed here, not one:
+// through. Two separate problems get fixed here, not one:
 //
-// 1. obviously, someone could just hand-edit "value" to whatever they want.
-// 2. less obviously: loadPersistentData() in TaroEntity.js applies whatever
+// 1. Obviously, someone could just hand-edit "value" to whatever they want.
+// 2. Less obviously: loadPersistentData() in TaroEntity.js applies whatever
 //    "min"/"max" the saved data claims BEFORE clamping "value" to that same
 //    min/max - so a pasted {"min":0,"max":999999999,"value":999999999}
 //    would sail straight through that clamp too, since the clamp is being
-//    checked against attacker-supplied bounds. rebuilding min/max here from
+//    checked against attacker-supplied bounds. Rebuilding min/max here from
 //    the game's own trusted schema (instead of copying whatever the pasted
 //    JSON claims) closes that off regardless of what the export contains.
 function transformModdPlayerExport(moddExport) {
@@ -298,18 +298,29 @@ async function wipePlayerData(uid) {
 	return { backupId };
 }
 
-// --- leaderboard ---
+// --- Leaderboard ---
 //
-// backed by a single cached doc (meta/leaderboard) rather than querying
+// Backed by a single cached doc (meta/leaderboard) rather than querying
 // every player on every page load - a full top-N query across the whole
 // players collection is not something we want running on every trophy-icon
-// click. the cache is considered fresh for a week
+// click. The cache is considered fresh for a week, matching "refreshes
+// every week" in the UI copy; getLeaderboard() recomputes it lazily the
+// first time it's asked for after going stale, rather than needing a cron
+// job or scheduled function.
 const LEADERBOARD_ATTRIBUTE_IDS = {
 	wins: 'fKYSjs9Zw4', // Wins
 	coins: 'KAohfBnN6V', // Coins
 };
 const LEADERBOARD_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // one week
 const LEADERBOARD_ENTRY_LIMIT = 50;
+
+// Usernames that should never show up on the public leaderboard - dev/test
+// accounts, admin accounts used for debugging, that kind of thing. Matched
+// case-insensitively so "TestAccount12345" and "testaccount12345" are both
+// caught by one entry. Add to this list as needed; it only affects the
+// leaderboard display, not the accounts themselves - they keep their real
+// Wins/Coins, they just don't get ranked publicly.
+const LEADERBOARD_EXCLUDED_USERNAMES = new Set(['testaccount12345'].map((name) => name.toLowerCase()));
 
 // guards against a stampede of concurrent recomputes if several requests
 // land back to back right as the cache goes stale - later callers just await
@@ -330,7 +341,7 @@ async function computeLeaderboard() {
 			.get(),
 	]);
 
-	// firestore's orderBy on a nested field automatically excludes any
+	// Firestore's orderBy on a nested field automatically excludes any
 	// document that doesn't have that field at all, so accounts that have
 	// never earned a Win/Coin simply won't appear in that particular
 	// leaderboard - which is the behavior we want here anyway.
@@ -344,7 +355,8 @@ async function computeLeaderboard() {
 					value: (attr && attr.value) || 0,
 				};
 			})
-			.filter((entry) => !!entry.username); // accounts that never claimed a username shouldn't show up on a public leaderboard
+			.filter((entry) => !!entry.username) // accounts that never claimed a username shouldn't show up on a public leaderboard
+			.filter((entry) => !LEADERBOARD_EXCLUDED_USERNAMES.has(entry.username.toLowerCase()));
 	}
 
 	return {
