@@ -1,0 +1,22 @@
+[
+  {
+    "url": "https://cache.modd.io/asset/spriteImage/1727675358606_3kluV+.png",
+    "filename": "1727675358606_3kluV+.png",
+    "ok": false,
+    "reason": "HTTP 404",
+    "usedBy": [
+      {
+        "category": "itemTypes",
+        "key": "3mtd2T1lhL",
+        "name": "Fire Effect"
+      }
+    ]
+  },
+  {
+    "url": "https://i.ibb.co/CpJszN1w/Screenshot-2025-05-28-230719.png",
+    "filename": "Screenshot-2025-05-28-230719.png",
+    "ok": false,
+    "reason": "This operation was aborted",
+    "usedBy": []
+  }
+]

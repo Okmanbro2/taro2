@@ -348,6 +348,8 @@ var Server = TaroClass.extend({
 		// parse application/json
 		app.use(bodyParser.json());
 
+		app.use('/sprites', express.static(path.join(__dirname, '..', 'assets', 'sprites')));
+
 		app.post('/api/verify-token', async (req, res) => {
 			const { idToken } = req.body;
 			if (!idToken) {
