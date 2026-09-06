@@ -24,7 +24,8 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 			BitmapFontManager.font(scene, 'Arial', true, false, '#FFFFFF')
 		);*/
 		const text = (this.textObject = scene.add.text(0, 0, this.trimText(chatText), {
-			font: '400 24px "Brianne\'s Hand"',
+			fontFamily: '"Brianne\'s Hand", Verdana',
+			fontStyle: '400',
 			color: '#ffffff',
 			align: 'center',
 		}));
@@ -43,6 +44,24 @@ class PhaserChatBubble extends Phaser.GameObjects.Container {
 		//text.letterSpacing = -0.6;
 
 		this.add(text);
+
+		// Canvas text (unlike DOM text) does not wait for a web font to finish
+		// loading - fillText() just silently draws with a default fallback font
+		// if "Brianne's Hand" isn't ready yet, and never redraws itself later.
+		// The font is preloaded via the FontFace API in index.ejs, but there's
+		// no hard guarantee that finishes before the first chat bubble is drawn
+		// (slow network, etc). document.fonts.ready resolves once every
+		// requested font has settled one way or another, so once it does, force
+		// this bubble to redraw - if the font loaded successfully it'll pick it
+		// up now; if it failed, the 'Verdana' fallback above already covers it.
+		if (document.fonts && document.fonts.ready) {
+			document.fonts.ready.then(() => {
+				if (this.textObject && this.textObject.active) {
+					this.textObject.updateText();
+					this.drawBubble();
+				}
+			});
+		}
 
 		if (scene.renderer.type === Phaser.CANVAS) {
 			//text.visible = false;
