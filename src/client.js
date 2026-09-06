@@ -245,6 +245,20 @@ const Client = TaroEventingClass.extend({
 
 				this.initializeConfigurationFields();
 
+				// Guarantee custom web fonts (Brianne's Hand, Burbank) have
+				// finished loading - or definitively failed - before the
+				// engine starts configuring the renderer. Canvas-rendered
+				// text (player labels, chat bubbles) draws with whatever
+				// font is loaded at the exact moment it's first drawn, and
+				// never retroactively fixes itself if the font was still in
+				// flight - so this removes that race entirely rather than
+				// just reacting to it after the fact.
+				let fontStartTime = performance.now();
+				if (window.customFontsReady) {
+					await window.customFontsReady;
+				}
+				this.setLoadingTime('customFontsReady', performance.now() - fontStartTime);
+
 				let engineStartTime = performance.now();
 				await this.configureEngine();
 				this.setLoadingTime('engineConfiguration', performance.now() - engineStartTime);
