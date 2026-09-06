@@ -4538,6 +4538,17 @@ var TaroEntity = TaroObject.extend({
 
 								break;
 
+							// pushed via taro.client.queueStreamUpdateData(unitId, 'hideUnit'/'showUnit', true)
+							// from ClientNetworkEvents._onHideUnitFromPlayer/_onShowUnitFromPlayer, which
+							// backs the "hide/show unit from player" script actions. Previously unhandled here,
+							// so those actions queued the update but nothing ever consumed it.
+							case 'hideUnit':
+								this.hide();
+								break;
+							case 'showUnit':
+								this.show();
+								break;
+
 							case 'hideNameLabel':
 								this.emit('hide-label');
 								break;
