@@ -241,7 +241,16 @@ var ClientNetworkEvents = {
 				return;
 			}
 
-			let sanitizedStyle = taro.clientSanitizer(data.style);
+			// This text becomes the textContent of a <style> element - it's parsed
+			// as CSS, never as HTML. taro.clientSanitizer HTML-escapes quote
+			// characters (" -> &quot;), which corrupts perfectly valid CSS such as
+			// `content: "Sunflower"` (used for ::before/::after pseudo-element
+			// text, e.g. the Zen Garden pot menu titles): the browser silently
+			// discards the un-parseable declaration and the pseudo-element keeps
+			// showing whatever content was last valid (its static default). Guard
+			// only against breaking out of the <style> tag itself instead of
+			// HTML-escaping.
+			let sanitizedStyle = String(data.style ?? '').replace(/<\/style/gi, '<\\/style');
 			if (data.action == 'update') {
 				taro.uiTextElementsObj[key].innerText = sanitizedStyle;
 			} else if (data.action == 'append') {
