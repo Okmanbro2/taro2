@@ -321,7 +321,9 @@ const LEADERBOARD_ENTRY_LIMIT = 50;
 // caught by one entry. Add to this list as needed; it only affects the
 // leaderboard display, not the accounts themselves - they keep their real
 // Wins/Coins, they just don't get ranked publicly.
-const LEADERBOARD_EXCLUDED_USERNAMES = new Set(['testaccount12345'].map((name) => name.toLowerCase()));
+const LEADERBOARD_EXCLUDED_USERNAMES = new Set(
+  ['testaccount12345', 'testaccount1', 'testaccount2', 'testaccount3', 'testaccount4', 'testaccount5'].map((name) => name.toLowerCase())
+);
 
 // guards against a stampede of concurrent recomputes if several requests
 // land back to back right as the cache goes stale - later callers just await
