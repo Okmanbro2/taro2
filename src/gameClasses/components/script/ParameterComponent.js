@@ -1,3 +1,59 @@
+// some game.json-authored "string array" values (used by getStringArrayElement,
+// insertStringArrayElement, etc.) contain raw, unescaped control characters
+// (most commonly literal newlines left over from multi-line text fields in the
+// script editor). strict JSON.parse throws a SyntaxError ("Bad control
+// character in string literal") on these even though the intent was always for
+// them to behave like plain string data. sanitize control characters that
+// appear *inside* quoted string literals before parsing so these values parse
+// successfully instead of hard-failing every action that touches them.
+function sanitizeJsonArrayString(string) {
+	if (typeof string !== 'string') {
+		return string;
+	}
+
+	var result = '';
+	var inString = false;
+	var isEscaped = false;
+
+	for (var i = 0; i < string.length; i++) {
+		var char = string[i];
+		var code = string.charCodeAt(i);
+		var wasEscaped = isEscaped;
+
+		// figure out whether the NEXT character is escaped, before we
+		// mutate/consume this one
+		isEscaped = inString && !wasEscaped && char === '\\';
+
+		if (inString && !wasEscaped && code >= 0x00 && code <= 0x1f) {
+			// Raw control character inside a string literal - drop it (this
+			// also matches the original intent of the "\n" cleanup step
+			// authors relied on, which silently failed to strip these).
+			continue;
+		}
+
+		if (char === '"' && !wasEscaped) {
+			inString = !inString;
+		}
+
+		result += char;
+	}
+
+	return result;
+}
+
+function safeParseJsonArray(string) {
+	try {
+		return JSON.parse(string);
+	} catch (err) {
+		if (!(err instanceof SyntaxError)) {
+			throw err;
+		}
+
+		// retry once with control characters inside string literals stripped
+		return JSON.parse(sanitizeJsonArrayString(string));
+	}
+}
+
 var ParameterComponent = TaroEntity.extend({
 	classId: 'ParameterComponent',
 	componentId: 'param',
@@ -2093,7 +2149,7 @@ var ParameterComponent = TaroEntity.extend({
 						// falsy check OK because empty string is not valid array
 						if (string) {
 							try {
-								var array = JSON.parse(string);
+								var array = safeParseJsonArray(string);
 
 								if (Array.isArray(array)) {
 									returnValue = array.length;
@@ -2118,7 +2174,7 @@ var ParameterComponent = TaroEntity.extend({
 						// index can be zero so more than a falsy check is necessary
 						if (string && index !== undefined) {
 							try {
-								var array = JSON.parse(string);
+								var array = safeParseJsonArray(string);
 								returnValue = array[index];
 							} catch (err) {
 								if (err instanceof SyntaxError) {
@@ -2140,7 +2196,7 @@ var ParameterComponent = TaroEntity.extend({
 						// value can be something that evaluates falsy so more is needed
 						if (string && value !== undefined) {
 							try {
-								var array = JSON.parse(string);
+								var array = safeParseJsonArray(string);
 
 								if (Array.isArray(array)) {
 									array.push(value);
@@ -2173,7 +2229,7 @@ var ParameterComponent = TaroEntity.extend({
 						// value and index can be falsy and valid so more is needed
 						if (string && value !== undefined && index !== undefined) {
 							try {
-								var array = JSON.parse(string);
+								var array = safeParseJsonArray(string);
 
 								if (Array.isArray(array)) {
 									array[index] = value;
@@ -2205,7 +2261,7 @@ var ParameterComponent = TaroEntity.extend({
 						// index can be zero so more than falsy check is necessary
 						if (string && index !== undefined) {
 							try {
-								var array = JSON.parse(string);
+								var array = safeParseJsonArray(string);
 
 								if (Array.isArray(array)) {
 									array.splice(index, 1);
