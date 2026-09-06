@@ -1,9 +1,21 @@
 {
-	"version": "3.3.1",
+	"version": "3.3.2 (Patch)",
 	"entries": [
 		{
 			"title": "Let's Grow Some Plants!",
 			"description": "Fixed the Zen Garden! Obtain sprouts by buying them or from killing zombies! Grow your sprouts to earn coins, and play as special plants!"
+		},
+		{
+			"title": "Let's Go Big Again",
+			"description": "Attempted a fix at making entity sizing (body/sprite) work again. Hopefully it works - I still gotta figure out why hitboxes are still being stupid."
+		},
+		{
+			"title": "Unit Visibility Fix",
+			"description": "Really, how many bugs do I have to fix MYSELF in this Taro Engine? This is embarrassing. Fixed entity visibility - stuff like the Fog Fertilizer or whatever should work now - if they don't I will be upset."
+		},
+		{
+			"title": "Soon: Spawn Fixing",
+			"description": "Planned for tomorrow: I'll try to fix the Event spawns for Winter 2024, and Halloween 2023."
 		}
 	]
 }
