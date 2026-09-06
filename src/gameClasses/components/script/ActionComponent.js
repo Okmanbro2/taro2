@@ -4084,7 +4084,14 @@ var ActionComponent = TaroEntity.extend({
 						var entity = self._script.param.getValue(action.entity, vars);
 						var scale = self._script.param.getValue(action.scale, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && !isNaN(scale)) {
-							entity.streamUpdateData([{ scale: parseFloat(scale).toFixed(2) }]);
+							var scaleValue = parseFloat(scale).toFixed(2);
+							entity.streamUpdateData([{ scale: scaleValue }]);
+							// streamUpdateData only applies the effect locally on the server -
+							// queueStreamData is what actually gets broadcast to clients on the
+							// next network tick. Without this, clients never see the resize.
+							if (taro.isServer) {
+								entity.queueStreamData({ scale: scaleValue });
+							}
 						}
 						break;
 
@@ -4092,7 +4099,15 @@ var ActionComponent = TaroEntity.extend({
 						var entity = self._script.param.getValue(action.entity, vars);
 						var scale = self._script.param.getValue(action.scale, vars);
 						if (entity && self.entityCategories.indexOf(entity._category) > -1 && !isNaN(scale)) {
-							entity.streamUpdateData([{ scaleBody: parseFloat(scale).toFixed(2) }]);
+							var scaleValue = parseFloat(scale).toFixed(2);
+							entity.streamUpdateData([{ scaleBody: scaleValue }]);
+							// see comment above - without queueStreamData, the server's own
+							// hitbox resizes correctly (streamUpdateData -> scaleBodyBy runs
+							// server-side immediately) but clients never find out, so their
+							// local collision/rendering stays at the old size.
+							if (taro.isServer) {
+								entity.queueStreamData({ scaleBody: scaleValue });
+							}
 						}
 						break;
 
