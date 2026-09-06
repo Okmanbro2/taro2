@@ -1,21 +1,35 @@
 <html lang="en">
 
 <script>
-  const burbankFont = new FontFace('Burbank Big Condensed', 'url(/assets/fonts/Burbank_Big_Condensed_Bold.otf)');
-  burbankFont.load().then(function(loadedFont) {
-    document.fonts.add(loadedFont);
-  }).catch(function(err) {
-    console.warn('Burbank font failed to preload yo:', err);
-  });
-</script>
-
-<script>
-  const briannesHandFont = new FontFace('Brianne\'s Hand', 'url(/assets/fonts/BriannesHand.ttf)');
-  briannesHandFont.load().then(function(loadedFont) {
-    document.fonts.add(loadedFont);
-  }).catch(function(err) {
-    console.warn('Brianne\'s Hand font failed to preload:', err);
-  });
+  // Custom web fonts (used by canvas-rendered text - player labels, chat
+  // bubbles) need to be force-loaded via the FontFace API, since @font-face
+  // in CSS alone only downloads when the browser sees the font actually used
+  // by visible DOM text - canvas drawing doesn't count, so it would never
+  // trigger the download on its own.
+  //
+  // window.customFontsReady is exposed so game boot (see client.js) can
+  // explicitly await it before any rendering starts, instead of hoping the
+  // fire-and-forget load finishes in time. It always resolves (never
+  // rejects) using allSettled, so one font failing doesn't block the others
+  // or hang boot - each outcome is logged clearly so a real failure (bad
+  // path, 404, server MIME issue, etc) is visible in the console instead of
+  // silently vanishing.
+  window.customFontsReady = Promise.allSettled([
+    { name: 'Burbank Big Condensed', url: '/assets/fonts/Burbank_Big_Condensed_Bold.otf' },
+    { name: 'Brianne\'s Hand', url: '/assets/fonts/BriannesHand.ttf' },
+  ].map(function ({ name, url }) {
+    return new FontFace(name, `url(${url})`)
+      .load()
+      .then(function (loadedFont) {
+        document.fonts.add(loadedFont);
+        console.log(`[FONT] "${name}" loaded successfully from ${url}`);
+        return loadedFont;
+      })
+      .catch(function (err) {
+        console.error(`[FONT] "${name}" FAILED to load from ${url} - will fall back to a default font wherever it's used. Error:`, err);
+        throw err;
+      });
+  }));
 </script>
 
 <head>
