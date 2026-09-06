@@ -1,21 +1,25 @@
 {
-	"version": "3.3.2 (Patch)",
+	"version": "3.3.3",
 	"entries": [
 		{
-			"title": "Let's Grow Some Plants!",
-			"description": "Fixed the Zen Garden! Obtain sprouts by buying them or from killing zombies! Grow your sprouts to earn coins, and play as special plants!"
+			"title": "The Great Migration",
+			"description": "Successfully migrated all 827 sprites onto the local server! Now modd can't ruin our game. If you see issues, please contact @thw0k on the Plants vs. Zombies: Roam Discord Server!"
 		},
 		{
-			"title": "Let's Go Big Again",
-			"description": "Attempted a fix at making entity sizing (body/sprite) work again. Hopefully it works - I still gotta figure out why hitboxes are still being stupid."
+			"title": "Zen Garden Fix no.2",
+			"description": "Fixed the Zen Garden again! Obtain sprouts by buying them or from killing zombies! Grow your sprouts to earn coins, and play as special plants!"
 		},
 		{
-			"title": "Unit Visibility Fix",
-			"description": "Really, how many bugs do I have to fix MYSELF in this Taro Engine? This is embarrassing. Fixed entity visibility - stuff like the Fog Fertilizer or whatever should work now - if they don't I will be upset."
+			"title": "JSON Touch-ups",
+			"description": "Carefully editd the JSON file to give some Plants buffs and nerfs - it's like two or three changes in damage."
 		},
 		{
-			"title": "Soon: Spawn Fixing",
-			"description": "Planned for tomorrow: I'll try to fix the Event spawns for Winter 2024, and Halloween 2023."
+			"title": "Spawn Fixing",
+			"description": "Fixed special spawns for previous and future event modes - everything and anything will spawn now!"
+		},
+		{
+			"title": "Greeting the Guests",
+			"description": "Fixed an issue where Guests couldn't join due to an invalidated token."
 		}
 	]
 }
