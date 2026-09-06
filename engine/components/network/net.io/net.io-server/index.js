@@ -848,8 +848,12 @@ NetIo.Server = NetIo.EventingClass.extend({
 			// skip this for verified Firebase users - their token is a real,
 			// short-lived identity credential meant to be reused across a session
 			// (page refreshes, rejoins), not a one-time connection ticket the way
-			// the old random guest tokens were.
-			const isUsedToken = !firebaseUserId && taro.server.usedConnectionJwts[token];
+			// the old random guest tokens were. Also skip for guests entirely -
+			// guests always send an empty string as their "token" (there's no per-
+			// guest JWT anymore), so without this check every guest after the
+			// first would collide on the same usedConnectionJwts[''] entry and get
+			// rejected as if they were replaying someone else's connection.
+			const isUsedToken = !firebaseUserId && !!token && taro.server.usedConnectionJwts[token];
 
 			if (isUsedToken) {
 				if (request.headers['sec-websocket-protocol'].split(', ')[1] == 'reconnect') {
@@ -887,8 +891,12 @@ NetIo.Server = NetIo.EventingClass.extend({
 				}
 			}
 
-			// store token for current client
-			taro.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
+			// store token for current client - only meaningful for tokens that are
+			// actually unique per-connection (guests' empty string isn't, so don't
+			// let it clutter/collide in this map at all)
+			if (token) {
+				taro.server.usedConnectionJwts[token] = socket._token.tokenCreatedAt;
+			}
 
 			// remove expired tokens
 			const filteredUsedConnectionJwts = {};
