@@ -94,7 +94,7 @@ var TaroEntityPhysics = TaroEntity.extend({
 		}
 
 		var filterCategoryBits = 0x0002;
-		if (this._category === 'units') {
+		if (this._category === 'unit') {
 			filterCategoryBits = 0x0002;
 		} else if (this._category === 'item') {
 			filterCategoryBits = 0x0008;
