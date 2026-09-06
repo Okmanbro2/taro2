@@ -737,13 +737,26 @@ var ClientNetworkEvents = {
 		var element = document.getElementById('error-log-content');
 		for (actionName in logs) {
 			var log = logs[actionName];
-			// element.innerHTML += `<li style='font-size:12px;'>${log}</li>`;
 			taro.client.errorLogs.push({ ...log, path: actionName });
 			$('#dev-error-button').text(`Errors (${taro.client.errorLogs.length})`);
 
 			if (window.addToLogs && typeof log.message === 'string') {
 				window.addToLogs({ ...log, path: actionName });
 			}
+		}
+
+		if (element) {
+			// re-render the full accumulated list (not just this batch) so it always
+			// matches the Errors (N) count on the button - newest first.
+			element.innerHTML = taro.client.errorLogs
+				.slice()
+				.reverse()
+				.map((log) => {
+					var message = $('<div>').text(log.message).html(); // escape for safe innerHTML
+					var countSuffix = log.count > 1 ? ` (x${log.count})` : '';
+					return `<li style='font-size:12px;'>${message}${countSuffix} <span style='opacity:0.6'>- ${log.path}</span></li>`;
+				})
+				.join('');
 		}
 
 		window.reactApp?.showErrorToast(logs[Object.keys(logs)[Object.keys(logs).length - 1]]);
