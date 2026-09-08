@@ -1,21 +1,21 @@
 {
-	"version": "3.3.3",
+	"version": "3.4.0",
 	"entries": [
 		{
-			"title": "The Great Migration",
-			"description": "Successfully migrated all 827 sprites onto the local server! Now modd can't ruin our game. If you see issues, please contact @thw0k on the Plants vs. Zombies: Roam Discord Server!"
+			"title": "The Great Migration 2",
+			"description": "Moved the game off of Render.com onto an Amazon server - we got six months of Roam, people!"
 		},
 		{
-			"title": "Zen Garden Fix no.2",
-			"description": "Fixed the Zen Garden again! Obtain sprouts by buying them or from killing zombies! Grow your sprouts to earn coins, and play as special plants!"
+			"title": "Zen Garden Fix no.3",
+			"description": "Fixed the Zen Garden once more! Coin collection should work guarenteed. Now, for the usual- ahem .. obtain sprouts by buying them or from killing zombies! Grow your sprouts to earn coins, and play as special plants!"
 		},
 		{
-			"title": "JSON Touch-ups",
-			"description": "Carefully editd the JSON file to give some Plants buffs and nerfs - it's like two or three changes in damage."
+			"title": "Plant Fixes",
+			"description": "Fixed Hypnoflower's attacks and Gloom-Shroom's attacks, both should now work properly as intended!"
 		},
 		{
-			"title": "Spawn Fixing",
-			"description": "Fixed special spawns for previous and future event modes - everything and anything will spawn now!"
+			"title": "Little Zombies Back In Action",
+			"description": "Flag 35's minigame should properly make zombies small again. Hopefully."
 		},
 		{
 			"title": "Greeting the Guests",
