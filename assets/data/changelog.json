@@ -6,6 +6,10 @@
 			"description": "Moved the game off of Render.com onto an Amazon server - we got six months of Roam, people!"
 		},
 		{
+			"title": "(Hopefully) Less Loading Time",
+			"description": "Made it so that sprites are optimized and cached for 30 days - hopefully that should not only lessen load time, it should also free a lot of Bandwidth - that stuff's valuable!"
+		},
+		{
 			"title": "Zen Garden Fix no.3",
 			"description": "Fixed the Zen Garden once more! Coin collection should work guarenteed. Now, for the usual- ahem .. obtain sprouts by buying them or from killing zombies! Grow your sprouts to earn coins, and play as special plants!"
 		},
@@ -15,11 +19,11 @@
 		},
 		{
 			"title": "Little Zombies Back In Action",
-			"description": "Flag 35's minigame should properly make zombies small again. Hopefully."
+			"description": "Flag 25's minigame should properly make zombies small again. Hopefully."
 		},
 		{
-			"title": "Greeting the Guests",
-			"description": "Fixed an issue where Guests couldn't join due to an invalidated token."
+			"title": "Join the Discord!",
+			"description": "Join our discord server! We need new faces."
 		}
 	]
 }
