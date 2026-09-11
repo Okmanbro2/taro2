@@ -1,3 +1,5 @@
+const nestedActionsLengthCache = new WeakMap();
+
 var ActionComponent = TaroEntity.extend({
 	classId: 'ActionComponent',
 	componentId: 'action',
@@ -59,6 +61,30 @@ var ActionComponent = TaroEntity.extend({
 
 	 */
 	getNestedActionsLength: (obj, _length, self, mode = 3) => {
+		// PERFORMANCE: this is a pure function of `obj` and `mode` - the action
+		// tree parsed from game.json is loaded once and never mutated while the
+		// server runs, so the nested count for a given action-tree node is the
+		// same every single time. Without this cache, every iteration of every
+		// loop action (forAllUnits, forAllPlayers, repeat, while, for, condition,
+		// etc.) re-walked the ENTIRE nested action tree from scratch, just to
+		// track a debugger line number - for a script with many nested actions
+		// running inside a loop over many entities, every tick, that's a lot of
+		// repeated recursive work for a result that never changes.
+		//
+		// _length === 0 reliably identifies the top-level (external) call: every
+		// one of the 21 call sites in this file passes 0 as the starting value,
+		// while internal recursive descent always passes an already-incremented,
+		// non-zero accumulator (see `length += 1` below, always run before any
+		// recursive call). So caching only when _length === 0 caches exactly the
+		// values callers actually ask for, without touching the recursion's own
+		// internal accumulator logic at all.
+		if (_length === 0) {
+			const cached = nestedActionsLengthCache.get(obj);
+			if (cached !== undefined && cached[mode] !== undefined) {
+				return cached[mode];
+			}
+		}
+
 		let length = _length;
 		if (obj.actions !== undefined) {
 			for (let i = 0; i < obj.actions.length; i++) {
@@ -80,6 +106,16 @@ var ActionComponent = TaroEntity.extend({
 				}
 			}
 		}
+
+		if (_length === 0) {
+			let cached = nestedActionsLengthCache.get(obj);
+			if (!cached) {
+				cached = {};
+				nestedActionsLengthCache.set(obj, cached);
+			}
+			cached[mode] = length;
+		}
+
 		return length;
 	},
 
