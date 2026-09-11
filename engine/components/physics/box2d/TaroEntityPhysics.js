@@ -64,21 +64,25 @@ var TaroEntityPhysics = TaroEntity.extend({
 				? bodyDef.fixtures[0].shape.data
 				: undefined;
 
-		// override body bounds
+		// Use the entity body's dimensions for the collision fixture.
+		// The body's width/height are the authoritative collision bounds.
 		if (bodyDef?.fixtures) {
-			var sizeX = bodyDef?.fixtures[0].size?.width;
-			var sizeY = bodyDef?.fixtures[0].size?.height;
-			var offsetX = bodyDef?.fixtures[0].offset?.x;
-			var offsetY = bodyDef?.fixtures[0].offset?.y;
-			if (shapeData === undefined) {
-				shapeData = {};
-			}
-			if (sizeX) {
-				shapeData.halfWidth = sizeX / 2;
-			}
-			if (sizeY) {
-				shapeData.halfHeight = sizeY / 2;
-			}
+		    var sizeX = bodyDef?.width;
+		    var sizeY = bodyDef?.height;
+		    var offsetX = bodyDef?.fixtures[0].offset?.x;
+		    var offsetY = bodyDef?.fixtures[0].offset?.y;
+		
+		    if (shapeData === undefined) {
+		        shapeData = {};
+		    }
+		
+		    if (sizeX) {
+		        shapeData.halfWidth = sizeX / 2;
+		    }
+		
+		    if (sizeY) {
+		        shapeData.halfHeight = sizeY / 2;
+		    }
 			if (offsetX) {
 				shapeData.x = offsetX;
 			}
