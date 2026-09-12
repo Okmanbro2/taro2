@@ -1005,17 +1005,17 @@ div#dev-console-table {
   width: 100%;
 }
 
-/* Wraps the chat log and the input field together so they behave as one visual
-   unit anchored at bottom-left. column-reverse stacks the log (first DOM child)
-   at the bottom and the input (second DOM child) directly above it; when the log
-   is hidden, the input drops down to the bottom automatically. */
+/* wraps the chat log and the input field together so they behave as one visual
+   unit anchored at bottom-left. Input is the first DOM child (see chat.ejs) so a
+   plain column layout puts it on top of the log; when the log is hidden, the
+   input drops down to the bottom automatically. */
 #chat-stack {
   position: fixed;
   left: 10px;
   bottom: 10px;
   z-index: 2500;
   display: flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   gap: 8px;
   align-items: flex-start;
 }
