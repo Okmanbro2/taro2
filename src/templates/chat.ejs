@@ -1,43 +1,31 @@
-<!-- chat stack: wraps the input field and the chat log together so they sit as one
-     visual unit at bottom-left. The input is the first DOM child so it always renders
-     above the log with a plain column layout (no reversed-flex trick, which wasn't
-     rendering as intended). When the log gets d-none'd by the Hide button, the input
-     becomes the only flex item left and drops down to the bottom automatically - that's
-     the "hiding the chat moves the textbox down" behavior, handled by CSS reflow alone,
-     no repositioning JS required. -->
-
-<div id="chat-stack">
-    <!-- chat input field -->
-    <div id="chat-input-field-div">
-        <!-- always visible now, matching how Roblox's chat box works (a persistent,
-             low-key input bar) instead of only appearing after pressing Enter once -->
-        <div class="form-group" id="chat-message-input">
-            <div class="input-group d-flex justify-content-center">
-                <form class="mb-0" onsubmit="taro.chat.sendChatMessage(); return false" onkeydown="event.stopPropagation();">
-                    <input type="text" class="form-control btn-sm" id="message" placeholder="Press Enter to send the message" />
-                </form>
-                <div class="input-group-append" onclick="taro.chat.sendChatMessage()">
-                    <button class="btn btn-secondary" type="button">
-                        <i class="fa fa-comment"></i>
-                    </button>
-                </div>
+<!-- chat input field -->
+<div id="chat-input-field-div" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%)">
+    <div class="form-group" id="chat-message-input" style="display: none">
+        <div class="input-group d-flex justify-content-center">
+            <form class="mb-0" onsubmit="taro.chat.sendChatMessage(); return false" onkeydown="event.stopPropagation();">
+                <input type="text" class="form-control btn-sm" id="message" placeholder="Press Enter to send the message" />
+            </form>
+            <div class="input-group-append" onclick="taro.chat.sendChatMessage()">
+                <button class="btn btn-secondary" type="button">
+                    <i class="fa fa-comment"></i>
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- chat box -->
-    <div id="chat-box" class="game-ui" style="display: none">
-        <div id="chat-tab-container" class="hide-on-mobile d-flex flex-column">
-            <ul id="tabs" class="nav nav-pills no-selection">
-                <li class="nav-item">
-                    <a id="hide-chat" class="cursor-pointer hide-on-mobile pr-0 nav-link" style="position: absolute; right: 0;"> Hide </a>
-                </li>
-            </ul>
-            <div class="tab-content flex-grow-1 d-flex" style="background-color: rgba(0, 0, 0, 0.5); border-radius: 0px 5px 5px 5px">
-                <div class="tab-pane fade show active w-100" id="pills-chat" role="tabpanel" aria-labelledby="pills-chat-tab">
-                    <div class="h-100 w-100 p-3">
-                        <div id="chat-history" class="hide-on-mobile h-100 tailwind" style="max-height: 200px; overflow: auto; width: 100%; min-height: 200px"></div>
-                    </div>
+<!-- chat box -->
+<div id="chat-box" class="game-ui" style="bottom: 0; display: none">
+    <div id="chat-tab-container" class="hide-on-mobile d-flex flex-column">
+        <ul id="tabs" class="nav nav-pills no-selection">
+            <li class="nav-item">
+                <a id="hide-chat" class="cursor-pointer hide-on-mobile pr-0 nav-link" style="position: absolute; right: 0;"> Hide </a>
+            </li>
+        </ul>
+        <div class="tab-content flex-grow-1 d-flex" style="background-color: rgba(0, 0, 0, 0.5); border-radius: 0px 5px 5px 5px">
+            <div class="tab-pane fade show active w-100" id="pills-chat" role="tabpanel" aria-labelledby="pills-chat-tab">
+                <div class="h-100 w-100 p-3">
+                    <div id="chat-history" class="hide-on-mobile h-100 tailwind" style="max-height: 200px; overflow: auto; min-width: 350px; min-height: 200px"></div>
                 </div>
             </div>
         </div>
@@ -51,12 +39,10 @@
 </div>
 
 <script>
-    // the input box is always visible now, so Enter's job is just to focus it
-    // (matching Roblox: chat is always present, a key just gives it focus so
-    // you can start typing) - sending still happens via the form's onsubmit,
-    // triggered by pressing Enter a second time while focused.
+    // add enter key listener, if enter is pressed, set #chat-message-input to display: block
     document.addEventListener('keydown', function(event) {
-        if (event.keyCode === 13 && document.activeElement.id !== 'message') {
+        if (event.keyCode === 13) {
+            document.getElementById('chat-message-input').style.display = 'block';
             setTimeout(() => {
                 document.getElementById('message').focus();
             }, 0);
