@@ -1,29 +1,13 @@
 {
-	"version": "3.4.0",
+	"version": "3.4.1",
 	"entries": [
 		{
-			"title": "The Great Migration 2",
-			"description": "Moved the game off of Render.com onto an Amazon server - we got six months of Roam, people!"
+			"title": "Mainly, bug fixes.",
+			"description": "That's honestly what this entire patch is about. Really - it's all bug fixes. Hopefully you can expect brand new content soon, I'm really working hard on this brand new editor. Just keep waiting- good things come from patience!"
 		},
 		{
-			"title": "(Hopefully) Less Loading Time",
-			"description": "Made it so that sprites are optimized and cached for 30 days - hopefully that should not only lessen load time, it should also free a lot of Bandwidth - that stuff's valuable!"
-		},
-		{
-			"title": "Zen Garden Fix no.3",
-			"description": "Fixed the Zen Garden once more! Coin collection should work guarenteed. Now, for the usual- ahem .. obtain sprouts by buying them or from killing zombies! Grow your sprouts to earn coins, and play as special plants!"
-		},
-		{
-			"title": "Plant Fixes",
-			"description": "Fixed Hypnoflower's attacks and Gloom-Shroom's attacks, both should now work properly as intended!"
-		},
-		{
-			"title": "Little Zombies Back In Action",
-			"description": "Flag 25's minigame should properly make zombies small again. Hopefully."
-		},
-		{
-			"title": "Join the Discord!",
-			"description": "Join our discord server! We need new faces."
+			"title": "Removed HorrorModeGlitch.js",
+			"description": "Removed HorrorModeGlitch.js"
 		}
 	]
 }
