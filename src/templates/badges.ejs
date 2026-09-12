@@ -1,0 +1,283 @@
+<style>
+	#pvz-badges-backdrop {
+		position: fixed;
+		inset: 0;
+		z-index: 100000;
+		display: flex;
+		justify-content: center;
+		background: rgba(0, 0, 0, 0.45);
+		backdrop-filter: blur(6px);
+		-webkit-backdrop-filter: blur(6px);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.35s ease;
+	}
+
+	#pvz-badges-backdrop.pvz-badges-open {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	#pvz-badges-panel {
+		width: min(720px, 92vw);
+		max-height: 82vh;
+		margin-top: 40px;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+		background: var(--pvz-grass);
+		border: 6px solid #5b8f32;
+		border-radius: 18px;
+		box-shadow: 0 8px 0 #5b8f32, 0 20px 40px rgba(0, 0, 0, 0.4);
+		padding: 20px 24px 24px;
+		font-family: 'Nunito', sans-serif;
+		transform: translateY(-140%);
+		transition: transform 0.4s ease;
+	}
+
+	#pvz-badges-backdrop.pvz-badges-open #pvz-badges-panel {
+		transform: translateY(0);
+	}
+
+	#pvz-badges-header {
+		position: relative;
+		text-align: center;
+		margin-bottom: 10px;
+	}
+
+	#pvz-badges-title {
+		font-family: 'House of Terror', sans-serif;
+		color: var(--pvz-cream);
+		text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+		font-size: 2em;
+		margin: 0;
+	}
+
+	#pvz-badges-close {
+		position: absolute;
+		top: -4px;
+		right: 0;
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--pvz-grass-dark);
+		border: 3px solid #5b8f32;
+		border-radius: 10px;
+		color: #e53935;
+		font-family: 'Brianne\'s Hand', cursive;
+		font-size: 1.6em;
+		line-height: 1;
+		cursor: pointer;
+		text-decoration: none;
+	}
+
+	#pvz-badges-rule {
+		border: none;
+		border-top: 2px solid rgba(255, 255, 255, 0.4);
+		margin: 8px 0 14px;
+	}
+
+	#pvz-badges-list {
+		overflow-y: auto;
+		overflow-x: hidden;
+		flex: 1;
+		min-height: 0;
+		padding-right: 4px;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	.pvz-badge-card {
+		display: flex;
+		gap: 14px;
+		background: var(--pvz-grass-dark);
+		border: 3px solid #5b8f32;
+		border-radius: 10px;
+		padding: 10px 14px;
+	}
+
+	.pvz-badge-icon {
+		flex-shrink: 0;
+		width: 72px;
+		height: 72px;
+		border-radius: 6px;
+		background: #fff;
+		object-fit: contain;
+	}
+
+	.pvz-badge-info {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.pvz-badge-name {
+		font-family: 'House of Terror', sans-serif;
+		color: var(--pvz-cream);
+		text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+		font-size: 1.3em;
+		margin: 0 0 4px;
+	}
+
+	.pvz-badge-description {
+		font-family: 'Brianne\'s Hand', cursive;
+		color: var(--pvz-cream);
+		opacity: 0.9;
+		font-size: 0.95em;
+		margin: 0 0 6px;
+	}
+
+	.pvz-badge-footer {
+		display: flex;
+		justify-content: space-between;
+		font-family: 'Brianne\'s Hand', cursive;
+		font-size: 0.9em;
+	}
+
+	.pvz-badge-obtained {
+		color: var(--pvz-cream);
+		opacity: 0.75;
+	}
+
+	.pvz-badge-reward {
+		color: #ffd54f;
+	}
+
+	.pvz-badges-empty {
+		font-family: 'Nunito', sans-serif;
+		color: var(--pvz-cream);
+		opacity: 0.7;
+		text-align: center;
+		padding: 16px 0;
+	}
+</style>
+
+<div id="pvz-badges-backdrop">
+	<div id="pvz-badges-panel">
+		<div id="pvz-badges-header">
+			<h2 id="pvz-badges-title">Badges</h2>
+			<a href="javascript:void(0)" id="pvz-badges-close" aria-label="Close badges">X</a>
+		</div>
+		<hr id="pvz-badges-rule" />
+		<div id="pvz-badges-list"></div>
+	</div>
+</div>
+
+<script>
+	(function () {
+		var $backdrop = document.getElementById('pvz-badges-backdrop');
+		var $panel = document.getElementById('pvz-badges-panel');
+		var $closeBtn = document.getElementById('pvz-badges-close');
+		var $openBtn = document.getElementById('pvz-badges-button');
+		var $list = document.getElementById('pvz-badges-list');
+		var loaded = false;
+
+		function renderBadges(badges) {
+			$list.innerHTML = '';
+
+			if (!badges || badges.length === 0) {
+				var $empty = document.createElement('div');
+				$empty.className = 'pvz-badges-empty';
+				$empty.textContent = 'No badges yet - check back soon!';
+				$list.appendChild($empty);
+				return;
+			}
+
+			badges.forEach(function (badge) {
+				var $card = document.createElement('div');
+				$card.className = 'pvz-badge-card';
+
+				var $icon = document.createElement('img');
+				$icon.className = 'pvz-badge-icon';
+				$icon.src = badge.icon || '/assets/images/favicon.png';
+				$icon.alt = badge.name || 'Badge';
+
+				var $info = document.createElement('div');
+				$info.className = 'pvz-badge-info';
+
+				var $name = document.createElement('h3');
+				$name.className = 'pvz-badge-name';
+				$name.textContent = badge.name || 'Badge';
+
+				var $description = document.createElement('p');
+				$description.className = 'pvz-badge-description';
+				$description.textContent = badge.description || '';
+
+				var $footer = document.createElement('div');
+				$footer.className = 'pvz-badge-footer';
+
+				var $obtained = document.createElement('span');
+				$obtained.className = 'pvz-badge-obtained';
+				// no per-player earning/tracking exists yet - this always shows the
+				// placeholder for now. Once badges can actually be earned, this is
+				// where that player-specific obtained-at date would be filled in
+				// (e.g. fetched the same way the account panel pulls Wins/Coins).
+				$obtained.textContent = 'Obtained: Not yet obtainable';
+
+				var $reward = document.createElement('span');
+				$reward.className = 'pvz-badge-reward';
+				$reward.textContent = 'Reward: ' + (badge.reward || '—');
+
+				$footer.appendChild($obtained);
+				$footer.appendChild($reward);
+
+				$info.appendChild($name);
+				$info.appendChild($description);
+				$info.appendChild($footer);
+
+				$card.appendChild($icon);
+				$card.appendChild($info);
+				$list.appendChild($card);
+			});
+		}
+
+		function loadBadges() {
+			if (loaded) {
+				return;
+			}
+			fetch('/assets/data/badges.json')
+				.then(function (res) {
+					return res.json();
+				})
+				.then(function (data) {
+					loaded = true;
+					renderBadges(data.badges);
+				})
+				.catch(function (err) {
+					console.warn('Could not load badges.json:', err);
+					renderBadges([]);
+				});
+		}
+
+		function openBadges() {
+			$backdrop.classList.add('pvz-badges-open');
+			loadBadges();
+		}
+
+		function closeBadges() {
+			$backdrop.classList.remove('pvz-badges-open');
+		}
+
+		if ($openBtn) {
+			$openBtn.addEventListener('click', openBadges);
+		}
+		$closeBtn.addEventListener('click', closeBadges);
+
+		// clicking the dark backdrop itself (not the panel) also closes it
+		$backdrop.addEventListener('click', function (event) {
+			if (event.target === $backdrop) {
+				closeBadges();
+			}
+		});
+
+		// so a stray click inside the panel doesn't bubble up and trigger
+		// the backdrop's own click-to-close handler above
+		$panel.addEventListener('click', function (event) {
+			event.stopPropagation();
+		});
+	})();
+</script>
