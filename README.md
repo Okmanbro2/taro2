@@ -1,6 +1,6 @@
 The Taro Engine was abandoned in late 2024 in favor of the brand new (and arguably worse, cryptoslop and ai-driven) indie.fun webspace. I, Okmanbro2, fixed, and repurposed this engine to host a single game.
 
-Why is copilot automating my commits
+Why is copilot naming my commits
 
 ## What's included in the box.
 
