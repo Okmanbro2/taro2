@@ -1003,26 +1003,11 @@ div#dev-console-table {
 
 #chat-message-input {
   width: 100%;
-}
-
-/* wraps the chat log and the input field together so they behave as one visual
-   unit anchored at bottom-left. Input is the first DOM child (see chat.ejs) so a
-   plain column layout puts it on top of the log; when the log is hidden, the
-   input drops down to the bottom automatically. */
-#chat-stack {
-  position: fixed;
-  left: 10px;
-  bottom: 10px;
-  z-index: 2500;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: flex-start;
+  display: none;
 }
 
 #chat-input-field-div {
-  width: 360px;
-  max-width: 90vw;
+  z-index: 2500;
 }
 
 #change-server, #play-game-button .button-text {
@@ -1200,7 +1185,6 @@ div#dev-console-table {
 #chat-box {
   width: 360px;
   max-width: 90vw;
-  margin: 0;
 }
 
 #chat-history,
@@ -1233,22 +1217,12 @@ div#dev-console-table {
 }
 
 /* chat input field */
-/* hidden by default (see chat.ejs's Enter-key listener) - once revealed, dim
-   it until the player actually focuses it, similar to how Roblox's chat box
-   stays unobtrusive until you click into it, rather than demanding attention
-   the whole time it's on screen. */
 #chat-message-input .input-group {
   background: var(--pvz-grass-transparent);
   border: 3px solid var(--pvz-grass-dark-transparent);
   border-radius: 10px;
   box-shadow: 0 3px 0 var(--pvz-grass-dark-transparent);
   padding: 6px;
-  opacity: 0.55;
-  transition: opacity 0.15s ease-out;
-}
-
-#chat-message-input .input-group:focus-within {
-  opacity: 1;
 }
 
 #chat-message-input .form-control {
