@@ -39,13 +39,39 @@
 </div>
 
 <script>
-    // add enter key listener, if enter is pressed, set #chat-message-input to display: block
-    document.addEventListener('keydown', function(event) {
-        if (event.keyCode === 13) {
-            document.getElementById('chat-message-input').style.display = 'block';
-            setTimeout(() => {
-                document.getElementById('message').focus();
-            }, 0);
+    // Focusing an element the same tick it goes from display:none to visible
+    // can race the browser's layout/paint step - the focus() call sometimes
+    // lands before the element is actually focusable yet, which is why a
+    // single Enter press could silently do nothing while holding it (forcing
+    // several attempts) eventually succeeds. Instead of one blind attempt,
+    // verify the focus actually landed and retry a few times via
+    // requestAnimationFrame (which waits for the next paint) until it does.
+    document.addEventListener('keydown', function (event) {
+        if (event.keyCode !== 13) {
+            return;
         }
+
+        var messageField = document.getElementById('message');
+
+        // already focused and typing - let the form's own submit handler
+        // (triggered by this same Enter press) handle sending instead
+        if (document.activeElement === messageField) {
+            return;
+        }
+
+        document.getElementById('chat-message-input').style.display = 'block';
+
+        function tryFocus(attemptsLeft) {
+            messageField.focus();
+            if (document.activeElement !== messageField && attemptsLeft > 0) {
+                requestAnimationFrame(function () {
+                    tryFocus(attemptsLeft - 1);
+                });
+            }
+        }
+
+        requestAnimationFrame(function () {
+            tryFocus(5);
+        });
     });
 </script>
