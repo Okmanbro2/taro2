@@ -29,6 +29,13 @@
 			"reward": "30 Gems"
 		},
 		{
+			"id": "coin-badge",
+			"name": "Scrooge McSprout",
+			"description": "Reach exactly or over 100,000 Coins!",
+			"icon": "/assets/images/coinBadge.png",
+			"reward": "100 Gems"
+		},
+		{
 			"id": "zm-badge",
 			"name": "Brand New Recruit",
 			"description": "Unlock Zombie Mode.",
