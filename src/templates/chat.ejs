@@ -5,6 +5,8 @@
      only flex item left and drops down to the bottom automatically - that's the
      "hiding the chat moves the textbox down" behavior, handled by CSS reflow alone,
      no repositioning JS required. -->
+<!--  u betterwork now -->
+
 <div id="chat-stack">
     <!-- chat box -->
     <div id="chat-box" class="game-ui" style="display: none">
@@ -17,7 +19,7 @@
             <div class="tab-content flex-grow-1 d-flex" style="background-color: rgba(0, 0, 0, 0.5); border-radius: 0px 5px 5px 5px">
                 <div class="tab-pane fade show active w-100" id="pills-chat" role="tabpanel" aria-labelledby="pills-chat-tab">
                     <div class="h-100 w-100 p-3">
-                        <div id="chat-history" class="hide-on-mobile h-100 tailwind" style="max-height: 200px; overflow: auto; min-width: 350px; min-height: 200px"></div>
+                        <div id="chat-history" class="hide-on-mobile h-100 tailwind" style="max-height: 200px; overflow: auto; width: 100%; min-height: 200px"></div>
                     </div>
                 </div>
             </div>
@@ -26,7 +28,9 @@
 
     <!-- chat input field -->
     <div id="chat-input-field-div">
-        <div class="form-group" id="chat-message-input" style="display: none">
+        <!-- always visible now, matching how Roblox's chat box works (a persistent,
+             low-key input bar) instead of only appearing after pressing Enter once -->
+        <div class="form-group" id="chat-message-input">
             <div class="input-group d-flex justify-content-center">
                 <form class="mb-0" onsubmit="taro.chat.sendChatMessage(); return false" onkeydown="event.stopPropagation();">
                     <input type="text" class="form-control btn-sm" id="message" placeholder="Press Enter to send the message" />
@@ -48,10 +52,12 @@
 </div>
 
 <script>
-    // add enter key listener, if enter is pressed, set #chat-message-input to display: block
+    // the input box is always visible now, so Enter's job is just to focus it
+    // (matching Roblox: chat is always present, a key just gives it focus so
+    // you can start typing) - sending still happens via the form's onsubmit,
+    // triggered by pressing Enter a second time while focused.
     document.addEventListener('keydown', function(event) {
-        if (event.keyCode === 13) {
-            document.getElementById('chat-message-input').style.display = 'block';
+        if (event.keyCode === 13 && document.activeElement.id !== 'message') {
             setTimeout(() => {
                 document.getElementById('message').focus();
             }, 0);
