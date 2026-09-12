@@ -1,0 +1,11 @@
+{
+	"badges": [
+		{
+			"id": "example-badge",
+			"name": "Badge Name",
+			"description": "Badge description - replace this whole entry once you have a real badge to add. Add more objects to this array for more badges.",
+			"icon": "/assets/images/favicon.png",
+			"reward": "Reward"
+		}
+	]
+}
