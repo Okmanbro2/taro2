@@ -1003,7 +1003,6 @@ div#dev-console-table {
 
 #chat-message-input {
   width: 100%;
-  display: none;
 }
 
 /* Wraps the chat log and the input field together so they behave as one visual
