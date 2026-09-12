@@ -1,12 +1,6 @@
 <html lang="en">
 
 <script>
-  // Custom web fonts (used by canvas-rendered text - player labels, chat
-  // bubbles) need to be force-loaded via the FontFace API, since @font-face
-  // in CSS alone only downloads when the browser sees the font actually used
-  // by visible DOM text - canvas drawing doesn't count, so it would never
-  // trigger the download on its own.
-  //
   // window.customFontsReady is exposed so game boot (see client.js) can
   // explicitly await it before any rendering starts, instead of hoping the
   // fire-and-forget load finishes in time. It always resolves (never
@@ -325,6 +319,7 @@
             <%- include('templates/game-editor'); -%>
                 <%- include('templates/menu'); -%>
                     <%- include('templates/leaderboard'); -%>
+                    <%- include('templates/badges'); -%>
                     <%- include('templates/shop'); -%>
                         <%- include('templates/gui'); -%>
                             <%- include('templates/chat'); -%>
