@@ -190,17 +190,38 @@ var AIComponent = TaroEntity.extend({
 
 	// return distance with consideration of both units body radius
 	getDistanceToUnit: function (targetUnit) {
-	    var myUnit = this._entity;
-	    if (targetUnit) {
-	        var a = Math.abs(myUnit._translate.x - targetUnit._translate.x);
-	        var b = Math.abs(myUnit._translate.y - targetUnit._translate.y);
-	        var distanceFromCenter = Math.sqrt(a * a + b * b);
-	    }
+		var myUnit = this._entity;
 	
-	    var myUnitReach = Math.max(myUnit.width(), myUnit.height()) / 2;
-	    var targetUnitRadius = Math.max(targetUnit.width(), targetUnit.height()) / 2;
+		if (!targetUnit) {
+			return Infinity;
+		}
 	
-	    return distanceFromCenter - targetUnitRadius - myUnitReach;
+		var dx = targetUnit._translate.x - myUnit._translate.x;
+		var dy = targetUnit._translate.y - myUnit._translate.y;
+		var distanceFromCenter = Math.sqrt(dx * dx + dy * dy);
+	
+		if (distanceFromCenter === 0) {
+			return 0;
+		}
+	
+		// Gotta fix all yo damn scripts
+		var myBody = myUnit._stats.currentBody || {};
+		var targetBody = targetUnit._stats.currentBody || {};
+	
+		var myHalfWidth = (myBody.width || myUnit.width()) / 2;
+		var myHalfHeight = (myBody.height || myUnit.height()) / 2;
+	
+		var targetHalfWidth = (targetBody.width || targetUnit.width()) / 2;
+		var targetHalfHeight = (targetBody.height || targetUnit.height()) / 2;
+	
+		// Why couldn't you guys just keep modd up damn
+		var dirX = Math.abs(dx) / distanceFromCenter;
+		var dirY = Math.abs(dy) / distanceFromCenter;
+	
+		var myReach = myHalfWidth * dirX + myHalfHeight * dirY;
+		var targetReach = targetHalfWidth * dirX + targetHalfHeight * dirY;
+	
+		return distanceFromCenter - myReach - targetReach;
 	},
 
 	// return target position whether it's a unit or a position.
