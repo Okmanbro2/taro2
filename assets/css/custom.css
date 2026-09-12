@@ -1233,9 +1233,10 @@ div#dev-console-table {
 }
 
 /* chat input field */
-/* always visible now (see chat.ejs) - dim it until the player actually focuses
-   it, similar to how Roblox's chat box stays unobtrusive until you click into
-   it, rather than demanding attention the whole time it's on screen. */
+/* hidden by default (see chat.ejs's Enter-key listener) - once revealed, dim
+   it until the player actually focuses it, similar to how Roblox's chat box
+   stays unobtrusive until you click into it, rather than demanding attention
+   the whole time it's on screen. */
 #chat-message-input .input-group {
   background: var(--pvz-grass-transparent);
   border: 3px solid var(--pvz-grass-dark-transparent);
