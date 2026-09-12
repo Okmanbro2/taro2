@@ -5,14 +5,28 @@
 			"name": "Home Lawn Security",
 			"description": "In Normal Mode, defeat the Zombot 1.0 for the very first time and recieve your first win!",
 			"icon": "/assets/images/winBadge.png",
-			"reward": "2500 Coins"
+			"reward": "25 Gems"
+		},
+		{
+			"id": "win2-badge",
+			"name": "Certified Triumphant",
+			"description": "Obtain 20 wins!",
+			"icon": "/assets/images/goldBadge.png",
+			"reward": "75 Gems, 5000 Coins"
+		},
+		{
+			"id": "dave-badge",
+			"name": "What A CRAAAZY Deal!",
+			"description": "Purchase your very first plant in Crazy Dave's Twiddydinkies.",
+			"icon": "/assets/images/daveBadge.png",
+			"reward": "30 Gems"
 		},
 		{
 			"id": "zm-badge",
 			"name": "Brand New Recruit",
 			"description": "Unlock Zombie Mode.",
 			"icon": "/assets/images/zmBadge.png",
-			"reward": "2500 Coins"
+			"reward": "50 Gems"
 		}
 	]
 }
