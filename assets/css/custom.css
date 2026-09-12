@@ -1006,8 +1006,24 @@ div#dev-console-table {
   display: none;
 }
 
-#chat-input-field-div {
+/* Wraps the chat log and the input field together so they behave as one visual
+   unit anchored at bottom-left. column-reverse stacks the log (first DOM child)
+   at the bottom and the input (second DOM child) directly above it; when the log
+   is hidden, the input drops down to the bottom automatically. */
+#chat-stack {
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
   z-index: 2500;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+#chat-input-field-div {
+  width: 360px;
+  max-width: 90vw;
 }
 
 #change-server, #play-game-button .button-text {
@@ -1185,6 +1201,7 @@ div#dev-console-table {
 #chat-box {
   width: 360px;
   max-width: 90vw;
+  margin: 0;
 }
 
 #chat-history,
