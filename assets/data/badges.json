@@ -1,11 +1,18 @@
 {
 	"badges": [
 		{
-			"id": "example-badge",
-			"name": "Badge Name",
-			"description": "Testificate",
-			"icon": "/assets/images/favicon.png",
-			"reward": "Reward"
+			"id": "win-badge",
+			"name": "Home Lawn Security",
+			"description": "In Normal Mode, defeat the Zombot 1.0 for the very first time and recieve your first win!",
+			"icon": "/assets/images/winBadge.png",
+			"reward": "2500 Coins"
+		},
+		{
+			"id": "zm-badge",
+			"name": "Brand New Recruit",
+			"description": "Unlock Zombie Mode.",
+			"icon": "/assets/images/zmBadge.png",
+			"reward": "2500 Coins"
 		}
 	]
 }
