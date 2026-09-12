@@ -14,6 +14,13 @@
 			"icon": "/assets/images/goldBadge.png",
 			"reward": "75 Gems, 5000 Coins"
 		},
+			{
+			"id": "win3-badge",
+			"name": "Roam Overlord",
+			"description": "Obtain 100 wins!",
+			"icon": "/assets/images/diamondBadge.png",
+			"reward": "500 Gems, 10000 Coins"
+		},
 		{
 			"id": "dave-badge",
 			"name": "What A CRAAAZY Deal!",
@@ -27,6 +34,13 @@
 			"description": "Unlock Zombie Mode.",
 			"icon": "/assets/images/zmBadge.png",
 			"reward": "50 Gems"
+		},
+		{
+			"id": "zm-win-badge",
+			"name": "We R Viktorz",
+			"description": "As a Zombie, successfully defeat the Plants!",
+			"icon": "/assets/images/zmWinBadge.png",
+			"reward": "100 Gems"
 		}
 	]
 }
