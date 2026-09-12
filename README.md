@@ -1,6 +1,4 @@
-The Taro Engine was abandoned in late 2024 in favor of the brand new (and arguably worse, cryptoslop and ai-driven) indie.fun webspace. I, Okmanbro2, fixed, and repurposed this engine to host a single game.
-
-Why is copilot naming my commits
+The Taro Engine was abandoned in late 2024 as MODD.IO transitioned into becoming INDIE.FUN. Thanks to the engine being public, I fixed a lot of bugs and made it fit a single game.json.
 
 ## What's included in the box.
 
