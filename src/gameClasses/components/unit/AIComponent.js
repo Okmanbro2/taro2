@@ -190,17 +190,17 @@ var AIComponent = TaroEntity.extend({
 
 	// return distance with consideration of both units body radius
 	getDistanceToUnit: function (targetUnit) {
-		var myUnit = this._entity;
-		if (targetUnit) {
-			var a = Math.abs(myUnit._translate.x - targetUnit._translate.x);
-			var b = Math.abs(myUnit._translate.y - targetUnit._translate.y);
-			var distanceFromCenter = Math.sqrt(a * a + b * b);
-		}
-
-		var myUnitReach = myUnit.height() / 2;
-		var targetUnitRadius = targetUnit.width() / 2;
-
-		return distanceFromCenter - targetUnitRadius - myUnitReach;
+	    var myUnit = this._entity;
+	    if (targetUnit) {
+	        var a = Math.abs(myUnit._translate.x - targetUnit._translate.x);
+	        var b = Math.abs(myUnit._translate.y - targetUnit._translate.y);
+	        var distanceFromCenter = Math.sqrt(a * a + b * b);
+	    }
+	
+	    var myUnitReach = Math.max(myUnit.width(), myUnit.height()) / 2;
+	    var targetUnitRadius = Math.max(targetUnit.width(), targetUnit.height()) / 2;
+	
+	    return distanceFromCenter - targetUnitRadius - myUnitReach;
 	},
 
 	// return target position whether it's a unit or a position.
