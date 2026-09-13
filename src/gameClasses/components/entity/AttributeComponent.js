@@ -1,3 +1,45 @@
+// Attribute IDs that some badge's earn-condition depends on - checked in
+// AttributeComponent.update() below so live badge-checking (see
+// server/playerData.js's checkBadgesLive) can fire the instant one of these
+// actually changes, not just wait for the periodic/leave-triggered check.
+//
+// Must mirror server/badges.js's ATTR.COINS / ATTR.WINS / OWNED_FLAG_IDS -
+// duplicated here (rather than imported) because this file is shared/bundled
+// for both client and server, and badges.js reads a file off disk at
+// module-load time (fs.readFileSync), which would risk breaking the client
+// webpack build if required from here. If you add a badge whose condition
+// depends on a new attribute, add that attribute's ID to this Set too, or
+// it'll only get caught by the slower periodic/leave check instead of
+// instantly.
+//
+// A Set gives O(1) lookup regardless of how many IDs end up in here, and
+// this only ever runs for the already-small subset of attribute changes
+// that are (a) server-side and (b) on a player entity - see the _category
+// check below, which already filters out the much higher-volume unit
+// (zombie/plant) attribute traffic before this is ever consulted.
+var BADGE_TRACKED_ATTR_IDS = new Set([
+	'KAohfBnN6V', // Coins
+	'fKYSjs9Zw4', // Wins
+	'uqtQLGEAGX', // gatlingOwned
+	'6FrKxX6Ygo', // twinOwned
+	'fsrhxCzzqD', // catOwned
+	'JBknp1V5aL', // melonOwned
+	'C44OGCREy5', // cobOwned
+	'aauepP1xHO', // gloomOwned
+	'tBPNYeOFAS', // laserOwned
+	'8gkUs7TVc5', // superChompOwned
+	'Owx5FrfwnP', // electroOwned
+	'TbyWpHp58y', // fireOwned?
+	'7OE6e1Qlat', // goldmagnetOwned
+	'avftaCtZLb', // magnetOwned
+	'zO3WiVUa11', // imitaterOwned
+	'87egOJ5hse', // spikerockOwned
+	'1exjfklDVt', // podOwned?
+	'dtsojqdxHt', // peanutOwned?
+	'DmNvoAw11g', // reedOwned?
+	'SavKmfObPs', // explodnutOwned?
+]);
+
 var AttributeComponent = TaroEntity.extend({
 	classId: 'AttributeComponent',
 	componentId: 'attribute',
@@ -269,6 +311,26 @@ var AttributeComponent = TaroEntity.extend({
 				newValue = Math.max(min, Math.min(max, newValue));
 
 				self._entity._stats.attributes[attributeTypeId].value = newValue;
+
+				// Live badge checking - see BADGE_TRACKED_ATTR_IDS above for
+				// which attributes this covers and why. Most attribute
+				// changes (health, speed, etc, changing constantly during
+				// play) have nothing to do with badges and should never
+				// reach that far - see server/playerData.js's
+				// checkBadgesLive for the actual check, which uses an
+				// in-memory cache seeded on join (Player.js) rather than a
+				// Firestore read, so this stays cheap even during frequent
+				// gameplay.
+				if (
+					taro.isServer &&
+					newValue != oldValue &&
+					self._entity._category === 'player' &&
+					BADGE_TRACKED_ATTR_IDS.has(attributeTypeId) &&
+					taro.playerDataStore &&
+					taro.playerDataStore.checkBadgesLive
+				) {
+					taro.playerDataStore.checkBadgesLive(self._entity, attributeTypeId);
+				}
 
 				if (taro.isServer) {
 					if (newValue != oldValue || updateMin || updateMax) {
