@@ -267,7 +267,12 @@ var SoundComponent = TaroEntity.extend({
 							if (self.cachedAudioBuffer[sound.file].locked === false) {
 								let source = self.audioCtx.createBufferSource();
 								source.buffer = self.cachedAudioBuffer[sound.file].buffer;
-								source.playbackRate.value = 1 + Math.random() * 0.1;
+								// Preserve the existing 10% random pitch by default, but allow individual sounds
+										// to opt out with pitchRandomization: 0 or choose another amount.
+										var pitchRandomization = Number(sound.pitchRandomization);
+										if (!isFinite(pitchRandomization)) pitchRandomization = 0.1;
+										pitchRandomization = Math.max(0, pitchRandomization);
+										source.playbackRate.value = 1 + Math.random() * pitchRandomization;
 								let gainNode = self.audioCtx.createGain();
 								let voiceKey = sound.file;
 								if (!self.activeSoundVoices[voiceKey]) self.activeSoundVoices[voiceKey] = [];
