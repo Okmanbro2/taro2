@@ -39,7 +39,7 @@ const crypto = require('crypto');
 
 const GAME_JSON_PATH = path.join(__dirname, '..', 'src', 'game.json');
 const AUDIO_DIR = path.join(__dirname, '..', 'assets', 'audio');
-const LOCAL_URL_PREFIX = '/audio/';
+const LOCAL_URL_PREFIX = '/assets/audio/';
 
 const MAX_CONCURRENT_DOWNLOADS = 8;
 const DOWNLOAD_TIMEOUT_MS = 20_000;
