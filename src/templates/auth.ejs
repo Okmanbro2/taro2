@@ -391,6 +391,9 @@
 		// called directly above after signup / saving a username, so the UI
 		// updates immediately instead of waiting on the next auth-state event.
 		window.renderAuthUI = function (user) {
+			if (typeof window.refreshGemCounter === 'function') {
+				window.refreshGemCounter(user);
+			}
 			if (!user) {
 				showView('forms');
 				$email.value = '';
@@ -424,9 +427,15 @@
 		// need to know this widget's internal structure.
 		window.showAuthWidget = function () {
 			$widget.classList.remove('d-none-important');
+			if (typeof window.showGemCounter === 'function') {
+				window.showGemCounter();
+			}
 		};
 		window.hideAuthWidget = function () {
 			$widget.classList.add('d-none-important');
+			if (typeof window.hideGemCounter === 'function') {
+				window.hideGemCounter();
+			}
 		};
 	})();
 </script>
