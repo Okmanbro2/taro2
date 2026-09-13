@@ -1,0 +1,99 @@
+<style>
+	#gem-counter-widget {
+		position: absolute;
+		/* sits below #auth-widget's compact status view - nudge this if it
+		   ends up overlapping once you see it live, auth-widget's height
+		   varies slightly depending on its content */
+		top: 110px;
+		right: 12px;
+		z-index: 20;
+		display: flex;
+		align-items: center;
+		border-radius: 8px;
+		overflow: hidden;
+		background-color: #272e37e5;
+		color: #fff;
+		font-family: inherit;
+		font-size: 20px;
+		font-weight: bold;
+		pointer-events: none;
+	}
+
+	#gem-counter-widget #gc-label {
+		background-color: #fff;
+		color: #3b82f6;
+		font-weight: bold;
+		font-size: 13px;
+		padding: 4px 8px;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	#gem-counter-widget #gc-label img {
+		width: 14px;
+		height: 14px;
+	}
+
+	#gem-counter-widget #gc-value {
+		padding: 4px 10px;
+	}
+</style>
+
+<!-- menu-only, same visibility lifecycle as #auth-widget - hidden until
+     BOTH: on the menu (d-none-important, toggled by showGemCounter/
+     hideGemCounter below, called from auth.ejs's showAuthWidget/
+     hideAuthWidget) AND signed in (d-none, toggled by refreshGemCounter,
+     since Gems is an account-linked currency). -->
+<div id="gem-counter-widget" class="d-none d-none-important">
+	<span id="gc-label"><img src="/assets/images/gemcurrencyicon.png" alt="" />gem</span>
+	<span id="gc-value">0</span>
+</div>
+
+<script>
+	(function () {
+		var $widget = document.getElementById('gem-counter-widget');
+		var $value = document.getElementById('gc-value');
+
+		function authedFetch(url) {
+			return window.getFirebaseIdToken().then(function (idToken) {
+				return fetch(url, { headers: { Authorization: 'Bearer ' + idToken } }).then(function (res) {
+					return res.json().then(function (json) {
+						if (!res.ok) {
+							throw new Error(json.error || 'request failed');
+						}
+						return json;
+					});
+				});
+			});
+		}
+
+		// exposed so auth.ejs's renderAuthUI can call this whenever sign-in
+		// state changes (login, logout, page load) - guarded there with
+		// `window.refreshGemCounter &&` so include order doesn't matter
+		window.refreshGemCounter = function (user) {
+			if (!user) {
+				$widget.classList.add('d-none');
+				return;
+			}
+			authedFetch('/api/player-data')
+				.then(function (json) {
+					$value.textContent = (json.playerDoc && json.playerDoc.gems) || 0;
+					$widget.classList.remove('d-none');
+				})
+				.catch(function (err) {
+					console.log('gem counter: failed to load gems:', err.message);
+				});
+		};
+
+		// menu-only visibility - called from auth.ejs's showAuthWidget/
+		// hideAuthWidget so this follows the exact same lifecycle without
+		// client.js/MenuUiComponent.js needing to know this widget exists
+		window.showGemCounter = function () {
+			$widget.classList.remove('d-none-important');
+		};
+		window.hideGemCounter = function () {
+			$widget.classList.add('d-none-important');
+		};
+	})();
+</script>
