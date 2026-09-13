@@ -11,6 +11,7 @@ const {
 	getPlayerData,
 	savePlayerData,
 	savePersistedEntityData,
+	checkBadgesLive,
 	claimUsername,
 	UsernameTakenError,
 	getUidByUsername,
@@ -201,7 +202,7 @@ var Server = TaroClass.extend({
 		// exposes the local Firestore-backed player data store (server/playerData.js) on
 		// the shared `taro` global, so isomorphic gameClasses files (which can't use
 		// require()) can reach it - e.g. ActionComponent's 'savePlayerData' script action.
-		taro.playerDataStore = { getPlayerData, savePlayerData, savePersistedEntityData };
+		taro.playerDataStore = { getPlayerData, savePlayerData, savePersistedEntityData, checkBadgesLive };
 
 		self.keysToRemoveBeforeSend = [
 			'abilities',
