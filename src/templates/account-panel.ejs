@@ -89,6 +89,7 @@
 	<h5>Stats</h5>
 	<div class="ap-row"><span>Wins</span><b id="ap-stat-wins">—</b></div>
 	<div class="ap-row"><span>Coins</span><b id="ap-stat-coins">—</b></div>
+	<div class="ap-row"><span>Gems</span><b id="ap-stat-gems">—</b></div>
 
 	<h5>Technical</h5>
 	<div class="ap-hint">
@@ -123,6 +124,7 @@
 		var $username = document.getElementById('ap-username');
 		var $statWins = document.getElementById('ap-stat-wins');
 		var $statCoins = document.getElementById('ap-stat-coins');
+		var $statGems = document.getElementById('ap-stat-gems');
 		var $closeBtn = document.getElementById('ap-close-btn');
 
 		var $importTextarea = document.getElementById('ap-import-textarea');
@@ -181,8 +183,13 @@
 					var attributes = json.playerDoc && json.playerDoc.data && json.playerDoc.data.player && json.playerDoc.data.player.attributes;
 					var wins = findAttributeValueByName(attributes, 'Wins');
 					var coins = findAttributeValueByName(attributes, 'Coins');
+					// gems is a top-level field on the player doc, not an in-game
+					// attribute (see badges.js/playerData.js) - read it directly
+					// rather than through findAttributeValueByName
+					var gems = (json.playerDoc && json.playerDoc.gems) || 0;
 					$statWins.textContent = wins === null || wins === undefined ? '—' : wins;
 					$statCoins.textContent = coins === null || coins === undefined ? '—' : coins;
+					$statGems.textContent = gems;
 				})
 				.catch(function (err) {
 					console.log('account panel: failed to load stats:', err.message);
