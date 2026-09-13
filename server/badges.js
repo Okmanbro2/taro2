@@ -41,6 +41,12 @@ function getBadgeDisplayInfo(badgeId) {
 const ATTR = {
 	WINS: 'fKYSjs9Zw4',
 	COINS: 'KAohfBnN6V',
+	// flipped to 1 the moment a player successfully joins Zomboss's
+	// Zomburbia for the first time (see the "join zombie mode" script,
+	// Q3UGCz57ya, right where the zombie unit gets created for them) -
+	// starts at 0 for every player type that can hold it, same as the
+	// other "<x>Won?"-style achievement flags.
+	ZOMBIE_MODE_UNLOCKED: 'zM4hVwsPQ7',
 };
 
 // every "<plant>Owned?" boolean player attribute in the game
@@ -96,7 +102,12 @@ const BADGE_DEFS = {
 		check: (attrs) => (attrValue(attrs, ATTR.COINS) || 0) >= 100000,
 		rewardGems: 100,
 	},
-	// zm-badge (50 Gems) / zm-win-badge (100 Gems) per badges.json
+	'zm-badge': {
+		check: (attrs) => !!attrValue(attrs, ATTR.ZOMBIE_MODE_UNLOCKED),
+		rewardGems: 50,
+	},
+	// zm-win-badge (100 Gems) still deferred until "win a round as a
+	// Zombie" has its own tracked flag, per badges.json
 };
 
 // returns { badges: <updated badges map>, newlyAwarded: [ids], coinsEarned, gemsEarned }
