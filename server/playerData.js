@@ -95,11 +95,11 @@ async function savePlayerData(uid, data) {
 // Also the one spot badge-earning gets checked: every time a fresh player
 // attributes snapshot comes in from the game server, we diff it against
 // whatever badges are already recorded and award any newly-earned ones (see
-// badges.js - only win-badge/win2-badge/win3-badge/coin-badge/dave-badge are
-// wired up so far). Coin rewards, where a badge has one, are applied
-// directly onto the attributes snapshot before it's saved, the same way
-// Coins are stored the rest of the time - there's no separate currency
-// ledger to touch.
+// badges.js). Coin rewards, where a badge has one, are applied directly onto
+// the attributes snapshot before it's saved, the same way Coins are stored
+// the rest of the time. Gem rewards go onto a separate top-level `gems`
+// field on the player doc instead (see checkAndAwardBadges's gemsEarned) -
+// Gems isn't an in-game attribute, so it doesn't belong inside data.player.
 //
 // notifyBadgesUnlocked pushes the live achievement-toast event (see
 // gameClasses/ClientNetworkEvents.js's 'achievementUnlocked' ui case and
@@ -135,7 +135,7 @@ async function savePersistedEntityData(uid, { player, unit } = {}) {
 	if (player !== undefined) {
 		if (player.attributes) {
 			const existing = await getPlayerData(uid);
-			const { badges, newlyAwarded, coinsEarned } = checkAndAwardBadges(
+			const { badges, newlyAwarded, coinsEarned, gemsEarned } = checkAndAwardBadges(
 				(existing && existing.badges) || {},
 				player.attributes
 			);
@@ -146,6 +146,10 @@ async function savePersistedEntityData(uid, { player, unit } = {}) {
 				}
 				data.badges = badges;
 				mergeFields.push(new admin.firestore.FieldPath('badges'));
+				if (gemsEarned > 0) {
+					data.gems = ((existing && existing.gems) || 0) + gemsEarned;
+					mergeFields.push(new admin.firestore.FieldPath('gems'));
+				}
 				notifyBadgesUnlocked(uid, newlyAwarded);
 			}
 		}
