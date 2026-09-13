@@ -384,6 +384,27 @@ var PhysicsComponent = TaroEventingClass.extend({
 						case 'createBody':
 							self.createBody(action.entity, action.def);
 
+							// Apply initial velocity after the body exists and before the next
+							// physics step, avoiding a race with the entity action queue.
+							if (
+								action.def.initialVelocity &&
+								action.entity &&
+								action.entity.hasPhysicsBody()
+							) {
+								const initialVelocity = action.def.initialVelocity;
+								switch (initialVelocity.deployMethod) {
+									case 'applyForce':
+										action.entity.applyForceLT(initialVelocity.x, initialVelocity.y);
+										break;
+									case 'applyImpulse':
+										action.entity.applyImpulseLT(initialVelocity.x, initialVelocity.y);
+										break;
+									case 'setVelocity':
+									default:
+										action.entity.setLinearVelocityLT(initialVelocity.x, initialVelocity.y);
+							}
+							}
+
 							// emit events for updating visibility mask
 							if (taro.isClient && action.entity._category === 'unit' && action.def.type === 'static') {
 								taro.client.emit('update-static-units');
