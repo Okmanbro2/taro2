@@ -971,6 +971,19 @@ var Player = TaroEntity.extend({
 		var self = this;
 
 		var persistData = rfdc()(self.persistedData);
+
+		// Seed the in-memory badge cache BEFORE attribute restoration below -
+		// restoring Coins/Wins routes through AttributeComponent.update(),
+		// which now does a live badge check against this cache (see that
+		// file + server/playerData.js's checkBadgesLive). It needs to already
+		// reflect badges this player actually has, not start out empty, or a
+		// returning player could look like they're earning badges they
+		// already own. Free - persistData is already the full Firestore doc
+		// fetched for this join, badges included, no extra read needed.
+		if (taro.isServer) {
+			self._badgeCache = (persistData && persistData.badges) || {};
+		}
+
 		if (persistData && persistData.data && persistData.data.player) {
 			TaroEntity.prototype.loadPersistentData.call(this, persistData.data.player);
 		}
