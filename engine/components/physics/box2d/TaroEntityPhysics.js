@@ -152,9 +152,32 @@ var TaroEntityPhysics = TaroEntity.extend({
 			],
 		};
 
+		// Keep initial velocity attached to body creation so it cannot be lost between
+		// the entity being created and its physics body becoming available.
+		if (defaultData?.velocity && !isNaN(defaultData.velocity.x) && !isNaN(defaultData.velocity.y)) {
+			bodyDef.initialVelocity = {
+				x: defaultData.velocity.x,
+				y: defaultData.velocity.y,
+				deployMethod: defaultData.velocity.deployMethod,
+			};
+		}
+
 		if (taro.physics) {
 			if (isLossTolerant) {
 				taro.physics.createBody(this, bodyDef, isLossTolerant);
+				if (bodyDef.initialVelocity) {
+					switch (bodyDef.initialVelocity.deployMethod) {
+						case 'applyForce':
+							this.applyForceLT(bodyDef.initialVelocity.x, bodyDef.initialVelocity.y);
+							break;
+						case 'applyImpulse':
+							this.applyImpulseLT(bodyDef.initialVelocity.x, bodyDef.initialVelocity.y);
+							break;
+						case 'setVelocity':
+						default:
+							this.setLinearVelocityLT(bodyDef.initialVelocity.x, bodyDef.initialVelocity.y);
+					}
+				}
 			} else {
 				this.destroyBody();
 				taro.physics.queueAction({ type: 'createBody', entity: this, def: bodyDef });
@@ -179,22 +202,6 @@ var TaroEntityPhysics = TaroEntity.extend({
 				this.teleportTo(x, y, rotate);
 			}
 
-			// immediately apply speed if assigned
-			if (defaultData.velocity && !isNaN(defaultData.velocity.x) && !isNaN(defaultData.velocity.y)) {
-				switch (defaultData.velocity.deployMethod) {
-					case 'applyForce':
-						this.applyForce(defaultData.velocity.x, defaultData.velocity.y);
-						break;
-					case 'applyImpulse':
-						this.applyImpulse(defaultData.velocity.x, defaultData.velocity.y);
-						break;
-
-					case 'setVelocity':
-					default:
-						this.setLinearVelocity(defaultData.velocity.x, defaultData.velocity.y, 0, isLossTolerant);
-						break;
-				}
-			}
 		}
 	},
 
