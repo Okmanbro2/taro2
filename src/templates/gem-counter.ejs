@@ -1,42 +1,28 @@
 <style>
 	#gem-counter-widget {
 		position: absolute;
-		/* sits below #auth-widget's compact status view - nudge this if it
-		   ends up overlapping once you see it live, auth-widget's height
-		   varies slightly depending on its content */
-		top: 110px;
+		/* top is set dynamically in JS below, based on #auth-widget's actual
+		   rendered height (which changes between the login form and the
+		   signed-in status view) - a hardcoded guess landed either stacked on
+		   top of the account widget or with an awkward gap depending on state */
 		right: 12px;
 		z-index: 20;
 		display: flex;
 		align-items: center;
+		gap: 8px;
+		padding: 8px 12px;
 		border-radius: 8px;
-		overflow: hidden;
 		background-color: #272e37e5;
 		color: #fff;
 		font-family: inherit;
-		font-size: 20px;
+		font-size: 18px;
 		font-weight: bold;
 		pointer-events: none;
 	}
 
-	#gem-counter-widget #gc-label {
-		background-color: #fff;
-		color: #3b82f6;
-		font-weight: bold;
-		font-size: 13px;
-		padding: 4px 8px;
-		display: flex;
-		align-items: center;
-		gap: 4px;
-	}
-
-	#gem-counter-widget #gc-label img {
-		width: 14px;
-		height: 14px;
-	}
-
-	#gem-counter-widget #gc-value {
-		padding: 4px 10px;
+	#gem-counter-widget img {
+		width: 20px;
+		height: 20px;
 	}
 </style>
 
@@ -46,7 +32,7 @@
      hideAuthWidget) AND signed in (d-none, toggled by refreshGemCounter,
      since Gems is an account-linked currency). -->
 <div id="gem-counter-widget" class="d-none d-none-important">
-	<span id="gc-label"><img src="/assets/images/gemcurrencyicon.png" alt="" />gem</span>
+	<img src="/assets/images/gemcurrencyicon.png" alt="" />
 	<span id="gc-value">0</span>
 </div>
 
@@ -68,10 +54,22 @@
 			});
 		}
 
+		// #auth-widget's height changes depending on what it's showing (login
+		// form vs signed-in status vs "pick a username"), so a fixed offset
+		// can't reliably sit just below it in every state - measure its real
+		// rendered position instead and place this widget 8px under that.
+		function repositionBelowAuthWidget() {
+			var $authWidget = document.getElementById('auth-widget');
+			if (!$authWidget) return;
+			var rect = $authWidget.getBoundingClientRect();
+			$widget.style.top = rect.bottom + 8 + 'px';
+		}
+
 		// exposed so auth.ejs's renderAuthUI can call this whenever sign-in
 		// state changes (login, logout, page load) - guarded there with
 		// `window.refreshGemCounter &&` so include order doesn't matter
 		window.refreshGemCounter = function (user) {
+			repositionBelowAuthWidget();
 			if (!user) {
 				$widget.classList.add('d-none');
 				return;
@@ -80,6 +78,7 @@
 				.then(function (json) {
 					$value.textContent = (json.playerDoc && json.playerDoc.gems) || 0;
 					$widget.classList.remove('d-none');
+					repositionBelowAuthWidget(); // auth-widget's height just changed too
 				})
 				.catch(function (err) {
 					console.log('gem counter: failed to load gems:', err.message);
@@ -91,6 +90,7 @@
 		// client.js/MenuUiComponent.js needing to know this widget exists
 		window.showGemCounter = function () {
 			$widget.classList.remove('d-none-important');
+			repositionBelowAuthWidget();
 		};
 		window.hideGemCounter = function () {
 			$widget.classList.add('d-none-important');
