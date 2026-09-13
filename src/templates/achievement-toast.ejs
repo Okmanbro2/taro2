@@ -1,9 +1,9 @@
 <style>
 	#pvz-achievement-toast-container {
 		position: fixed;
-		top: 16px;
-		right: 16px;
-		z-index: 10600; /* above the badges modal / menu, visible during gameplay too */
+		top: 14px;
+		left: 14px;
+		z-index: 10600;
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
@@ -11,19 +11,21 @@
 	}
 
 	.pvz-achievement-toast {
+		box-sizing: border-box;
 		display: flex;
 		align-items: center;
 		gap: 12px;
-		width: 320px;
-		background: linear-gradient(135deg, #2f7d32, #1f5a22);
-		border: 3px solid #ffd700;
-		border-radius: 10px;
-		padding: 10px 14px;
-		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-		color: #fff;
-		font-family: inherit;
-		transform: translateX(120%);
-		transition: transform 0.4s ease-out;
+		width: 490px;
+		max-width: calc(100vw - 28px);
+		min-height: 72px;
+		background: #5c9d2f;
+		border: none;
+		border-radius: 0 20px 20px 0;
+		padding: 8px 14px 8px 8px;
+		box-shadow: 0 5px 14px rgba(0, 0, 0, 0.28);
+		font-family: 'Brianne\'s Hand', cursive;
+		transform: translateX(-110%);
+		transition: transform 0.35s ease-out;
 	}
 
 	.pvz-achievement-toast--visible {
@@ -31,44 +33,60 @@
 	}
 
 	.pvz-achievement-toast-icon {
-		width: 48px;
-		height: 48px;
-		flex-shrink: 0;
-		border-radius: 6px;
-		background: #fff;
+		width: 56px;
+		height: 56px;
+		flex: 0 0 56px;
+		border-radius: 5px;
+		background: transparent;
 		object-fit: contain;
 	}
 
 	.pvz-achievement-toast-body {
+		position: relative;
 		min-width: 0;
 		flex: 1;
-	}
-
-	.pvz-achievement-toast-title {
-		font-size: 11px;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		color: #ffd700;
-		font-weight: 700;
-		margin: 0 0 2px 0;
+		padding-right: 96px;
 	}
 
 	.pvz-achievement-toast-name {
-		font-size: 15px;
-		font-weight: 700;
-		margin: 0 0 2px 0;
+		font-family: 'House of Terror', sans-serif;
+		font-size: 17px;
+		line-height: 1.05;
+		color: #fff;
+		text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.18);
+		margin: 0 0 4px 0;
 	}
 
 	.pvz-achievement-toast-desc {
+		font-family: 'Brianne\'s Hand', cursive;
 		font-size: 12px;
-		opacity: 0.9;
-		margin: 0 0 2px 0;
+		line-height: 1.1;
+		color: #fff;
+		margin: 0;
 	}
 
 	.pvz-achievement-toast-reward {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		font-family: 'Brianne\'s Hand', cursive;
 		font-size: 11px;
-		color: #ffe57a;
+		line-height: 1;
+		color: #f8d34e;
+		white-space: nowrap;
 		margin: 0;
+	}
+
+	@media (max-width: 560px) {
+		#pvz-achievement-toast-container {
+			top: 8px;
+			left: 8px;
+		}
+
+		.pvz-achievement-toast {
+			width: calc(100vw - 16px);
+			border-radius: 0 14px 14px 0;
+		}
 	}
 </style>
 
@@ -79,7 +97,7 @@
 		var $container = document.getElementById('pvz-achievement-toast-container');
 		var queue = [];
 		var isShowing = false;
-		var VISIBLE_MS = 2000;
+		var VISIBLE_MS = 2600;
 		var SLIDE_MS = 400;
 
 		function showNext() {
@@ -100,15 +118,10 @@
 			var $body = document.createElement('div');
 			$body.className = 'pvz-achievement-toast-body';
 
-			var $title = document.createElement('p');
-			$title.className = 'pvz-achievement-toast-title';
-			$title.textContent = 'Achievement Unlocked!';
-
 			var $name = document.createElement('p');
 			$name.className = 'pvz-achievement-toast-name';
 			$name.textContent = badge.name || 'Badge';
 
-			$body.appendChild($title);
 			$body.appendChild($name);
 
 			if (badge.description) {
