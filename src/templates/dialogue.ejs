@@ -97,6 +97,11 @@
     $('.dialogue-option') && $('.dialogue-option').removeClass('d-none');
 
     var letterPrintSpeed = {{ternary dialogue.letterPrintSpeed dialogue.letterPrintSpeed 0}};
+    // the message text to type out - it's already sitting in #modd-dialogue-message
+    // (rendered via {{dialogue.message}} in the template above), but that element
+    // gets cleared below before typing starts, so it has to be captured into a real
+    // variable first rather than referenced by a bare, never-declared `message`.
+    var message = {{{json dialogue.message}}};
 
     var messageHeight = $('#modd-dialogue-message').innerHeight();
     $('#modd-dialogue-message').css('min-height', messageHeight);
