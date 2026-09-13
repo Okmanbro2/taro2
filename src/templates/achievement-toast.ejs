@@ -1,0 +1,174 @@
+<style>
+	#pvz-achievement-toast-container {
+		position: fixed;
+		top: 16px;
+		right: 16px;
+		z-index: 10600; /* above the badges modal / menu, visible during gameplay too */
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		pointer-events: none;
+	}
+
+	.pvz-achievement-toast {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		width: 320px;
+		background: linear-gradient(135deg, #2f7d32, #1f5a22);
+		border: 3px solid #ffd700;
+		border-radius: 10px;
+		padding: 10px 14px;
+		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+		color: #fff;
+		font-family: inherit;
+		transform: translateX(120%);
+		transition: transform 0.4s ease-out;
+	}
+
+	.pvz-achievement-toast--visible {
+		transform: translateX(0);
+	}
+
+	.pvz-achievement-toast-icon {
+		width: 48px;
+		height: 48px;
+		flex-shrink: 0;
+		border-radius: 6px;
+		background: #fff;
+		object-fit: contain;
+	}
+
+	.pvz-achievement-toast-body {
+		min-width: 0;
+		flex: 1;
+	}
+
+	.pvz-achievement-toast-title {
+		font-size: 11px;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: #ffd700;
+		font-weight: 700;
+		margin: 0 0 2px 0;
+	}
+
+	.pvz-achievement-toast-name {
+		font-size: 15px;
+		font-weight: 700;
+		margin: 0 0 2px 0;
+	}
+
+	.pvz-achievement-toast-desc {
+		font-size: 12px;
+		opacity: 0.9;
+		margin: 0 0 2px 0;
+	}
+
+	.pvz-achievement-toast-reward {
+		font-size: 11px;
+		color: #ffe57a;
+		margin: 0;
+	}
+</style>
+
+<div id="pvz-achievement-toast-container"></div>
+
+<script>
+	(function () {
+		var $container = document.getElementById('pvz-achievement-toast-container');
+		var queue = [];
+		var isShowing = false;
+		var VISIBLE_MS = 2000;
+		var SLIDE_MS = 400;
+
+		function showNext() {
+			if (isShowing || queue.length === 0) {
+				return;
+			}
+			isShowing = true;
+			var badge = queue.shift();
+
+			var $toast = document.createElement('div');
+			$toast.className = 'pvz-achievement-toast';
+
+			var $icon = document.createElement('img');
+			$icon.className = 'pvz-achievement-toast-icon';
+			$icon.src = badge.icon || '/assets/images/favicon.png';
+			$icon.alt = badge.name || 'Badge';
+
+			var $body = document.createElement('div');
+			$body.className = 'pvz-achievement-toast-body';
+
+			var $title = document.createElement('p');
+			$title.className = 'pvz-achievement-toast-title';
+			$title.textContent = 'Achievement Unlocked!';
+
+			var $name = document.createElement('p');
+			$name.className = 'pvz-achievement-toast-name';
+			$name.textContent = badge.name || 'Badge';
+
+			$body.appendChild($title);
+			$body.appendChild($name);
+
+			if (badge.description) {
+				var $desc = document.createElement('p');
+				$desc.className = 'pvz-achievement-toast-desc';
+				$desc.textContent = badge.description;
+				$body.appendChild($desc);
+			}
+
+			if (badge.reward) {
+				var $reward = document.createElement('p');
+				$reward.className = 'pvz-achievement-toast-reward';
+				$reward.textContent = 'Reward: ' + badge.reward;
+				$body.appendChild($reward);
+			}
+
+			$toast.appendChild($icon);
+			$toast.appendChild($body);
+			$container.appendChild($toast);
+
+			// play the achievement sound the same way other one-off client
+			// sounds are played in this codebase - a plain <audio> element,
+			// independent of the in-game sound/music toggle since this is a
+			// meta/account-level event, not a gameplay sound effect.
+			try {
+				var audio = new Audio('/assets/audio/achievement.mp3');
+				audio.play().catch(function () {});
+			} catch (e) {}
+
+			// slide in from the right
+			requestAnimationFrame(function () {
+				requestAnimationFrame(function () {
+					$toast.classList.add('pvz-achievement-toast--visible');
+				});
+			});
+
+			setTimeout(function () {
+				$toast.classList.remove('pvz-achievement-toast--visible');
+				setTimeout(function () {
+					$toast.remove();
+					isShowing = false;
+					showNext();
+				}, SLIDE_MS);
+			}, VISIBLE_MS);
+		}
+
+		// public entry point - accepts either a single badge object or an
+		// array of them (server sends one push per save, but that push can
+		// contain more than one newly-earned badge at once). each badge is
+		// { id, name, description, icon, reward }. multiple calls (or a
+		// multi-badge array) queue up and stack one after another rather
+		// than overlapping.
+		window.showAchievementToast = function (badgeOrBadges) {
+			var badges = Array.isArray(badgeOrBadges) ? badgeOrBadges : [badgeOrBadges];
+			badges.forEach(function (badge) {
+				if (badge) {
+					queue.push(badge);
+				}
+			});
+			showNext();
+		};
+	})();
+</script>

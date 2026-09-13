@@ -298,6 +298,16 @@ var ClientNetworkEvents = {
 	_onUi: function (data) {
 		const runAction = functionalTryCatch(() => {
 			switch (data.command) {
+				case 'achievementUnlocked':
+					// pushed from playerData.js's checkAndAwardBadges (see server/badges.js)
+					// the moment a badge is newly earned - shows regardless of whether the
+					// player is on the menu or in an active game, since the toast markup in
+					// templates/achievement-toast.ejs is mounted once on the outer page.
+					if (typeof window.showAchievementToast === 'function' && data.badges) {
+						window.showAchievementToast(data.badges);
+					}
+					break;
+
 				case 'openItemShop':
 					taro.shop.openModdShop('item');
 					break;

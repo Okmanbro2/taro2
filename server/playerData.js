@@ -5,6 +5,13 @@ const admin = require('./firebaseAdmin');
 const { db } = admin;
 const fs = require('fs');
 const path = require('path');
+const { checkAndAwardBadges, getBadgeDisplayInfo } = require('./badges');
+
+// same Coins attribute id used throughout this file (see IMPORT_VALUE_CAPS
+// below) - pulled out as its own constant here since savePersistedEntityData
+// needs it directly to apply badge coin rewards onto a fresh attributes
+// snapshot before it's saved.
+const COINS_ATTR_ID = 'KAohfBnN6V';
 
 // stuuuff
 //
@@ -84,11 +91,64 @@ async function savePlayerData(uid, data) {
 // the nested data.player / data.unit maps wholesale on each save, which is
 // what we want here since getPersistentData() already returns a complete,
 // self-contained snapshot each time - not a partial diff to deep-merge.
+//
+// Also the one spot badge-earning gets checked: every time a fresh player
+// attributes snapshot comes in from the game server, we diff it against
+// whatever badges are already recorded and award any newly-earned ones (see
+// badges.js - only win-badge/win2-badge/win3-badge/coin-badge/dave-badge are
+// wired up so far). Coin rewards, where a badge has one, are applied
+// directly onto the attributes snapshot before it's saved, the same way
+// Coins are stored the rest of the time - there's no separate currency
+// ledger to touch.
+//
+// notifyBadgesUnlocked pushes the live achievement-toast event (see
+// gameClasses/ClientNetworkEvents.js's 'achievementUnlocked' ui case and
+// templates/achievement-toast.ejs) to the player's connected client, the same
+// way sendChatMessageToPlayer / the shop / sound actions push to one client:
+// taro.network.send(eventName, data, clientId). This assumes `taro` is
+// reachable as a bare global from this module the same way it already is in
+// server.js (taro.playerDataStore = ...) - if that assumption is wrong in
+// this deployment, the try/catch below just means the toast silently doesn't
+// fire while badge saving/awarding itself is unaffected. Worth confirming
+// against a live badge unlock the first time.
+function notifyBadgesUnlocked(uid, newlyAwarded) {
+	try {
+		if (typeof taro === 'undefined' || !taro.network || !taro.$$) return;
+		const player = taro
+			.$$('player')
+			.find((p) => p._stats && (p._stats.userId === uid || p._stats.guestUserId === uid));
+		if (!player || !player._stats.clientId) return;
+
+		const badgesForToast = newlyAwarded.map((id) => getBadgeDisplayInfo(id)).filter(Boolean);
+		if (badgesForToast.length === 0) return;
+
+		taro.network.send('ui', { command: 'achievementUnlocked', badges: badgesForToast }, player._stats.clientId);
+	} catch (err) {
+		console.error('notifyBadgesUnlocked failed', err);
+	}
+}
+
 async function savePersistedEntityData(uid, { player, unit } = {}) {
 	const data = { data: {} };
 	const mergeFields = [];
 
 	if (player !== undefined) {
+		if (player.attributes) {
+			const existing = await getPlayerData(uid);
+			const { badges, newlyAwarded, coinsEarned } = checkAndAwardBadges(
+				(existing && existing.badges) || {},
+				player.attributes
+			);
+			if (newlyAwarded.length > 0) {
+				if (coinsEarned > 0 && player.attributes[COINS_ATTR_ID]) {
+					player.attributes[COINS_ATTR_ID].value =
+						(player.attributes[COINS_ATTR_ID].value || 0) + coinsEarned;
+				}
+				data.badges = badges;
+				mergeFields.push(new admin.firestore.FieldPath('badges'));
+				notifyBadgesUnlocked(uid, newlyAwarded);
+			}
+		}
 		data.data.player = player;
 		mergeFields.push(new admin.firestore.FieldPath('data', 'player'));
 	}

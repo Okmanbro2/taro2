@@ -9,7 +9,20 @@ var SoundComponent = TaroEntity.extend({
 		self.preLoadedSounds = {};
 		self.preLoadedMusic = {};
 		self.cachedAudioBuffer = {};
+		self.activeSoundVoices = {};
 		self.audioCtx = taro.isClient ? new (window.AudioContext || window.webkitAudioContext)() : null;
+		self.sfxMasterGain = taro.isClient ? self.audioCtx.createGain() : null;
+		self.sfxCompressor = taro.isClient ? self.audioCtx.createDynamicsCompressor() : null;
+		if (self.sfxMasterGain && self.sfxCompressor) {
+			self.sfxMasterGain.gain.value = 1;
+			self.sfxCompressor.threshold.value = -8;
+			self.sfxCompressor.knee.value = 18;
+			self.sfxCompressor.ratio.value = 4;
+			self.sfxCompressor.attack.value = 0.003;
+			self.sfxCompressor.release.value = 0.12;
+			self.sfxMasterGain.connect(self.sfxCompressor);
+			self.sfxCompressor.connect(self.audioCtx.destination);
+		}
 		if (taro.isClient) {
 			var soundSetting = self.getItem('sound');
 			var musicSetting = self.getItem('music');
@@ -256,11 +269,32 @@ var SoundComponent = TaroEntity.extend({
 								source.buffer = self.cachedAudioBuffer[sound.file].buffer;
 								source.playbackRate.value = 1 + Math.random() * 0.1;
 								let gainNode = self.audioCtx.createGain();
-								gainNode.gain.value = volume;
+								let voiceKey = sound.file;
+								if (!self.activeSoundVoices[voiceKey]) self.activeSoundVoices[voiceKey] = [];
+								let activeVoices = self.activeSoundVoices[voiceKey];
+								let voice = { source: source, gainNode: gainNode, volume: volume };
+								activeVoices.push(voice);
+
+								// Preserve every sound event, but distribute loudness across simultaneous copies.
+								let attenuation = 1 / Math.sqrt(activeVoices.length);
+								for (let i = 0; i < activeVoices.length; i++) {
+									activeVoices[i].gainNode.gain.value = activeVoices[i].volume * attenuation;
+								}
+
 								source.connect(gainNode);
-								gainNode.connect(self.audioCtx.destination);
+								gainNode.connect(self.sfxMasterGain || self.audioCtx.destination);
 								source.start();
 								source.addEventListener('ended', function () {
+									let index = activeVoices.indexOf(voice);
+									if (index !== -1) activeVoices.splice(index, 1);
+									if (activeVoices.length > 0) {
+										let newAttenuation = 1 / Math.sqrt(activeVoices.length);
+										for (let i = 0; i < activeVoices.length; i++) {
+											activeVoices[i].gainNode.gain.value = activeVoices[i].volume * newAttenuation;
+										}
+									} else {
+										delete self.activeSoundVoices[voiceKey];
+									}
 									source = null;
 									gainNode = null;
 								});

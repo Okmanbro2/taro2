@@ -1,13 +1,21 @@
 {
-	"version": "3.4.1",
+	"version": "3.5.0",
 	"entries": [
 		{
-			"title": "Mainly, bug fixes.",
-			"description": "That's honestly what this entire patch is about. Really - it's all bug fixes. Hopefully you can expect brand new content soon, I'm really working hard on this brand new editor. Just keep waiting- good things come from patience!"
+			"title": "A Badge For You, Sir!",
+			"description": "Added badges! Big feature - more badges are to come and be obtained soon!"
 		},
 		{
-			"title": "Removed HorrorModeGlitch.js",
-			"description": "Removed HorrorModeGlitch.js"
-		}
+			"title": "The Great Migration 3",
+			"description": "Migrated all sounds to load locally on the github - if sounds experience issues, contact @thw0k or @.footsoldier on the Plants vs. Zombies: Roam Discord Server!"
+		},
+		{
+			"title": "Nice On My Ears!",
+			"description": "Following TGM3, edited SoundComponent to deal with duplicate sounds playing."
+		},
+		{
+			"title": "New Content(?)",
+			"description": "Stay tuned! You might see a new plant here and there."
+		},
 	]
 }
