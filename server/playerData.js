@@ -128,6 +128,57 @@ function notifyBadgesUnlocked(uid, newlyAwarded) {
 	}
 }
 
+// Real-time badge checking, hooked from AttributeComponent.js whenever a
+// player's Coins/Wins attribute actually changes value. Uses the in-memory
+// badge cache seeded on join (see Player.js's loadPersistentData) instead of
+// reading Firestore here, so this stays cheap even during frequent gameplay
+// (many coin pickups per second, across many players) - by far the common
+// case (nothing newly earned) costs a few in-memory comparisons and nothing
+// else. A Firestore write only happens on the rare event a badge is newly
+// earned, and it's a small merge (badges + a gems increment) - not the full
+// attributes/variables/quests blob savePersistedEntityData writes.
+//
+// This runs ALONGSIDE the existing badge-check inside savePersistedEntityData
+// (still triggered every 2 minutes + on leave) rather than replacing it -
+// that slower path re-reads badges fresh from Firestore each time, so it's a
+// harmless safety net (catches anything this path might miss) rather than a
+// source of double-awarding; checkAndAwardBadges only ever grants a badge
+// once regardless of which path notices it first.
+function checkBadgesLive(player, changedAttrId) {
+	if (!player || !player._stats) return;
+	const userId = player._stats.userId || player._stats.guestUserId;
+	if (!userId) return; // no account to save a badge onto
+
+	const knownBadges = player._badgeCache || {};
+	const { badges, newlyAwarded, coinsEarned, gemsEarned } = checkAndAwardBadges(knownBadges, player._stats.attributes);
+
+	if (newlyAwarded.length === 0) return; // the common case - nothing further to do
+
+	player._badgeCache = badges; // keep the in-memory cache in sync for next time
+
+	if (coinsEarned > 0 && player._stats.attributes[COINS_ATTR_ID]) {
+		const newCoins = (player._stats.attributes[COINS_ATTR_ID].value || 0) + coinsEarned;
+		// routes back through AttributeComponent.update() - safe against
+		// infinite recursion, since checkAndAwardBadges skips already-owned
+		// badges, so any further recursive call can only ever award badges
+		// that are still new, which is bounded by the fixed badge count.
+		player.attribute.update(COINS_ATTR_ID, newCoins);
+	}
+
+	const update = { badges };
+	if (gemsEarned > 0) {
+		// atomic increment - avoids needing to read the current gems value
+		// first (which would mean a Firestore read on every badge earned)
+		update.gems = admin.firestore.FieldValue.increment(gemsEarned);
+	}
+
+	db.collection('players')
+		.doc(userId)
+		.set(update, { merge: true })
+		.then(() => notifyBadgesUnlocked(userId, newlyAwarded))
+		.catch((err) => console.log('checkBadgesLive: failed to save badges for', userId, err.message));
+}
+
 async function savePersistedEntityData(uid, { player, unit } = {}) {
 	const data = { data: {} };
 	const mergeFields = [];
@@ -463,6 +514,7 @@ module.exports = {
 	getPlayerData,
 	savePlayerData,
 	savePersistedEntityData,
+	checkBadgesLive,
 	claimUsername,
 	UsernameTakenError,
 	getUidByUsername,
