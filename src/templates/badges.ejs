@@ -176,7 +176,18 @@
 		var $list = document.getElementById('pvz-badges-list');
 		var loaded = false;
 
-		function renderBadges(badges) {
+		function formatObtainedDate(obtainedAt) {
+			if (!obtainedAt) return null;
+			var date = new Date(obtainedAt);
+			if (isNaN(date.getTime())) return null;
+			return date.toLocaleDateString(undefined, {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric'
+			});
+		}
+
+		function renderBadges(badges, obtainedBadges) {
 			$list.innerHTML = '';
 
 			if (!badges || badges.length === 0) {
@@ -212,11 +223,9 @@
 
 				var $obtained = document.createElement('span');
 				$obtained.className = 'pvz-badge-obtained';
-				// no per-player earning/tracking exists yet - this always shows the
-				// placeholder for now. Once badges can actually be earned, this is
-				// where that player-specific obtained-at date would be filled in
-				// (e.g. fetched the same way the account panel pulls Wins/Coins).
-				$obtained.textContent = 'Obtained: Not yet obtainable';
+				var earned = obtainedBadges && obtainedBadges[badge.id];
+				var obtainedDate = formatObtainedDate(earned && earned.obtainedAt);
+				$obtained.textContent = obtainedDate ? 'Obtained: ' + obtainedDate : 'Not obtained yet!';
 
 				var $reward = document.createElement('span');
 				$reward.className = 'pvz-badge-reward';
@@ -235,22 +244,46 @@
 			});
 		}
 
+		function authedFetch(url, options) {
+			return window.getFirebaseIdToken().then(function (idToken) {
+				options = options || {};
+				options.headers = Object.assign({
+					'Content-Type': 'application/json',
+					Authorization: 'Bearer ' + idToken
+				}, options.headers || {});
+				return fetch(url, options).then(function (res) {
+					return res.json().then(function (json) {
+						if (!res.ok) {
+							throw new Error(json.error || 'request failed');
+						}
+						return json;
+					});
+				});
+			});
+		}
+
 		function loadBadges() {
 			if (loaded) {
 				return;
 			}
-			fetch('/assets/data/badges.json')
-				.then(function (res) {
-					return res.json();
+	
+			Promise.all([
+				fetch('/assets/data/badges.json').then(function (res) { return res.json(); }),
+				authedFetch('/api/player-data').catch(function (err) {
+					console.warn('Could not load player badge data:', err);
+					return { playerDoc: null };
 				})
-				.then(function (data) {
-					loaded = true;
-					renderBadges(data.badges);
-				})
-				.catch(function (err) {
-					console.warn('Could not load badges.json:', err);
-					renderBadges([]);
-				});
+			])
+			.then(function (results) {
+				loaded = true;
+				var badgeData = results[0] || {};
+				var playerDoc = results[1] && results[1].playerDoc;
+				renderBadges(badgeData.badges || [], (playerDoc && playerDoc.badges) || {});
+			})
+			.catch(function (err) {
+				console.warn('Could not load badges:', err);
+				renderBadges([], {});
+			});
 		}
 
 		function openBadges() {
