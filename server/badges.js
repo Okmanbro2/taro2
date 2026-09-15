@@ -1,16 +1,12 @@
-// Central badge definitions + the logic that decides whether a player has
+// central badge definitions + the logic that decides whether a player has
 // newly earned any of them. Mirrors assets/data/badges.json (the client's
 // display copy) but adds the actual "how do you earn this" check and any
-// reward payout, which is intentionally server-only.
+// reward payout, which is intentionally server-only
 //
-// SCOPE NOTE: only the 5 badges that are checkable against data we already
-// persist are wired up here (win-badge, win2-badge, win3-badge, coin-badge,
-// dave-badge). zm-badge and zm-win-badge are deferred until Zombie Mode has
-// its own tracked flags - add them to BADGE_DEFS the same way once that
-// exists. Gems is a top-level `gems` field on the player's Firestore doc
-// (see playerData.js), not an in-game attribute - same pattern as `badges`
-// itself, since it's an account-level currency rather than something the
-// live game simulation needs to read.
+// badge conditions are evaluated here against the player's live attribute map.
+// Game-side scripts set the small number of event flags (boss kills / zombie
+// victory), while ordinary persistent attributes such as Wins and plant-owned
+// flags can be checked directly
 
 const fs = require('fs');
 const path = require('path');
@@ -41,12 +37,10 @@ function getBadgeDisplayInfo(badgeId) {
 const ATTR = {
 	WINS: 'fKYSjs9Zw4',
 	COINS: 'KAohfBnN6V',
-	// flipped to 1 the moment a player successfully joins Zomboss's
-	// Zomburbia for the first time (see the "join zombie mode" script,
-	// Q3UGCz57ya, right where the zombie unit gets created for them) -
-	// starts at 0 for every player type that can hold it, same as the
-	// other "<x>Won?"-style achievement flags.
 	ZOMBIE_MODE_UNLOCKED: 'zM4hVwsPQ7',
+	PLANT_BOSS_KILL: 'pBvKq7N2Lm',
+	ZOMBIE_BOSS_KILL: 'zK9dP4wXcR',
+	ZOMBIE_WIN: 'yM3tQ8sLhV',
 };
 
 // every "<plant>Owned?" boolean player attribute in the game
@@ -57,12 +51,10 @@ const OWNED_FLAG_IDS = [
 	'JBknp1V5aL', // melonOwned
 	'C44OGCREy5', // cobOwned
 	'aauepP1xHO', // gloomOwned
-	'tBPNYeOFAS', // laserOwned
 	'8gkUs7TVc5', // superChompOwned
 	'Owx5FrfwnP', // electroOwned
 	'TbyWpHp58y', // fireOwned?
-	'7OE6e1Qlat', // goldmagnetOwned
-	'avftaCtZLb', // magnetOwned
+	'avftaCtZLb', // magnetOwned (Golden Magnet)
 	'zO3WiVUa11', // imitaterOwned
 	'87egOJ5hse', // spikerockOwned
 	'1exjfklDVt', // podOwned?
@@ -106,8 +98,22 @@ const BADGE_DEFS = {
 		check: (attrs) => !!attrValue(attrs, ATTR.ZOMBIE_MODE_UNLOCKED),
 		rewardGems: 50,
 	},
-	// zm-win-badge (100 Gems) still deferred until "win a round as a
-	// Zombie" has its own tracked flag, per badges.json
+	'plant-dave-all-badge': {
+		check: (attrs) => OWNED_FLAG_IDS.every((id) => Number(attrValue(attrs, id) || 0) >= 1),
+		rewardGems: 80,
+	},
+	'plant-boss-badge': {
+		check: (attrs) => !!attrValue(attrs, ATTR.PLANT_BOSS_KILL),
+		rewardGems: 75,
+	},
+	'zm-boss-badge': {
+		check: (attrs) => !!attrValue(attrs, ATTR.ZOMBIE_BOSS_KILL),
+		rewardGems: 75,
+	},
+	'zm-win-badge': {
+		check: (attrs) => !!attrValue(attrs, ATTR.ZOMBIE_WIN),
+		rewardGems: 100,
+	},
 };
 
 // returns { badges: <updated badges map>, newlyAwarded: [ids], coinsEarned, gemsEarned }
