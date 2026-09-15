@@ -14,7 +14,7 @@
 			"icon": "/assets/images/goldBadge.png",
 			"reward": "75 Gems, 5000 Coins"
 		},
-			{
+		{
 			"id": "win3-badge",
 			"name": "Roam Overlord",
 			"description": "Obtain 100 wins!",
@@ -43,6 +43,13 @@
 			"reward": "75 Gems"
 		},
 		{
+			"id": "plant-dave-all-badge",
+			"name": "My Green Thumb",
+			"description": "Purchase all avaliable plants in Crazy Dave's Twiddydinkies!",
+			"icon": "/assets/images/greenThumbBadge.png",
+			"reward": "80 Gems"
+		}
+		{
 			"id": "zm-badge",
 			"name": "Brand New Recruit",
 			"description": "Unlock Zombie Mode.",
@@ -59,7 +66,7 @@
 		{
 			"id": "zm-boss-badge",
 			"name": "Plantoid Down",
-			"description": "As a Zombie, successfully defeat a Plant Boss.",
+			"description": "As a Zombie, successfully defeat a Plant Boss!",
 			"icon": "/assets/images/plantBossBadge.png",
 			"reward": "75 Gems"
 		}
