@@ -40,6 +40,9 @@ var BADGE_TRACKED_ATTR_IDS = new Set([
 	'DmNvoAw11g', // reedOwned?
 	'SavKmfObPs', // explodnutOwned?
 	'zM4hVwsPQ7', // zombieModeUnlocked
+	'pBvKq7N2Lm', // plantBossKill
+	'zK9dP4wXcR', // zombieBossKill
+	'yM3tQ8sLhV', // zombieWin
 ]);
 
 var AttributeComponent = TaroEntity.extend({
