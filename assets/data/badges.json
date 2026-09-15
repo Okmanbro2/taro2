@@ -37,7 +37,7 @@
 		},
 		{
 			"id": "plant-boss-badge",
-			"name": "Bis Boss Vanquish",
+			"name": "Big Boss Vanquish",
 			"description": "As a Plant, successfully defeat a Zombie Boss!",
 			"icon": "/assets/images/zombieBossBadge.png",
 			"reward": "75 Gems"
