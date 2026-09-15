@@ -48,7 +48,7 @@
 			"description": "Purchase all avaliable plants in Crazy Dave's Twiddydinkies!",
 			"icon": "/assets/images/greenThumbBadge.png",
 			"reward": "80 Gems"
-		}
+		},
 		{
 			"id": "zm-badge",
 			"name": "Brand New Recruit",
