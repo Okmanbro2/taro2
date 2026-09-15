@@ -36,6 +36,13 @@
 			"reward": "100 Gems"
 		},
 		{
+			"id": "plant-boss-badge",
+			"name": "Bis Boss Vanquish",
+			"description": "As a Plant, successfully defeat a Zombie Boss!",
+			"icon": "/assets/images/zombieBossBadge.png",
+			"reward": "75 Gems"
+		},
+		{
 			"id": "zm-badge",
 			"name": "Brand New Recruit",
 			"description": "Unlock Zombie Mode.",
@@ -48,6 +55,13 @@
 			"description": "As a Zombie, successfully defeat the Plants!",
 			"icon": "/assets/images/zmWinBadge.png",
 			"reward": "100 Gems"
+		},
+		{
+			"id": "zm-boss-badge",
+			"name": "Plantoid Down",
+			"description": "As a Zombie, successfully defeat a Plant Boss.",
+			"icon": "/assets/images/plantBossBadge.png",
+			"reward": "75 Gems"
 		}
 	]
 }
