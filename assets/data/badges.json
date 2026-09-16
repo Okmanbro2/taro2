@@ -29,6 +29,13 @@
 			"reward": "30 Gems"
 		},
 		{
+			"id": "yeti-badge",
+			"name": "Cryptozombologist",
+			"description": "Discover and vanquish the Zombie Yeti!",
+			"icon": "/assets/images/yetiBadge.png",
+			"reward": "40 Gems"
+		},
+		{
 			"id": "coin-badge",
 			"name": "Scrooge McSprout",
 			"description": "Reach exactly or over 100,000 Coins!",
