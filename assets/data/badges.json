@@ -38,7 +38,7 @@
 		{
 			"id": "coin-badge",
 			"name": "Scrooge McSprout",
-			"description": "Reach exactly or over 100,000 Coins!",
+			"description": "Reach exactly or over 250,000 Coins!",
 			"icon": "/assets/images/coinBadge.png",
 			"reward": "100 Gems"
 		},
