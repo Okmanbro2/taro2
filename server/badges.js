@@ -1,8 +1,9 @@
 // central badge definitions + the logic that decides whether a player has
 // newly earned any of them, mirrors assets/data/badges.json
 //
-// badge conditions are evaluated here against the player's live attribute map.
-// Game-side scripts set the small number of event flags (boss kills / zombie
+// badge conditions are evaluated here against the player's live attribute map
+//
+// game-side scripts set the small number of event flags (boss kills / zombie
 // victory), while ordinary persistent attributes such as Wins and plant-owned
 // flags can be checked directly
 
@@ -46,6 +47,9 @@ const ATTR = {
 	// already set in-game by Senator Zomboss's "dead" script, so this one
 	// needed no game-side change - just the rule below
 	CRAZY_MODE_WON: 'n1BUlF5Jqz',
+	// same deal - set in-game by the Disco Zombie's embedded script
+	// (unitTypes.xbM8Ft4vBX), so the badge only needed the rule below
+	DISCO_MODE_WON: 'tngCfbbF9I',
 };
 
 // every "<plant>Owned?" boolean player attribute in the game
@@ -127,6 +131,10 @@ const BADGE_DEFS = {
 		check: (attrs) => !!attrValue(attrs, ATTR.CRAZY_MODE_WON),
 		rewardGems: 100,
 	},
+	'disco-badge': {
+		check: (attrs) => !!attrValue(attrs, ATTR.DISCO_MODE_WON),
+		rewardGems: 100,
+	},
 };
 
 // returns { badges: <updated badges map>, newlyAwarded: [ids], coinsEarned, gemsEarned }
@@ -144,7 +152,7 @@ function checkAndAwardBadges(existingBadges, attributes) {
 			// gemsPaid marks that this badge's Gems reward (if any) has already
 			// been accounted for - checked by the one-time backfill script
 			// (server/scripts/backfillGems.js) so it never double-pays a badge
-			// that was earned normally after Gems already existed.
+			// that was earned normally after Gems already existed
 			badges[badgeId] = { obtainedAt: Date.now(), gemsPaid: true };
 			newlyAwarded.push(badgeId);
 			coinsEarned += def.rewardCoins || 0;
