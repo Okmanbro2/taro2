@@ -41,6 +41,13 @@ const ATTR = {
 	PLANT_BOSS_KILL: 'pBvKq7N2Lm',
 	ZOMBIE_BOSS_KILL: 'zK9dP4wXcR',
 	ZOMBIE_WIN: 'yM3tQ8sLhV',
+	// set by the global "unit's attribute is 0" script when the Yeti Zombie
+	// (ba607jTTAi) dies to a human player - and i can't believe I'm saying this but deliberately NOT the Fake Yeti
+	// Zombie (3bEMMPjlgN), which must never count toward this badge
+	YETI_KILL: 'yTk4Rn8vQz',
+	// already set in-game by Senator Zomboss's "dead" script, so this one
+	// needed no game-side change - just the rule below
+	CRAZY_MODE_WON: 'n1BUlF5Jqz',
 };
 
 // every "<plant>Owned?" boolean player attribute in the game
@@ -91,7 +98,7 @@ const BADGE_DEFS = {
 		rewardGems: 30,
 	},
 	'coin-badge': {
-		check: (attrs) => (attrValue(attrs, ATTR.COINS) || 0) >= 100000,
+		check: (attrs) => (attrValue(attrs, ATTR.COINS) || 0) >= 250000,
 		rewardGems: 100,
 	},
 	'zm-badge': {
@@ -112,6 +119,14 @@ const BADGE_DEFS = {
 	},
 	'zm-win-badge': {
 		check: (attrs) => !!attrValue(attrs, ATTR.ZOMBIE_WIN),
+		rewardGems: 100,
+	},
+	'yeti-badge': {
+		check: (attrs) => !!attrValue(attrs, ATTR.YETI_KILL),
+		rewardGems: 40,
+	},
+	'crazy-badge': {
+		check: (attrs) => !!attrValue(attrs, ATTR.CRAZY_MODE_WON),
 		rewardGems: 100,
 	},
 };
