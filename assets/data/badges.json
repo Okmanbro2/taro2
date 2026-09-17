@@ -5,35 +5,35 @@
 			"name": "Home Lawn Security",
 			"description": "In Normal Mode, defeat the Zombot 1.0 for the very first time and recieve your first win!",
 			"icon": "/assets/images/winBadge.png",
-			"reward": "25 Gems"
+			"reward": "15 Gems"
 		},
 		{
 			"id": "win2-badge",
 			"name": "Certified Triumphant",
 			"description": "Obtain 20 wins!",
 			"icon": "/assets/images/goldBadge.png",
-			"reward": "75 Gems, 5000 Coins"
+			"reward": "50 Gems, 10000 Coins"
 		},
 		{
 			"id": "win3-badge",
 			"name": "Roam Overlord",
 			"description": "Obtain 100 wins!",
 			"icon": "/assets/images/diamondBadge.png",
-			"reward": "500 Gems, 10000 Coins"
+			"reward": "500 Gems, 25000 Coins"
 		},
 		{
 			"id": "dave-badge",
 			"name": "What A CRAAAZY Deal!",
 			"description": "Purchase your very first plant in Crazy Dave's Twiddydinkies.",
 			"icon": "/assets/images/daveBadge.png",
-			"reward": "30 Gems"
+			"reward": "20 Gems"
 		},
 		{
 			"id": "yeti-badge",
 			"name": "Cryptozombologist",
 			"description": "Discover and vanquish the Zombie Yeti!",
 			"icon": "/assets/images/yetiBadge.png",
-			"reward": "40 Gems"
+			"reward": "75 Gems"
 		},
 		{
 			"id": "coin-badge",
@@ -47,14 +47,14 @@
 			"name": "Big Boss Vanquish",
 			"description": "As a Plant, successfully defeat a Zombie Boss!",
 			"icon": "/assets/images/zombieBossBadge.png",
-			"reward": "75 Gems"
+			"reward": "50 Gems"
 		},
 		{
 			"id": "plant-dave-all-badge",
 			"name": "My Green Thumb",
 			"description": "Purchase all avaliable plants in Crazy Dave's Twiddydinkies!",
 			"icon": "/assets/images/greenThumbBadge.png",
-			"reward": "80 Gems"
+			"reward": "75 Gems"
 		},
 		{
 			"id": "crazy-badge",
@@ -75,21 +75,21 @@
 			"name": "Brand New Recruit",
 			"description": "Unlock Zombie Mode.",
 			"icon": "/assets/images/zmBadge.png",
-			"reward": "50 Gems"
+			"reward": "40 Gems"
 		},
 		{
 			"id": "zm-win-badge",
 			"name": "We R Viktorz",
 			"description": "As a Zombie, successfully defeat the Plants!",
 			"icon": "/assets/images/zmWinBadge.png",
-			"reward": "100 Gems"
+			"reward": "75 Gems"
 		},
 		{
 			"id": "zm-boss-badge",
 			"name": "Plantoid Down",
 			"description": "As a Zombie, successfully defeat a Plant Boss!",
 			"icon": "/assets/images/plantBossBadge.png",
-			"reward": "75 Gems"
+			"reward": "50 Gems"
 		}
 	]
 }
