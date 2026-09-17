@@ -43,6 +43,13 @@
 			"reward": "100 Gems"
 		},
 		{
+			"id": "crazy-badge",
+			"name": "What A Crazy Mode",
+			"description": "Beat Crazy Mode!",
+			"icon": "/assets/images/crazyBadge.png",
+			"reward": "100 Gems"
+		},
+		{
 			"id": "plant-boss-badge",
 			"name": "Big Boss Vanquish",
 			"description": "As a Plant, successfully defeat a Zombie Boss!",
