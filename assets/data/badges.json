@@ -43,13 +43,6 @@
 			"reward": "100 Gems"
 		},
 		{
-			"id": "crazy-badge",
-			"name": "What A Crazy Mode",
-			"description": "Beat Crazy Mode!",
-			"icon": "/assets/images/crazyBadge.png",
-			"reward": "100 Gems"
-		},
-		{
 			"id": "plant-boss-badge",
 			"name": "Big Boss Vanquish",
 			"description": "As a Plant, successfully defeat a Zombie Boss!",
@@ -62,6 +55,20 @@
 			"description": "Purchase all avaliable plants in Crazy Dave's Twiddydinkies!",
 			"icon": "/assets/images/greenThumbBadge.png",
 			"reward": "80 Gems"
+		},
+		{
+			"id": "crazy-badge",
+			"name": "What A Crazy Mode",
+			"description": "Beat Crazy Mode!",
+			"icon": "/assets/images/crazyBadge.png",
+			"reward": "100 Gems"
+		},
+		{
+			"id": "disco-badge",
+			"name": "Boogie Your Brains Out",
+			"description": "Beat Disco Mode!",
+			"icon": "/assets/images/discoBadge.png",
+			"reward": "100 Gems"
 		},
 		{
 			"id": "zm-badge",
