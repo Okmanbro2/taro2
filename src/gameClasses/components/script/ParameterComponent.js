@@ -1042,6 +1042,24 @@ var ParameterComponent = TaroEntity.extend({
 
 						break;
 
+					// unlike getLastAttackingUnit (a single value shared by the whole
+					// server, which a concurrent, unrelated hit elsewhere can overwrite
+					// before a death script gets to read it), this reads the id stored
+					// directly on the dying unit itself (Unit.js inflictDamage sets
+					// this.lastAttackedBy), so it can't be clobbered by other combat
+					// happening the same tick. Prefer this whenever you already have
+					// the specific unit whose attacker you want (e.g. on death).
+					case 'getLastUnitToAttackEntity':
+						var targetEntity = self.getValue(text.entity, vars);
+						if (targetEntity && targetEntity._category == 'unit') {
+							unit = taro.$(targetEntity.lastAttackedBy);
+							if (unit && unit._category == 'unit') {
+								return unit;
+							}
+						}
+
+						break;
+
 					case 'getLastAttackedUnit':
 						var id = taro.game.lastAttackedUnitId;
 						unit = taro.$(id);
