@@ -1,7 +1,5 @@
 // central badge definitions + the logic that decides whether a player has
-// newly earned any of them. Mirrors assets/data/badges.json (the client's
-// display copy) but adds the actual "how do you earn this" check and any
-// reward payout, which is intentionally server-only
+// newly earned any of them, mirrors assets/data/badges.json
 //
 // badge conditions are evaluated here against the player's live attribute map.
 // Game-side scripts set the small number of event flags (boss kills / zombie
