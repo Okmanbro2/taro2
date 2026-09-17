@@ -81,21 +81,21 @@ function attrValue(attributes, attrId) {
 const BADGE_DEFS = {
 	'win-badge': {
 		check: (attrs) => (attrValue(attrs, ATTR.WINS) || 0) >= 1,
-		rewardGems: 25,
+		rewardGems: 15,
 	},
 	'win2-badge': {
 		check: (attrs) => (attrValue(attrs, ATTR.WINS) || 0) >= 20,
-		rewardCoins: 5000,
-		rewardGems: 75,
+		rewardCoins: 10000,
+		rewardGems: 50,
 	},
 	'win3-badge': {
 		check: (attrs) => (attrValue(attrs, ATTR.WINS) || 0) >= 100,
-		rewardCoins: 10000,
+		rewardCoins: 25000,
 		rewardGems: 500,
 	},
 	'dave-badge': {
 		check: (attrs) => OWNED_FLAG_IDS.some((id) => !!attrValue(attrs, id)),
-		rewardGems: 30,
+		rewardGems: 20,
 	},
 	'coin-badge': {
 		check: (attrs) => (attrValue(attrs, ATTR.COINS) || 0) >= 250000,
@@ -103,27 +103,27 @@ const BADGE_DEFS = {
 	},
 	'zm-badge': {
 		check: (attrs) => !!attrValue(attrs, ATTR.ZOMBIE_MODE_UNLOCKED),
-		rewardGems: 50,
+		rewardGems: 40,
 	},
 	'plant-dave-all-badge': {
 		check: (attrs) => OWNED_FLAG_IDS.every((id) => Number(attrValue(attrs, id) || 0) >= 1),
-		rewardGems: 80,
+		rewardGems: 75,
 	},
 	'plant-boss-badge': {
 		check: (attrs) => !!attrValue(attrs, ATTR.PLANT_BOSS_KILL),
-		rewardGems: 75,
+		rewardGems: 50,
 	},
 	'zm-boss-badge': {
 		check: (attrs) => !!attrValue(attrs, ATTR.ZOMBIE_BOSS_KILL),
-		rewardGems: 75,
+		rewardGems: 50,
 	},
 	'zm-win-badge': {
 		check: (attrs) => !!attrValue(attrs, ATTR.ZOMBIE_WIN),
-		rewardGems: 100,
+		rewardGems: 75,
 	},
 	'yeti-badge': {
 		check: (attrs) => !!attrValue(attrs, ATTR.YETI_KILL),
-		rewardGems: 40,
+		rewardGems: 75,
 	},
 	'crazy-badge': {
 		check: (attrs) => !!attrValue(attrs, ATTR.CRAZY_MODE_WON),
