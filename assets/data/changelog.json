@@ -1,17 +1,21 @@
 {
-	"version": "3.5.2",
+	"version": "3.6.0",
 	"entries": [
 		{
-			"title": "A Badge For You, Sir!",
-			"description": "Added badges! Big feature - get rewards for playing the game! More badges are to come and be obtained soon!"
+			"title": "Join the Discord",
+			"description": "Join the Discord for the full changelog!"
 		},
 		{
-			"title": "The Great Migration 3",
-			"description": "Migrated all sounds to load locally on the github - if sounds experience issues, contact @thw0k or @.footsoldier on the Plants vs. Zombies: Roam Discord Server!"
+			"title": "Brand New Boss",
+			"description": "Added a brand new plant boss, the Monstrous Hogshroom!"
 		},
 		{
-			"title": "Nice On My Ears!",
-			"description": "Following TGM3, edited SoundComponent to deal with duplicate sounds playing."
+			"title": "Shiny, shiny!",
+			"description": "Added a new currency - Gems! Usage will be revealed soon."
+		},
+		{
+			"title": "Optimization and Tweaks",
+			"description": "Fixed a lot of bugs and changed some sprites."
 		},
 		{
 			"title": "New Content(?)",
