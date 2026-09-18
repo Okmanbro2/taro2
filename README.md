@@ -1,20 +1,11 @@
 The Taro Engine was abandoned in late 2024 as MODD.IO transitioned into becoming INDIE.FUN. Thanks to the engine being public, I fixed a lot of bugs and made it fit a single game.json.
 
-## What's included in the box.
+## What I personally added
 
-- Box2D Physics
-- Server-authoritative netcode using Websocket, Snapshot interpolation, Client-side reconciliation, and LZ-string compression
-- Inventory & Item system
-- Built-in Attributes (e.g. HP, Energy, etc) with regeneration rates
-- Built-in Item system (melee & projectile)
-- Dialogues (ideal for visual novel-style games)
-- Shops (for selling items)
-- Unit control (top-down WASD or platformer)
-- Client-side predicted projectile + unit movement (optional)
-- Unit AI including A\* pathfinding
-- Mobile controls
-- and more!
-
+- An achievement/badge system
+- Optimizations to the engine's core
+- Separate account system
+- And more ...
 ## Running the game
 
 Make sure you have [Node 16](https://nodejs.org) or later.
