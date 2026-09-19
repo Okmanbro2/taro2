@@ -3231,6 +3231,21 @@ var TaroEntity = TaroObject.extend({
 
 		if (taro.isServer) {
 			this.clientStreamedPosition = undefined;
+			// translateTo() above only updates this entity's own bookkeeping
+			// (_translate) - it never touches the Box2D body itself. Box2D
+			// bodies are simulated independently, so if the body itself never
+			// moves (which is the case for a stationary body that's only ever
+			// repositioned via teleportTo/moveEntity, like a drifting Cloud),
+			// Box2D puts it to sleep almost immediately - and once asleep, the
+			// physics step (Box2dComponent.js) stops reading/writing its
+			// position entirely, silently freezing the entity right where it
+			// fell asleep, undoing this teleport on the very next physics tick.
+			// taro.physics.translateTo() (Box2dComponent.js) is the function
+			// that actually calls body.setPosition(...) and wakes the body -
+			// call it here so the physics body and the logical position agree.
+			if (taro.physics && this.hasPhysicsBody && this.hasPhysicsBody()) {
+				taro.physics.translateTo(this, x, y);
+			}
 		} else if (taro.isClient) {
 			// client-side prediction is enabled (cspMode either 1 or 2)
 			let myUnit = taro.client.selectedUnit;
