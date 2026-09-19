@@ -30,7 +30,7 @@
 		border-radius: 18px;
 		box-shadow: 0 8px 0 #5b8f32, 0 20px 40px rgba(0, 0, 0, 0.4);
 		padding: 20px 24px 24px;
-		font-family: 'Nunito', sans-serif;
+		font-family: 'Brianne\'s Hand', cursive;
 		transform: translateY(-140%);
 		transition: transform 0.4s ease;
 	}
@@ -120,7 +120,7 @@
 		width: 64px;
 		height: 64px;
 		border-radius: 6px;
-		background: #fff;
+		background: transparent;
 		object-fit: contain;
 	}
 
@@ -132,7 +132,7 @@
 	}
 
 	.pvz-skin-name {
-		font-family: 'House of Terror', sans-serif;
+		font-family: 'Brianne\'s Hand', cursive;
 		color: var(--pvz-cream);
 		text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
 		font-size: 1.15em;
@@ -152,7 +152,7 @@
 
 	.pvz-skin-tag {
 		display: inline-block;
-		font-family: 'Nunito', sans-serif;
+		font-family: 'Brianne\'s Hand', cursive;
 		font-size: 0.75em;
 		font-weight: 700;
 		padding: 1px 7px;
@@ -197,7 +197,7 @@
 	}
 
 	.pvz-skin-btn {
-		font-family: 'Nunito', sans-serif;
+		font-family: 'Brianne\'s Hand', cursive;
 		font-weight: 700;
 		font-size: 0.85em;
 		border-radius: 8px;
@@ -236,7 +236,7 @@
 
 	.pvz-skins-empty,
 	.pvz-skins-error {
-		font-family: 'Nunito', sans-serif;
+		font-family: 'Brianne\'s Hand', cursive;
 		color: var(--pvz-cream);
 		opacity: 0.7;
 		text-align: center;
@@ -317,7 +317,7 @@
 				var $subtitle = document.createElement('p');
 				$subtitle.className = 'pvz-skin-subtitle';
 				var subtitleText = document.createElement('span');
-				subtitleText.textContent = 'For ' + (skin.unitTypeName || 'Unknown');
+				subtitleText.textContent = skin.unitTypeName || 'Unknown';
 				$subtitle.appendChild(subtitleText);
 				if (skin.availability === 'limited') {
 					var $tag = document.createElement('span');
