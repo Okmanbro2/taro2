@@ -1,11 +1,11 @@
 {
 	"globalSale": {
-		"active": false,
-		"discountPercent": 0,
-		"label": "",
-		"start": null,
-		"end": null
-	},
+        "active": true,
+        "discountPercent": 25,
+        "label": "Test Sale",
+        "start": null,
+        "end": null
+    },
 	"skins": [
 		{
 			"id": "tweeter-peashooter",
@@ -125,6 +125,19 @@
 			"sale": null
 		},
 		{
+			"id": "twin-marigold",
+			"name": "Twin Marigold",
+			"unitType": "lehOvApK7F",
+			"unitTypeName": "Twin Sunflower - It was a crazed night of forbidden science that brought Twin Marigold into existence. Thunder crashed over .. this seems familiar.",
+			"image": "assets/skins/MarigoldSkin.png",
+			"price": 30,
+			"availability": "always",
+			"availableFrom": null,
+			"availableUntil": null,
+			"excludeFromGlobalSale": false,
+			"sale": null
+		},
+		{
 			"id": "browncoat-hypnotized-human",
 			"name": "Regular Ol' Human",
 			"unitType": "o2hvbfE07a",
@@ -143,6 +156,32 @@
 			"unitType": "o2hvbfE07a",
 			"unitTypeName": "Hypnotized Browncoat - Dress up in style with this costume right here.",
 			"image": "assets/skins/ZombieBonesSkin.png",
+			"price": 40,
+			"availability": "limited",
+			"availableFrom": "2026-10-01T00:00:00Z",
+			"availableUntil": "2026-11-01T00:00:00Z",
+			"excludeFromGlobalSale": false,
+			"sale": null
+		},
+		{
+			"id": "pumpkin-squash-skin",
+			"name": "Gourd",
+			"unitType": "o2hvbfE07a",
+			"unitTypeName": "Squash - Well, a gourd is in the same type of family, no?",
+			"image": "assets/skins/wUEgKccIih.png",
+			"price": 40,
+			"availability": "limited",
+			"availableFrom": "2026-10-01T00:00:00Z",
+			"availableUntil": "2026-11-01T00:00:00Z",
+			"excludeFromGlobalSale": false,
+			"sale": null
+		},
+		{
+			"id": "dancing-hypnotized-skeleton",
+			"name": "Hypnotized Michael Jackson",
+			"unitType": "TwoTdfRZhM",
+			"unitTypeName": "Hypnotized Dancing Zombie - It's Thriller night, baby!",
+			"image": "assets/skins/MJSkin.png",
 			"price": 40,
 			"availability": "limited",
 			"availableFrom": "2026-10-01T00:00:00Z",
