@@ -1,25 +1,21 @@
 {
-	"version": "3.6.0",
+	"version": "3.6.1",
 	"entries": [
 		{
 			"title": "Join the Discord",
 			"description": "Join the Discord for the full changelog!"
 		},
 		{
-			"title": "Brand New Boss",
-			"description": "Added a brand new plant boss, the Monstrous Hogshroom!"
+			"title": "Welcome Back, Skins!",
+			"description": "Added back most of the previously lost skins that were present in the skin shop in the game during the MODD days. Get your skins in the skin store!"
 		},
 		{
-			"title": "Shiny, shiny!",
-			"description": "Added a new currency - Gems! Usage will be revealed soon."
+			"title": "More Bugs Are Squashed",
+			"description": "Fixed more bugs."
 		},
 		{
-			"title": "Optimization and Tweaks",
-			"description": "Fixed a lot of bugs and changed some sprites."
-		},
-		{
-			"title": "New Content(?)",
-			"description": "Stay tuned! You might see a new plant here and there."
+			"title": "New Content Soon!",
+			"description": "Stay tuned for brand new content coming soon!"
 		}
 	]
 }
