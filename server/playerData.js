@@ -147,7 +147,8 @@ function notifyBadgesUnlocked(uid, newlyAwarded) {
 function checkBadgesLive(player, changedAttrId) {
 	if (!player || !player._stats) return;
 	const userId = player._stats.userId || player._stats.guestUserId;
-	if (!userId) return; // no account to save a badge onto
+    const isGuestUser = !player._stats.userId && !!player._stats.guestUserId;
+    if (!userId) return; // no badges for guests
 
 	const knownBadges = player._badgeCache || {};
 	const { badges, newlyAwarded, coinsEarned, gemsEarned } = checkAndAwardBadges(knownBadges, player._stats.attributes);
@@ -172,14 +173,23 @@ function checkBadgesLive(player, changedAttrId) {
 		update.gems = admin.firestore.FieldValue.increment(gemsEarned);
 	}
 
-	db.collection('players')
-		.doc(userId)
-		.set(update, { merge: true })
-		.then(() => notifyBadgesUnlocked(userId, newlyAwarded))
-		.catch((err) => console.log('checkBadgesLive: failed to save badges for', userId, err.message));
+	if (isGuestUser) {
+        notifyBadgesUnlocked(userId, newlyAwarded);
+        return;
+    }
+
+    db.collection('players')
+        .doc(userId)
+        .set(update, { merge: true })
+        .then(() => notifyBadgesUnlocked(userId, newlyAwarded))
+        .catch((err) => console.log('checkBadgesLive: failed to save badges for', userId, err.message));
 }
 
-async function savePersistedEntityData(uid, { player, unit } = {}) {
+async function savePersistedEntityData(uid, { player, unit } = {}, isGuestUser = false) {
+    if (isGuestUser) {
+    	return;
+    }
+	
 	const data = { data: {} };
 	const mergeFields = [];
 
