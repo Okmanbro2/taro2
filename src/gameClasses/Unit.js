@@ -142,6 +142,15 @@ var Unit = TaroEntityPhysics.extend({
 
 			self._scaleTexture();
 
+			// Cosmetic skins (see Player.js's createUnit): the equipped skin's
+			// image is already baked into _stats.cellSheet.url as part of this
+			// unit's normal creation data by the time it reaches the client, so
+			// this just needs to actually render it. Unlike the legacy
+			// equipSkin() call above, this doesn't depend on ownerId having
+			// resolved yet - the cellSheet value is already correct either way,
+			// this just makes sure the texture picks it up.
+			self.updateTexture();
+
 			self.flip(self._stats.flip);
 
 			if (this._stats.isHidden) {

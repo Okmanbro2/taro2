@@ -6,6 +6,7 @@ const { db } = admin;
 const fs = require('fs');
 const path = require('path');
 const { checkAndAwardBadges, getBadgeDisplayInfo } = require('./badges');
+const { getSkinById, isPurchasable, getEffectivePrice } = require('./skins');
 
 // same Coins attribute id used throughout this file (see IMPORT_VALUE_CAPS
 // below) - pulled out as its own constant here since savePersistedEntityData
@@ -279,6 +280,77 @@ async function getUidByUsername(username) {
 	return doc.exists ? doc.data().uid : null;
 }
 
+// Atomically charges `uid` for skin `skinId` and adds it to their owned
+// skins - wrapped in a transaction (same pattern as claimUsername above) so
+// two rapid purchase clicks (or two requests racing) can't both succeed off
+// a stale gem balance. Price and purchasability are never taken from the
+// client - both come from skins.js, which is the only source of truth for
+// what a skin actually costs and whether it's currently buyable at all.
+async function buySkin(uid, skinId) {
+	const skin = getSkinById(skinId);
+	if (!skin) {
+		throw new Error('unknown skin');
+	}
+	if (!isPurchasable(skin)) {
+		throw new Error('this skin is not currently available for purchase');
+	}
+	const price = getEffectivePrice(skin);
+	const playerRef = db.collection('players').doc(uid);
+
+	await db.runTransaction(async (tx) => {
+		const playerDoc = await tx.get(playerRef);
+		const data = playerDoc.exists ? playerDoc.data() : {};
+		const ownedSkins = data.ownedSkins || [];
+
+		if (ownedSkins.includes(skinId)) {
+			throw new Error('you already own this skin');
+		}
+		const gems = data.gems || 0;
+		if (gems < price) {
+			throw new Error('not enough Gems');
+		}
+
+		tx.set(playerRef, { gems: gems - price, ownedSkins: [...ownedSkins, skinId] }, { merge: true });
+	});
+}
+
+// Sets (or clears, if skinId is null) which owned skin is equipped for a
+// given unit type. A skin can only ever be equipped for the one unit type
+// it belongs to - equippedSkins is a map from unitType -> skinId, so
+// equipping a new skin for a unit type simply overwrites whatever was
+// equipped there before, no separate "unequip" call needed for that case.
+async function equipSkinForUnitType(uid, unitType, skinId) {
+	const playerRef = db.collection('players').doc(uid);
+
+	await db.runTransaction(async (tx) => {
+		const playerDoc = await tx.get(playerRef);
+		const data = playerDoc.exists ? playerDoc.data() : {};
+		const ownedSkins = data.ownedSkins || [];
+
+		if (skinId !== null) {
+			const skin = getSkinById(skinId);
+			if (!skin) {
+				throw new Error('unknown skin');
+			}
+			if (skin.unitType !== unitType) {
+				throw new Error('this skin does not belong to that unit type');
+			}
+			if (!ownedSkins.includes(skinId)) {
+				throw new Error('you do not own this skin');
+			}
+		}
+
+		const equippedSkins = Object.assign({}, data.equippedSkins || {});
+		if (skinId === null) {
+			delete equippedSkins[unitType];
+		} else {
+			equippedSkins[unitType] = skinId;
+		}
+
+		tx.set(playerRef, { equippedSkins }, { merge: true });
+	});
+}
+
 // snapshots whatever's currently saved for uid into
 // players/{uid}/backups/{timestamp} before a destructive operation (modd
 // import, wipe) touches it, so a mistake is always recoverable and nothing
@@ -528,6 +600,8 @@ module.exports = {
 	claimUsername,
 	UsernameTakenError,
 	getUidByUsername,
+	buySkin,
+	equipSkinForUnitType,
 	backupPlayerData,
 	importModdData,
 	wipePlayerData,

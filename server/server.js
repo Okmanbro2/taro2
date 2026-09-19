@@ -15,10 +15,13 @@ const {
 	claimUsername,
 	UsernameTakenError,
 	getUidByUsername,
+	buySkin,
+	equipSkinForUnitType,
 	importModdData,
 	wipePlayerData,
 	getLeaderboard,
 } = require('./playerData');
+const { getSkinById, getAllSkins, isPurchasable, getEffectivePrice } = require('./skins');
 
 // keep in sync with OWNER_USERNAMES in src/gameClasses/components/GameComponent.js -
 // these are the only two accounts allowed developer tools in-game, and (here)
@@ -202,7 +205,7 @@ var Server = TaroClass.extend({
 		// exposes the local Firestore-backed player data store (server/playerData.js) on
 		// the shared `taro` global, so isomorphic gameClasses files (which can't use
 		// require()) can reach it - e.g. ActionComponent's 'savePlayerData' script action.
-		taro.playerDataStore = { getPlayerData, savePlayerData, savePersistedEntityData, checkBadgesLive };
+		taro.playerDataStore = { getPlayerData, savePlayerData, savePersistedEntityData, checkBadgesLive, getSkinById };
 
 		self.keysToRemoveBeforeSend = [
 			'abilities',
@@ -458,6 +461,62 @@ var Server = TaroClass.extend({
 				return res.json({ playerDoc: playerDoc || null });
 			} catch (err) {
 				return res.status(500).json({ error: err.message });
+			}
+		});
+
+		// Lists every skin with this player's owned/purchasable state baked in -
+		// price, effectivePrice (after any sale), and purchasable are always
+		// resolved server-side (see skins.js) so the client never has to (and
+		// never should be trusted to) compute pricing itself.
+		app.get('/api/skins', requireAuth, async (req, res) => {
+			try {
+				const data = await getPlayerData(req.uid);
+				const ownedSkins = (data && data.ownedSkins) || [];
+				const equippedSkins = (data && data.equippedSkins) || {};
+				const skins = getAllSkins().map((skin) => ({
+					id: skin.id,
+					name: skin.name,
+					unitType: skin.unitType,
+					unitTypeName: skin.unitTypeName,
+					image: skin.image,
+					price: skin.price,
+					effectivePrice: getEffectivePrice(skin),
+					availability: skin.availability,
+					purchasable: isPurchasable(skin),
+					owned: ownedSkins.includes(skin.id),
+				}));
+				return res.json({ skins, equippedSkins });
+			} catch (err) {
+				return res.status(500).json({ error: err.message });
+			}
+		});
+
+		app.post('/api/skins/buy', requireAuth, async (req, res) => {
+			const skinId = (req.body.skinId || '').trim();
+			if (!skinId) {
+				return res.status(400).json({ error: 'missing skinId' });
+			}
+			try {
+				await buySkin(req.uid, skinId);
+				return res.json({ success: true });
+			} catch (err) {
+				return res.status(400).json({ error: err.message });
+			}
+		});
+
+		// pass skinId: null (or omit it) to unequip whatever's currently set
+		// for that unit type
+		app.post('/api/skins/equip', requireAuth, async (req, res) => {
+			const unitType = (req.body.unitType || '').trim();
+			const skinId = req.body.skinId || null;
+			if (!unitType) {
+				return res.status(400).json({ error: 'missing unitType' });
+			}
+			try {
+				await equipSkinForUnitType(req.uid, unitType, skinId);
+				return res.json({ success: true });
+			} catch (err) {
+				return res.status(400).json({ error: err.message });
 			}
 		});
 
