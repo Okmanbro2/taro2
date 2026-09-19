@@ -1,8 +1,8 @@
 {
 	"globalSale": {
-        "active": true,
-        "discountPercent": 25,
-        "label": "Test Sale",
+        "active": false,
+        "discountPercent": 0,
+        "label": "",
         "start": null,
         "end": null
     },
