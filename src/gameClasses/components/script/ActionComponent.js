@@ -1037,7 +1037,7 @@ var ActionComponent = TaroEntity.extend({
 						var userId = ownerPlayer._stats.userId || ownerPlayer._stats.guestUserId;
 						var isGuestUser = !!(!ownerPlayer._stats.userId && ownerPlayer._stats.guestUserId);
 
-						if (unit && ownerPlayer && userId && ownerPlayer.persistentDataLoaded) {
+						if (unit && ownerPlayer && userId && ownerPlayer.persistentDataLoaded && !isGuestUser) {
 							if (taro.game.isWorldMap && !vars.isWorldScript) {
 								self._script.errorLog('can not save unit data from map');
 								console.log('can not save unit data from map', path);
@@ -1059,7 +1059,7 @@ var ActionComponent = TaroEntity.extend({
 						var userId = player && player._stats && (player._stats.userId || player._stats.guestUserId);
 						var isGuestUser = !!(!player._stats.userId && player._stats.guestUserId);
 
-						if (player && userId && player.persistentDataLoaded) {
+						if (player && userId && player.persistentDataLoaded && !isGuestUser) {
 							if (taro.game.isWorldMap && !vars.isWorldScript) {
 								self._script.errorLog('can not save player data from map');
 								console.log('can not save player data from map', path);
@@ -1086,13 +1086,13 @@ var ActionComponent = TaroEntity.extend({
 								// (e.g. username). Player.js/Unit.js loadPersistentData() read these
 								// back from that same persistedData.data.player / .data.unit shape.
 								taro.playerDataStore
-									.savePersistedEntityData(userId, { player: persistedData.player, unit: persistedData.unit })
+									.savePersistedEntityData(userId, { player: persistedData.player, unit: persistedData.unit }, isGuestUser)
 									.catch((err) => {
 										self._script.errorLog(`savePlayerData failed: ${err.message}`, path);
 									});
 							} else {
 								// save player data only
-								taro.playerDataStore.savePersistedEntityData(userId, { player: persistedData.player }).catch((err) => {
+								taro.playerDataStore.savePersistedEntityData(userId, { player: persistedData.player }, isGuestUser).catch((err) => {
 									self._script.errorLog(`savePlayerData failed: ${err.message}`, path);
 								});
 
