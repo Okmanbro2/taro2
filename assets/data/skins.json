@@ -151,6 +151,19 @@
 			"sale": null
 		},
 		{
+			"id": "football-hypnotized-giga",
+			"name": "Giga Hypnotized Football Zombie",
+			"unitType": "OqP7KXdMt0",
+			"unitTypeName": "Hypnotized Football Zombie - This zombie thought it'd be funny to cosplay as a Giga Football Zombie.",
+			"image": "assets/skins/FootballSkin.png",
+			"price": 125,
+			"availability": "always",
+			"availableFrom": null,
+			"availableUntil": null,
+			"excludeFromGlobalSale": false,
+			"sale": null
+		},
+		{
 			"id": "browncoat-hypnotized-skeleton",
 			"name": "Skeleton Zombie",
 			"unitType": "o2hvbfE07a",
