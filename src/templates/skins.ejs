@@ -1,475 +1,674 @@
+<%- include('header', { title: 'Skins' }) %>
+
 <style>
-	#pvz-skins-backdrop {
-		position: fixed;
-		inset: 0;
-		z-index: 100000;
-		display: flex;
-		justify-content: center;
-		background: rgba(0, 0, 0, 0.45);
-		backdrop-filter: blur(6px);
-		-webkit-backdrop-filter: blur(6px);
-		opacity: 0;
-		pointer-events: none;
-		transition: opacity 0.35s ease;
-	}
+    .pvz-skins-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.55);
+        font-family: "Brianne's Hand", sans-serif;
+    }
 
-	#pvz-skins-backdrop.pvz-skins-open {
-		opacity: 1;
-		pointer-events: auto;
-	}
+    .pvz-skins-window {
+        width: min(940px, 94vw);
+        max-height: 90vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        background: #78b83f;
+        border: 6px solid #4d8727;
+        border-radius: 18px;
+        box-shadow:
+            0 0 0 4px rgba(0, 0, 0, 0.18),
+            0 10px 30px rgba(0, 0, 0, 0.45);
+        color: white;
+    }
 
-	#pvz-skins-panel {
-		width: min(720px, 92vw);
-		max-height: 82vh;
-		margin-top: 40px;
-		display: flex;
-		flex-direction: column;
-		overflow: hidden;
-		background: var(--pvz-grass);
-		border: 6px solid #5b8f32;
-		border-radius: 18px;
-		box-shadow: 0 8px 0 #5b8f32, 0 20px 40px rgba(0, 0, 0, 0.4);
-		padding: 20px 24px 24px;
-		font-family: 'Brianne\'s Hand', cursive;
-		transform: translateY(-140%);
-		transition: transform 0.4s ease;
-	}
+    .pvz-skins-header {
+        position: relative;
+        text-align: center;
+        padding: 16px 55px 12px;
+    }
 
-	#pvz-skins-backdrop.pvz-skins-open #pvz-skins-panel {
-		transform: translateY(0);
-	}
+    .pvz-skins-title {
+        margin: 0;
+        font-size: 42px;
+        line-height: 1;
+        text-shadow: 2px 3px 0 #38631d;
+    }
 
-	#pvz-skins-header {
-		position: relative;
-		text-align: center;
-		margin-bottom: 4px;
-	}
+    .pvz-skins-gems {
+        margin-top: 8px;
+        font-size: 22px;
+        color: #ffe35a;
+        text-shadow: 1px 2px 0 #4e7421;
+    }
 
-	#pvz-skins-title {
-		font-family: 'House of Terror', sans-serif;
-		color: var(--pvz-cream);
-		text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
-		font-size: 2em;
-		margin: 0;
-	}
+    .pvz-skins-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 42px;
+        height: 42px;
+        border: 0;
+        border-radius: 11px;
+        background: #5d9b2c;
+        color: #ff3030;
+        font-size: 30px;
+        font-weight: bold;
+        cursor: pointer;
+    }
 
-	#pvz-skins-close {
-		position: absolute;
-		top: -4px;
-		right: 0;
-		width: 40px;
-		height: 40px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: var(--pvz-grass-dark);
-		border: 3px solid #5b8f32;
-		border-radius: 10px;
-		color: #e53935;
-		font-family: 'Brianne\'s Hand', cursive;
-		font-size: 1.6em;
-		line-height: 1;
-		cursor: pointer;
-		text-decoration: none;
-	}
+    .pvz-skins-close:hover {
+        background: #6aaa35;
+    }
 
-	#pvz-skins-gems-row {
-		text-align: center;
-		font-family: 'Brianne\'s Hand', cursive;
-		color: #ffd54f;
-		font-size: 1.15em;
-		margin-bottom: 8px;
-	}
+    .pvz-skins-tabs {
+        display: flex;
+        gap: 4px;
+        padding: 0 20px;
+    }
 
-	#pvz-skins-gems-row img {
-		width: 18px;
-		height: 18px;
-		vertical-align: -2px;
-		margin-right: 4px;
-	}
+    .pvz-skins-tab {
+        flex: 1;
+        min-height: 55px;
+        border: 0;
+        border-radius: 8px 8px 0 0;
+        background: #528d2d;
+        color: white;
+        font-family: inherit;
+        font-size: 28px;
+        cursor: pointer;
+        transition: 0.15s;
+    }
 
-	#pvz-skins-rule {
-		border: none;
-		border-top: 2px solid rgba(255, 255, 255, 0.4);
-		margin: 8px 0 14px;
-	}
+    .pvz-skins-tab:hover:not(:disabled) {
+        background: #619f34;
+    }
 
-	#pvz-skins-list {
-		overflow-y: auto;
-		overflow-x: hidden;
-		flex: 1;
-		min-height: 0;
-		padding-right: 4px;
-		display: flex;
-		flex-direction: column;
-		gap: 12px;
-	}
+    .pvz-skins-tab.active {
+        background: #3f7722;
+        box-shadow: inset 0 -4px 0 #76bf43;
+    }
 
-	.pvz-skin-card {
-		display: flex;
-		gap: 14px;
-		align-items: center;
-		background: var(--pvz-grass-dark);
-		border: 3px solid #5b8f32;
-		border-radius: 10px;
-		padding: 10px 14px;
-	}
+    .pvz-skins-tab:disabled {
+        background: #7b8774;
+        color: #bfc4bb;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
 
-	.pvz-skin-image {
-		flex-shrink: 0;
-		width: 64px;
-		height: 64px;
-		border-radius: 6px;
-		background: transparent;
-		object-fit: contain;
-	}
+    .pvz-skins-content {
+        margin: 0 20px 20px;
+        padding: 15px;
+        overflow-y: auto;
+        min-height: 300px;
+        background: #3f7024;
+        border-radius: 0 0 13px 13px;
+    }
 
-	.pvz-skin-info {
-		flex: 1;
-		min-width: 0;
-		display: flex;
-		flex-direction: column;
-	}
+    .pvz-skins-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 12px;
+    }
 
-	.pvz-skin-name {
-		font-family: 'Brianne\'s Hand', cursive;
-		color: var(--pvz-cream);
-		text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
-		font-size: 1.15em;
-		margin: 0 0 2px;
-	}
+    .pvz-skin-card {
+        position: relative;
+        min-height: 190px;
+        padding: 12px;
+        background: #4f8b29;
+        border: 3px solid #346b1e;
+        border-radius: 12px;
+        box-shadow: inset 0 2px 0 rgba(255,255,255,0.12);
+    }
 
-	.pvz-skin-subtitle {
-		font-family: 'Brianne\'s Hand', cursive;
-		color: var(--pvz-cream);
-		opacity: 0.85;
-		font-size: 0.9em;
-		margin: 0 0 6px;
-		display: flex;
-		align-items: center;
-		gap: 6px;
-	}
+    .pvz-skin-card.sale {
+        border-color: #d4a52c;
+        box-shadow:
+            inset 0 2px 0 rgba(255,255,255,0.12),
+            0 0 0 2px rgba(255, 211, 66, 0.25);
+    }
 
-	.pvz-skin-tag {
-		display: inline-block;
-		font-family: 'Brianne\'s Hand', cursive;
-		font-size: 0.75em;
-		font-weight: 700;
-		padding: 1px 7px;
-		border-radius: 999px;
-	}
+    .pvz-skin-sale-badge {
+        position: absolute;
+        top: -7px;
+        right: -7px;
+        padding: 4px 9px;
+        border-radius: 7px;
+        background: #e64b32;
+        color: white;
+        font-size: 15px;
+        font-weight: bold;
+        transform: rotate(4deg);
+        box-shadow: 0 2px 0 rgba(0,0,0,0.25);
+    }
 
-	.pvz-skin-tag-limited {
-		background: #ff8f00;
-		color: #fff;
-	}
+    .pvz-skin-image {
+        width: 82px;
+        height: 82px;
+        object-fit: contain;
+        float: left;
+        margin: 0 10px 6px 0;
+        background: transparent;
+    }
 
-	.pvz-skin-tag-unavailable {
-		background: #555;
-		color: #ccc;
-	}
+    .pvz-skin-name {
+        font-size: 24px;
+        font-weight: bold;
+        line-height: 1.05;
+        margin-top: 2px;
+    }
 
-	.pvz-skin-price-row {
-		font-family: 'Brianne\'s Hand', cursive;
-		font-size: 0.95em;
-		display: flex;
-		align-items: center;
-		gap: 6px;
-	}
+    .pvz-skin-unit {
+        margin-top: 4px;
+        font-size: 15px;
+        line-height: 1.15;
+        color: #e9f5d8;
+    }
 
-	.pvz-skin-price-original {
-		color: var(--pvz-cream);
-		opacity: 0.6;
-		text-decoration: line-through;
-	}
+    .pvz-skin-price {
+        margin-top: 10px;
+        font-size: 20px;
+        color: #ffe65b;
+    }
 
-	.pvz-skin-price-current {
-		color: #ffd54f;
-	}
+    .pvz-skin-old-price {
+        margin-right: 6px;
+        color: #c7c7c7;
+        text-decoration: line-through;
+        font-size: 16px;
+    }
 
-	.pvz-skin-actions {
-		flex-shrink: 0;
-		display: flex;
-		flex-direction: column;
-		align-items: stretch;
-		gap: 6px;
-		min-width: 96px;
-	}
+    .pvz-skin-action {
+        clear: both;
+        display: block;
+        width: 100%;
+        margin-top: 12px;
+        padding: 8px 12px;
+        border: 2px solid #3e8a43;
+        border-radius: 8px;
+        background: #69c477;
+        color: white;
+        font-family: inherit;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+        text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+    }
 
-	.pvz-skin-btn {
-		font-family: 'Brianne\'s Hand', cursive;
-		font-weight: 700;
-		font-size: 0.85em;
-		border-radius: 8px;
-		border: none;
-		padding: 6px 10px;
-		cursor: pointer;
-	}
+    .pvz-skin-action:hover {
+        background: #7bd386;
+    }
 
-	.pvz-skin-btn-buy {
-		background: #ffca28;
-		color: #4a3200;
-	}
+    .pvz-skin-action:disabled {
+        background: #7f9680;
+        border-color: #697a69;
+        color: #cdd2cc;
+        cursor: not-allowed;
+    }
 
-	.pvz-skin-btn-buy:disabled {
-		background: #777;
-		color: #ccc;
-		cursor: not-allowed;
-	}
+    .pvz-skins-empty {
+        padding: 50px 20px;
+        text-align: center;
+        color: #dcebcf;
+        font-size: 24px;
+    }
 
-	.pvz-skin-btn-equip {
-		background: #66bb6a;
-		color: #fff;
-	}
+    .pvz-skins-confirm-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.45);
+    }
 
-	.pvz-skin-btn-unequip {
-		background: #e53935;
-		color: #fff;
-	}
+    .pvz-skins-confirm {
+        width: min(560px, 90vw);
+        padding: 25px;
+        border: 4px solid #4b7f25;
+        border-radius: 16px;
+        background: #eef4c9;
+        color: #31551b;
+        text-align: center;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.45);
+    }
 
-	.pvz-skin-equipped-label {
-		text-align: center;
-		font-family: 'Brianne\'s Hand', cursive;
-		color: #a5d6a7;
-		font-size: 0.85em;
-	}
+    .pvz-skins-confirm-title {
+        font-size: 27px;
+        font-weight: bold;
+    }
 
-	.pvz-skins-empty,
-	.pvz-skins-error {
-		font-family: 'Brianne\'s Hand', cursive;
-		color: var(--pvz-cream);
-		opacity: 0.7;
-		text-align: center;
-		padding: 16px 0;
-	}
+    .pvz-skins-confirm-text {
+        margin-top: 8px;
+        font-size: 20px;
+    }
 
-	.pvz-skins-error {
-		color: #ff8a80;
-	}
+    .pvz-skins-confirm-buttons {
+        display: flex;
+        gap: 18px;
+        margin-top: 22px;
+    }
+
+    .pvz-skins-confirm-buttons button {
+        flex: 1;
+        padding: 11px;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 22px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .pvz-confirm-yes {
+        border: 3px solid #238b32;
+        background: #31d44a;
+        color: white;
+    }
+
+    .pvz-confirm-no {
+        border: 3px solid #a9281d;
+        background: #e84032;
+        color: white;
+    }
+
+    @media (max-width: 650px) {
+        .pvz-skins-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .pvz-skins-tab {
+            font-size: 21px;
+        }
+
+        .pvz-skins-title {
+            font-size: 34px;
+        }
+    }
 </style>
 
-<div id="pvz-skins-backdrop">
-	<div id="pvz-skins-panel">
-		<div id="pvz-skins-header">
-			<h2 id="pvz-skins-title">Skins</h2>
-			<a href="javascript:void(0)" id="pvz-skins-close" aria-label="Close skins">X</a>
-		</div>
-		<div id="pvz-skins-gems-row"><img src="/assets/images/gemcurrencyicon.png" alt="" /><span id="pvz-skins-gems-count">0</span> Gems</div>
-		<hr id="pvz-skins-rule" />
-		<div id="pvz-skins-list"></div>
-	</div>
+<div class="pvz-skins-modal" id="skinsModal">
+    <div class="pvz-skins-window">
+
+        <div class="pvz-skins-header">
+            <button class="pvz-skins-close" id="skinsClose">×</button>
+
+            <h1 class="pvz-skins-title">Skins</h1>
+
+            <div class="pvz-skins-gems">
+                💎 <span id="skinsGemCount">0</span> Gems
+            </div>
+        </div>
+
+        <div class="pvz-skins-tabs">
+            <button class="pvz-skins-tab active" data-tab="store">
+                Store
+            </button>
+
+            <button class="pvz-skins-tab" data-tab="inventory">
+                Inventory
+            </button>
+
+            <button class="pvz-skins-tab" data-tab="limited">
+                Limited
+            </button>
+        </div>
+
+        <div class="pvz-skins-content">
+            <div class="pvz-skins-grid" id="skinsGrid"></div>
+        </div>
+    </div>
+</div>
+
+<div class="pvz-skins-confirm-overlay" id="skinsConfirmOverlay">
+    <div class="pvz-skins-confirm">
+
+        <div class="pvz-skins-confirm-title">
+            Are you sure you want to purchase <span id="confirmSkinName">(skin)</span>?
+        </div>
+
+        <div class="pvz-skins-confirm-text">
+            You will have
+            <span id="confirmRemainingGems">0</span>
+            💎 gems left after you purchase this skin, so think about it!
+        </div>
+
+        <div class="pvz-skins-confirm-buttons">
+            <button class="pvz-confirm-yes" id="confirmSkinPurchase">
+                Let's rock!
+            </button>
+
+            <button class="pvz-confirm-no" id="cancelSkinPurchase">
+                Maybe later!
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
-	(function () {
-		var $backdrop = document.getElementById('pvz-skins-backdrop');
-		var $panel = document.getElementById('pvz-skins-panel');
-		var $closeBtn = document.getElementById('pvz-skins-close');
-		var $openBtn = document.getElementById('pvz-skins-button');
-		var $list = document.getElementById('pvz-skins-list');
-		var $gemsCount = document.getElementById('pvz-skins-gems-count');
+(function () {
+    var currentTab = 'store';
+    var cachedSkins = [];
+    var pendingSkin = null;
 
-		function authedFetch(url, options) {
-			return window.getFirebaseIdToken().then(function (idToken) {
-				options = options || {};
-				options.headers = Object.assign({
-					'Content-Type': 'application/json',
-					Authorization: 'Bearer ' + idToken
-				}, options.headers || {});
-				return fetch(url, options).then(function (res) {
-					return res.json().then(function (json) {
-						if (!res.ok) {
-							throw new Error(json.error || 'request failed');
-						}
-						return json;
-					});
-				});
-			});
-		}
+    var modal = document.getElementById('skinsModal');
+    var grid = document.getElementById('skinsGrid');
+    var gemCount = document.getElementById('skinsGemCount');
 
-		function renderSkins(skins, equippedSkins) {
-			$list.innerHTML = '';
+    var confirmOverlay =
+        document.getElementById('skinsConfirmOverlay');
 
-			if (!skins || skins.length === 0) {
-				var $empty = document.createElement('div');
-				$empty.className = 'pvz-skins-empty';
-				$empty.textContent = 'No skins yet - check back soon!';
-				$list.appendChild($empty);
-				return;
-			}
+    var confirmName =
+        document.getElementById('confirmSkinName');
 
-			skins.forEach(function (skin) {
-				var $card = document.createElement('div');
-				$card.className = 'pvz-skin-card';
+    var confirmRemaining =
+        document.getElementById('confirmRemainingGems');
 
-				var $image = document.createElement('img');
-				$image.className = 'pvz-skin-image';
-				$image.src = skin.image || '/assets/images/favicon.png';
-				$image.alt = skin.name || 'Skin';
+    function escapeHtml(value) {
+        return String(value == null ? '' : value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 
-				var $info = document.createElement('div');
-				$info.className = 'pvz-skin-info';
+    function getCurrentGems() {
+        var element =
+            document.querySelector('[data-gems], #gems, .gems');
 
-				var $name = document.createElement('h3');
-				$name.className = 'pvz-skin-name';
-				$name.textContent = skin.name || 'Skin';
+        if (!element) {
+            return 0;
+        }
 
-				var $subtitle = document.createElement('p');
-				$subtitle.className = 'pvz-skin-subtitle';
-				var subtitleText = document.createElement('span');
-				subtitleText.textContent = skin.unitTypeName || 'Unknown';
-				$subtitle.appendChild(subtitleText);
-				if (skin.availability === 'limited') {
-					var $tag = document.createElement('span');
-					$tag.className = 'pvz-skin-tag ' + (skin.purchasable || skin.owned ? 'pvz-skin-tag-limited' : 'pvz-skin-tag-unavailable');
-					$tag.textContent = skin.purchasable || skin.owned ? 'Limited' : 'No longer available';
-					$subtitle.appendChild($tag);
-				}
+        var match = String(element.textContent || '')
+            .replace(/,/g, '')
+            .match(/\d+/);
 
-				var $priceRow = document.createElement('div');
-				$priceRow.className = 'pvz-skin-price-row';
-				if (!skin.owned) {
-					if (skin.effectivePrice < skin.price) {
-						var $original = document.createElement('span');
-						$original.className = 'pvz-skin-price-original';
-						$original.textContent = skin.price + ' Gems';
-						$priceRow.appendChild($original);
-					}
-					var $current = document.createElement('span');
-					$current.className = 'pvz-skin-price-current';
-					$current.textContent = skin.effectivePrice + ' Gems';
-					$priceRow.appendChild($current);
-				}
+        return match ? Number(match[0]) : 0;
+    }
 
-				$info.appendChild($name);
-				$info.appendChild($subtitle);
-				$info.appendChild($priceRow);
+    function setGemDisplay(value) {
+        if (gemCount) {
+            gemCount.textContent = Number(value || 0).toLocaleString();
+        }
+    }
 
-				var $actions = document.createElement('div');
-				$actions.className = 'pvz-skin-actions';
+    function setActiveTab(tab) {
+        currentTab = tab;
 
-				var isEquipped = equippedSkins && equippedSkins[skin.unitType] === skin.id;
+        document.querySelectorAll('.pvz-skins-tab')
+            .forEach(function (button) {
+                button.classList.toggle(
+                    'active',
+                    button.dataset.tab === tab
+                );
+            });
 
-				if (!skin.owned) {
-					var $buyBtn = document.createElement('button');
-					$buyBtn.type = 'button';
-					$buyBtn.className = 'pvz-skin-btn pvz-skin-btn-buy';
-					$buyBtn.textContent = 'Buy';
-					$buyBtn.disabled = !skin.purchasable;
-					$buyBtn.addEventListener('click', function () {
-						buySkin(skin.id, $buyBtn);
-					});
-					$actions.appendChild($buyBtn);
-				} else if (isEquipped) {
-					var $equippedLabel = document.createElement('div');
-					$equippedLabel.className = 'pvz-skin-equipped-label';
-					$equippedLabel.textContent = 'Equipped';
-					var $unequipBtn = document.createElement('button');
-					$unequipBtn.type = 'button';
-					$unequipBtn.className = 'pvz-skin-btn pvz-skin-btn-unequip';
-					$unequipBtn.textContent = 'Unequip';
-					$unequipBtn.addEventListener('click', function () {
-						equipSkin(skin.unitType, null, $unequipBtn);
-					});
-					$actions.appendChild($equippedLabel);
-					$actions.appendChild($unequipBtn);
-				} else {
-					var $equipBtn = document.createElement('button');
-					$equipBtn.type = 'button';
-					$equipBtn.className = 'pvz-skin-btn pvz-skin-btn-equip';
-					$equipBtn.textContent = 'Equip';
-					$equipBtn.addEventListener('click', function () {
-						equipSkin(skin.unitType, skin.id, $equipBtn);
-					});
-					$actions.appendChild($equipBtn);
-				}
+        renderCurrentTab();
+    }
 
-				$card.appendChild($image);
-				$card.appendChild($info);
-				$card.appendChild($actions);
-				$list.appendChild($card);
-			});
-		}
+    function updateLimitedTabState() {
+        var limitedSkins = cachedSkins.filter(function (skin) {
+            return skin.availability === 'limited' &&
+                   skin.purchasable;
+        });
 
-		function showListError(message) {
-			$list.innerHTML = '';
-			var $error = document.createElement('div');
-			$error.className = 'pvz-skins-error';
-			$error.textContent = message;
-			$list.appendChild($error);
-		}
+        var limitedTab =
+            document.querySelector(
+                '.pvz-skins-tab[data-tab="limited"]'
+            );
 
-		function loadSkins() {
-			Promise.all([
-				authedFetch('/api/skins'),
-				authedFetch('/api/player-data').catch(function () {
-					return { playerDoc: null };
-				})
-			])
-			.then(function (results) {
-				var skinsRes = results[0] || {};
-				var playerDoc = results[1] && results[1].playerDoc;
-				$gemsCount.textContent = (playerDoc && playerDoc.gems) || 0;
-				renderSkins(skinsRes.skins || [], skinsRes.equippedSkins || {});
-			})
-			.catch(function (err) {
-				console.warn('Could not load skins:', err);
-				showListError('Could not load skins - are you signed in?');
-			});
-		}
+        limitedTab.disabled = limitedSkins.length === 0;
 
-		function buySkin(skinId, $btn) {
-			$btn.disabled = true;
-			authedFetch('/api/skins/buy', {
-				method: 'POST',
-				body: JSON.stringify({ skinId: skinId })
-			})
-			.then(function () {
-				loadSkins();
-			})
-			.catch(function (err) {
-				alert(err.message);
-				$btn.disabled = false;
-			});
-		}
+        if (limitedTab.disabled && currentTab === 'limited') {
+            setActiveTab('store');
+        }
+    }
 
-		function equipSkin(unitType, skinId, $btn) {
-			$btn.disabled = true;
-			authedFetch('/api/skins/equip', {
-				method: 'POST',
-				body: JSON.stringify({ unitType: unitType, skinId: skinId })
-			})
-			.then(function () {
-				loadSkins();
-			})
-			.catch(function (err) {
-				alert(err.message);
-				$btn.disabled = false;
-			});
-		}
+    function renderCurrentTab() {
+        var skins = cachedSkins.slice();
 
-		function openSkins() {
-			$backdrop.classList.add('pvz-skins-open');
-			loadSkins(); // always reload - gems/ownership can change between opens
-		}
+        if (currentTab === 'inventory') {
+            skins = skins.filter(function (skin) {
+                return skin.owned;
+            });
+        } else if (currentTab === 'limited') {
+            skins = skins.filter(function (skin) {
+                return skin.availability === 'limited' &&
+                       skin.purchasable;
+            });
+        } else {
+            skins.sort(function (a, b) {
+                return Number(!!b.onSale) -
+                       Number(!!a.onSale);
+            });
+        }
 
-		function closeSkins() {
-			$backdrop.classList.remove('pvz-skins-open');
-		}
+        if (!skins.length) {
+            grid.innerHTML =
+                '<div class="pvz-skins-empty">' +
+                'There are no skins here right now.' +
+                '</div>';
 
-		if ($openBtn) {
-			$openBtn.addEventListener('click', openSkins);
-		}
-		$closeBtn.addEventListener('click', closeSkins);
+            return;
+        }
 
-		$backdrop.addEventListener('click', function (event) {
-			if (event.target === $backdrop) {
-				closeSkins();
-			}
-		});
+        grid.innerHTML = skins.map(function (skin) {
+            var price = Number(
+                skin.effectivePrice != null
+                    ? skin.effectivePrice
+                    : skin.price
+            );
 
-		$panel.addEventListener('click', function (event) {
-			event.stopPropagation();
-		});
-	})();
+            var oldPrice =
+                Number(skin.price) > price
+                    ? Number(skin.price)
+                    : null;
+
+            var saleBadge =
+                skin.onSale
+                    ? '<div class="pvz-skin-sale-badge">SALE!</div>'
+                    : '';
+
+            var actionText =
+                skin.owned ? 'Equip' : 'Buy';
+
+            var disabled =
+                skin.owned
+                    ? ''
+                    : (!skin.purchasable ? 'disabled' : '');
+
+            return (
+                '<div class="pvz-skin-card ' +
+                    (skin.onSale ? 'sale' : '') +
+                '">' +
+
+                    saleBadge +
+
+                    '<img class="pvz-skin-image" ' +
+                        'src="' + escapeHtml(skin.image) + '" ' +
+                        'alt="' + escapeHtml(skin.name) + '">' +
+
+                    '<div class="pvz-skin-name">' +
+                        escapeHtml(skin.name) +
+                    '</div>' +
+
+                    '<div class="pvz-skin-unit">' +
+                        escapeHtml(skin.unitTypeName) +
+                    '</div>' +
+
+                    '<div class="pvz-skin-price">' +
+
+                        (oldPrice !== null
+                            ? '<span class="pvz-skin-old-price">' +
+                                oldPrice +
+                              '</span>'
+                            : '') +
+
+                        '💎 ' + price +
+
+                    '</div>' +
+
+                    '<button class="pvz-skin-action" ' +
+                        'data-skin-id="' +
+                        escapeHtml(skin.id) + '" ' +
+                        disabled +
+                    '>' +
+                        actionText +
+                    '</button>' +
+
+                '</div>'
+            );
+        }).join('');
+    }
+
+    function openPurchaseConfirmation(skin) {
+        var gems = getCurrentGems();
+        var price = Number(
+            skin.effectivePrice != null
+                ? skin.effectivePrice
+                : skin.price
+        );
+
+        pendingSkin = skin;
+
+        confirmName.textContent = skin.name;
+        confirmRemaining.textContent =
+            Math.max(0, gems - price).toLocaleString();
+
+        confirmOverlay.style.display = 'flex';
+    }
+
+    function closePurchaseConfirmation() {
+        pendingSkin = null;
+        confirmOverlay.style.display = 'none';
+    }
+
+    async function purchaseSkin(skin) {
+        var response = await fetch('/api/skins/purchase', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                skinId: skin.id
+            })
+        });
+
+        var result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(
+                result.error || 'Unable to purchase skin.'
+            );
+        }
+
+        return result;
+    }
+
+    async function loadSkins() {
+        try {
+            var response = await fetch('/api/skins');
+
+            if (!response.ok) {
+                throw new Error('Unable to load skins.');
+            }
+
+            var data = await response.json();
+
+            cachedSkins = data.skins || [];
+
+            setGemDisplay(getCurrentGems());
+            updateLimitedTabState();
+
+            renderCurrentTab();
+        } catch (error) {
+            grid.innerHTML =
+                '<div class="pvz-skins-empty">' +
+                'Unable to load skins right now.' +
+                '</div>';
+
+            console.error(error);
+        }
+    }
+
+    document.querySelectorAll('.pvz-skins-tab')
+        .forEach(function (button) {
+            button.addEventListener('click', function () {
+                if (button.disabled) {
+                    return;
+                }
+
+                setActiveTab(button.dataset.tab);
+            });
+        });
+
+    grid.addEventListener('click', async function (event) {
+        var button =
+            event.target.closest('.pvz-skin-action');
+
+        if (!button || button.disabled) {
+            return;
+        }
+
+        var skin = cachedSkins.find(function (item) {
+            return item.id === button.dataset.skinId;
+        });
+
+        if (!skin) {
+            return;
+        }
+
+        if (skin.owned) {
+            return;
+        }
+
+        openPurchaseConfirmation(skin);
+    });
+
+    document.getElementById('confirmSkinPurchase')
+        .addEventListener('click', async function () {
+            if (!pendingSkin) {
+                return;
+            }
+
+            var skin = pendingSkin;
+
+            try {
+                this.disabled = true;
+
+                await purchaseSkin(skin);
+
+                closePurchaseConfirmation();
+
+                await loadSkins();
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                this.disabled = false;
+            }
+        });
+
+    document.getElementById('cancelSkinPurchase')
+        .addEventListener(
+            'click',
+            closePurchaseConfirmation
+        );
+
+    document.getElementById('skinsClose')
+        .addEventListener('click', function () {
+            modal.style.display = 'none';
+        });
+
+    // Always open on Store.
+    currentTab = 'store';
+    setActiveTab('store');
+    loadSkins();
+})();
 </script>
