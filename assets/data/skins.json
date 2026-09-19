@@ -8,34 +8,17 @@
 	},
 	"skins": [
 		{
-			"id": "golden-wallnut",
-			"name": "Golden Wall-nut",
-			"unitType": "wqQ9brWk3x",
-			"unitTypeName": "Wall-nut",
-			"image": "/sprites/1671313700127_wallnut.png",
-			"price": 500,
+			"id": "tweeter-peashooter",
+			"name": "Peashooter",
+			"unitType": "CbHUJI1d2B",
+			"unitTypeName": "Peashooter - Tweet, tweet! Not to be confused with X.",
+			"image": "/skins/TweeterSkin.png",
+			"price": 20,
 			"availability": "always",
 			"availableFrom": null,
 			"availableUntil": null,
 			"excludeFromGlobalSale": false,
 			"sale": null
-		},
-		{
-			"id": "disco-browncoat",
-			"name": "Disco Browncoat",
-			"unitType": "xI4x9Y0MzD",
-			"unitTypeName": "Browncoat",
-			"image": "/sprites/1670932866310_1661295352240_1651771939123_2022_05_05_0mj_Kleki.png",
-			"price": 750,
-			"availability": "limited",
-			"availableFrom": null,
-			"availableUntil": "2026-12-31T23:59:59Z",
-			"excludeFromGlobalSale": false,
-			"sale": {
-				"price": 400,
-				"start": null,
-				"end": "2026-10-15T00:00:00Z"
-			}
 		}
 	]
 }
