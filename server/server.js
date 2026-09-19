@@ -482,8 +482,11 @@ var Server = TaroClass.extend({
 					price: skin.price,
 					effectivePrice: getEffectivePrice(skin),
 					availability: skin.availability,
+					availableFrom: skin.availableFrom || null,
+					availableUntil: skin.availableUntil || null,
 					purchasable: isPurchasable(skin),
 					owned: ownedSkins.includes(skin.id),
+					onSale: getEffectivePrice(skin) < skin.price,
 				}));
 				return res.json({ skins, equippedSkins });
 			} catch (err) {
