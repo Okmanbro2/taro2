@@ -9,10 +9,10 @@
 	"skins": [
 		{
 			"id": "tweeter-peashooter",
-			"name": "Peashooter",
+			"name": "Tweeter",
 			"unitType": "CbHUJI1d2B",
-			"unitTypeName": "Peashooter - Tweet, tweet! Not to be confused with X.",
-			"image": "/skins/TweeterSkin.png",
+			"unitTypeName": "For Peashooter - Tweet, tweet! Not to be confused with X.",
+			"image": "assets/skins/TweeterSkin.png",
 			"price": 20,
 			"availability": "always",
 			"availableFrom": null,
