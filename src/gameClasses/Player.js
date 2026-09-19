@@ -209,6 +209,27 @@ var Player = TaroEntity.extend({
 			var unit = new Unit(data);
 			unit.setOwnerPlayer(self.id());
 
+			// Cosmetic skins: purely visual, reuses the one working piece of the
+			// original (dead, modd.io-real-money-backed) purchasables system -
+			// setting _stats.cellSheet.url directly. This becomes part of the
+			// unit's normal creation payload synced to clients, same as any
+			// other default stat - see Unit.js's client-side init for the
+			// updateTexture() call that actually renders it.
+			if (self._equippedSkins) {
+				var equippedSkinId = self._equippedSkins[unit._stats.type];
+				if (equippedSkinId && taro.playerDataStore && taro.playerDataStore.getSkinById) {
+					var skin = taro.playerDataStore.getSkinById(equippedSkinId);
+					// re-check the skin actually belongs to this unit type here too,
+					// even though equipSkinForUnitType already enforces this at
+					// equip-time - skins.json could change between when this was
+					// equipped and now, and this is cheap insurance against ever
+					// putting the wrong skin's art on a unit
+					if (skin && skin.unitType === unit._stats.type && skin.image) {
+						unit._stats.cellSheet.url = skin.image;
+					}
+				}
+			}
+
 			taro.script.trigger('entityCreatedGlobal', { entityId: unit.id() });
 			unit.script.trigger('entityCreated');
 
@@ -982,6 +1003,11 @@ var Player = TaroEntity.extend({
 		// fetched for this join, badges included, no extra read needed.
 		if (taro.isServer) {
 			self._badgeCache = (persistData && persistData.badges) || {};
+			// equippedSkins: map of unitType -> equipped skinId, read by
+			// createUnit below when a unit actually spawns. Same free seeding
+			// as _badgeCache above - persistData already has this, no extra
+			// Firestore read needed.
+			self._equippedSkins = (persistData && persistData.equippedSkins) || {};
 		}
 
 		if (persistData && persistData.data && persistData.data.player) {
