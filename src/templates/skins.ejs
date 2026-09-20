@@ -19,7 +19,7 @@
 	}
 
 	#pvz-skins-panel {
-		width: min(760px, 92vw);
+		width: min(920px, 94vw);
 		max-height: 82vh;
 		margin-top: 40px;
 		display: flex;
@@ -130,6 +130,50 @@
 		color: #aaa;
 		cursor: not-allowed;
 		opacity: 0.65;
+	}
+
+	#pvz-skins-body-row {
+		display: flex;
+		gap: 12px;
+		flex: 1;
+		min-height: 0;
+	}
+
+	#pvz-skins-sidebar {
+		flex-shrink: 0;
+		width: 140px;
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		padding-right: 2px;
+	}
+
+	.pvz-skins-category-btn {
+		font-family: 'Brianne\'s Hand', cursive;
+		font-weight: 700;
+		font-size: 0.85em;
+		padding: 8px 10px;
+		border: 3px solid #5b8f32;
+		border-radius: 9px;
+		background: var(--pvz-grass-dark);
+		color: var(--pvz-cream);
+		cursor: pointer;
+		text-align: left;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		transition: background 0.15s ease, transform 0.15s ease;
+	}
+
+	.pvz-skins-category-btn:hover {
+		background: #4f822d;
+		transform: translateX(2px);
+	}
+
+	.pvz-skins-category-btn.active {
+		background: #79a942;
+		box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.15);
 	}
 
 	#pvz-skins-list {
@@ -384,7 +428,10 @@
 			<button type="button" class="pvz-skins-tab" data-tab="limited">Limited</button>
 		</div>
 
-		<div id="pvz-skins-list"></div>
+		<div id="pvz-skins-body-row">
+			<div id="pvz-skins-sidebar"></div>
+			<div id="pvz-skins-list"></div>
+		</div>
 	</div>
 </div>
 
@@ -408,12 +455,14 @@
 		var $list = document.getElementById('pvz-skins-list');
 		var $gemsCount = document.getElementById('pvz-skins-gems-count');
 		var $tabs = document.querySelectorAll('.pvz-skins-tab');
+		var $sidebar = document.getElementById('pvz-skins-sidebar');
 		var $confirmBackdrop = document.getElementById('pvz-skins-confirm-backdrop');
 		var $confirmText = document.getElementById('pvz-skins-confirm-text');
 		var $confirmYes = document.getElementById('pvz-skins-confirm-yes');
 		var $confirmNo = document.getElementById('pvz-skins-confirm-no');
 
 		var currentTab = 'store';
+		var currentCategory = null; // null = "All" - a specific unitType id otherwise
 		var cachedSkins = [];
 		var cachedEquippedSkins = {};
 		var pendingPurchase = null;
@@ -433,6 +482,55 @@
 						return json;
 					});
 				});
+			});
+		}
+
+		function setCategory(unitType) {
+			currentCategory = unitType;
+			renderSidebar();
+			renderCurrentTab();
+		}
+
+		// builds one button per unique unitType found in cachedSkins, labeled
+		// with the unit's actual display name (unitTypeName) rather than its
+		// raw id - "peashooter", not "CbHUJI1d2B" - skins sharing the same
+		// unitType (e.g. the 3 Peashooter skins) collapse into a single
+		// category button, since they're all the same unit underneath
+		function renderSidebar() {
+			$sidebar.innerHTML = '';
+
+			var categoriesById = {};
+			cachedSkins.forEach(function (skin) {
+				if (!categoriesById[skin.unitType]) {
+					categoriesById[skin.unitType] = skin.unitTypeName || skin.unitType;
+				}
+			});
+			var categories = Object.keys(categoriesById).map(function (unitType) {
+				return { unitType: unitType, name: categoriesById[unitType] };
+			});
+			categories.sort(function (a, b) {
+				return a.name.localeCompare(b.name);
+			});
+
+			var $allBtn = document.createElement('button');
+			$allBtn.type = 'button';
+			$allBtn.className = 'pvz-skins-category-btn' + (currentCategory === null ? ' active' : '');
+			$allBtn.textContent = 'All';
+			$allBtn.addEventListener('click', function () {
+				setCategory(null);
+			});
+			$sidebar.appendChild($allBtn);
+
+			categories.forEach(function (category) {
+				var $btn = document.createElement('button');
+				$btn.type = 'button';
+				$btn.className = 'pvz-skins-category-btn' + (currentCategory === category.unitType ? ' active' : '');
+				$btn.textContent = category.name;
+				$btn.title = category.name;
+				$btn.addEventListener('click', function () {
+					setCategory(category.unitType);
+				});
+				$sidebar.appendChild($btn);
 			});
 		}
 
@@ -467,6 +565,12 @@
 
 		function renderCurrentTab() {
 			var skins = cachedSkins.slice();
+
+			if (currentCategory !== null) {
+				skins = skins.filter(function (skin) {
+					return skin.unitType === currentCategory;
+				});
+			}
 
 			if (currentTab === 'inventory') {
 				skins = skins.filter(function (skin) {
@@ -524,7 +628,11 @@
 				var $subtitle = document.createElement('p');
 				$subtitle.className = 'pvz-skin-subtitle';
 				var subtitleText = document.createElement('span');
-				subtitleText.textContent = 'For ' + (skin.unitTypeName || 'Unknown');
+				var subtitleLabel = 'For ' + (skin.unitTypeName || 'Unknown');
+				if (skin.description) {
+					subtitleLabel += ' - ' + skin.description;
+				}
+				subtitleText.textContent = subtitleLabel;
 				$subtitle.appendChild(subtitleText);
 
 				if (skin.availability === 'limited') {
@@ -627,6 +735,7 @@
 				$gemsCount.textContent = (playerDoc && playerDoc.gems) || 0;
 				cachedSkins = skinsRes.skins || [];
 				cachedEquippedSkins = skinsRes.equippedSkins || {};
+				renderSidebar();
 				updateLimitedTab();
 				renderCurrentTab();
 			})
