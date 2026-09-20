@@ -160,4 +160,5 @@ src/helpers/tiers.js.map
 engine/components/physics/*.js
 engine/components/physics/*.js.map
 src/utils/*.js
+!src/utils/profanityFilter.js
 src/utils/*.js.map

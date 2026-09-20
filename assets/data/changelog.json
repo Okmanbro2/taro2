@@ -1,16 +1,12 @@
 {
-	"version": "3.6.1",
+	"version": "3.6.2",
 	"entries": [
 		{
-			"title": "Join the Discord",
-			"description": "Join the Discord for the full changelog!"
+			"title": "Chat Upgrades",
+			"description": "Upgraded the chat - increased character limits and added a proper filter."
 		},
 		{
-			"title": "Welcome Back, Skins!",
-			"description": "Added back most of the previously lost skins that were present in the skin shop in the game during the MODD days. Get your skins in the skin store!"
-		},
-		{
-			"title": "More Bugs Are Squashed",
+			"title": "Even More Bugs Are Squashed",
 			"description": "Fixed more bugs."
 		},
 		{

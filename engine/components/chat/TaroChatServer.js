@@ -172,8 +172,8 @@ var TaroChatServer = {
 				returnValue = true;
 			}
 
-			// sending more than 80 characters in 4 seconds
-			if (timeElapsed <= 4000 && charCount > 80) {
+			// sending more than 200 characters in 4 seconds
+			if (timeElapsed <= 4000 && charCount > 200) {
 				returnValue = true;
 			}
 
@@ -195,18 +195,19 @@ var TaroChatServer = {
 			return;
 		}
 
+		// enforce the 200-char limit server-side too - the client-side cap in
+		// TaroChatComponent.sendChatMessage() is trivially bypassable by anyone
+		// sending taroChatMsg directly instead of through the UI.
+		if (msg.text.length > 200) {
+			msg.text = msg.text.substr(0, 200);
+		}
+
 		// msg.text = self.validator.blacklist(msg.text, self.regex);
 		// msg.text = self.validator.whitelist(msg.text, self.regex)
 		// msg.text = self.sanitizer.sanitize(msg.text);
 		// msg.text = self.validator.escape(msg.text);
-		// msg.text = self.filter.clean(msg.text);
 
-		// no filter on standalone
-		//
-		if (process.env.ENV != 'standalone') {
-			msg.text = self.filter.cleanHacked(msg.text); // https://github.com/web-mech/badwords/issues/93
-		}
-		//
+		msg.text = self.filter.clean(msg.text);
 
 		if (msg == undefined || msg.text == undefined) return;
 

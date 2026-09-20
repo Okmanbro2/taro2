@@ -15,9 +15,12 @@ var TaroChatComponent = TaroEventingClass.extend({
 
 		/* CEXCLUDE */
 		if (taro.isServer) {
-			if (process.env.ENV != 'standalone') {
-				this.filter = betterFilter;
-			}
+			// betterFilter was modd.io's own hosted-platform filter (see
+			// server/ServerConfig.js) - never included in this open-source repo,
+			// and only ever loaded when NOT running standalone, so this did
+			// nothing at all on a self-hosted server. src/utils/profanityFilter.js
+			// replaces it and runs regardless of ENV.
+			this.filter = require('../../../src/utils/profanityFilter');
 
 			// this.sanitizer = require('sanitizer');
 			this.validator = require('validator');
@@ -73,8 +76,8 @@ var TaroChatComponent = TaroEventingClass.extend({
 			var gameData = taro.game && taro.game.data && taro.game.data.defaultData;
 			var message = val === undefined ? $('#message').val() : val;
 
-			// set character limit to 100 characters
-			if (message.length > 80) message = message.substr(0, 80);
+			// set character limit to 200 characters
+			if (message.length > 200) message = message.substr(0, 200);
 
 			console.log('[CHAT DEBUG] sendChatMessage called. message:', message, 'player:', player, 'banChat:', player && player._stats && player._stats.banChat);
 
