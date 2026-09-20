@@ -68,6 +68,18 @@
 		// exposed so auth.ejs's renderAuthUI can call this whenever sign-in
 		// state changes (login, logout, page load) - guarded there with
 		// `window.refreshGemCounter &&` so include order doesn't matter
+		// The skins store dispatches this event immediately after a successful
+		// purchase. Update the actual menu counter directly so it changes
+		// without waiting for a page reload or another /api/player-data request.
+		document.addEventListener('pvz:gems-updated', function (event) {
+			var detail = event && event.detail;
+			var gems = detail && Number(detail.gems);
+			if (!Number.isFinite(gems)) return;
+			$value.textContent = gems;
+			$widget.classList.remove('d-none');
+			repositionBelowAuthWidget();
+		});
+
 		window.refreshGemCounter = function (user) {
 			repositionBelowAuthWidget();
 			if (!user) {
