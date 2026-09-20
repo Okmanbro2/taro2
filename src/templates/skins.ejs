@@ -140,8 +140,9 @@
 	}
 
 	#pvz-skins-sidebar {
-		flex-shrink: 0;
-		width: 140px;
+		flex: 0 0 190px;
+		width: 190px;
+		max-width: 28%;
 		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
@@ -150,9 +151,12 @@
 	}
 
 	.pvz-skins-category-btn {
+		width: 100%;
+		box-sizing: border-box;
 		font-family: 'Brianne\'s Hand', cursive;
 		font-weight: 700;
-		font-size: 0.85em;
+		font-size: 0.88em;
+		line-height: 1.05;
 		padding: 8px 10px;
 		border: 3px solid #5b8f32;
 		border-radius: 9px;
@@ -160,9 +164,11 @@
 		color: var(--pvz-cream);
 		cursor: pointer;
 		text-align: left;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		white-space: normal;
+		overflow: visible;
+		text-overflow: clip;
+		word-break: normal;
+		overflow-wrap: anywhere;
 		transition: background 0.15s ease, transform 0.15s ease;
 	}
 
@@ -411,6 +417,27 @@
 		opacity: 0.6;
 		cursor: not-allowed;
 	}
+
+	@media (max-width: 700px) {
+		#pvz-skins-body-row {
+			flex-direction: column;
+		}
+
+		#pvz-skins-sidebar {
+			flex: 0 0 auto;
+			width: 100%;
+			max-width: none;
+			max-height: 150px;
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 6px;
+		}
+
+		.pvz-skins-category-btn {
+			text-align: center;
+		}
+	}
+
 </style>
 
 <div id="pvz-skins-backdrop">
@@ -485,6 +512,20 @@
 			});
 		}
 
+		// skins.json stores the unit name and its flavor description together
+		// in unitTypeName, separated by " - ". Keep them separate in the UI.
+		function getUnitName(skin) {
+			var value = String((skin && skin.unitTypeName) || '').trim();
+			var separator = value.indexOf(' - ');
+			return separator >= 0 ? value.slice(0, separator).trim() : value;
+		}
+
+		function getUnitDescription(skin) {
+			var value = String((skin && skin.unitTypeName) || '').trim();
+			var separator = value.indexOf(' - ');
+			return separator >= 0 ? value.slice(separator + 3).trim() : '';
+		}
+
 		function setCategory(unitType) {
 			currentCategory = unitType;
 			renderSidebar();
@@ -499,16 +540,56 @@
 		function renderSidebar() {
 			$sidebar.innerHTML = '';
 
+			// store: a category exists only when that unit has at least one
+			// permanent/always-available skin. limited-only units therefore
+			// do not create a store category
+			//
+			// Inventory: owned limited skins count too
+			//
+			// Limited: show categories for limited skins that are currently
+			// purchasable
 			var categoriesById = {};
-			cachedSkins.forEach(function (skin) {
+
+			function addCategorySkin(skin) {
+				if (!skin || !skin.unitType) return;
+
 				if (!categoriesById[skin.unitType]) {
-					categoriesById[skin.unitType] = skin.unitTypeName || skin.unitType;
+					categoriesById[skin.unitType] = {
+						unitType: skin.unitType,
+						name: getUnitName(skin) || skin.unitType,
+						count: 0
+					};
 				}
+
+				categoriesById[skin.unitType].count += 1;
+			}
+
+			cachedSkins.forEach(function (skin) {
+				var include = false;
+
+				if (currentTab === 'inventory') {
+					// inventory is the exception: owned limited skins still
+					// make their unit category visible
+					include = !!skin.owned;
+				} else if (currentTab === 'limited') {
+					include = skin.availability === 'limited' && skin.purchasable;
+				} else {
+					// store categories are based only on permanent skins
+					include = skin.availability !== 'limited';
+				}
+
+				if (include) addCategorySkin(skin);
 			});
+
 			var categories = Object.keys(categoriesById).map(function (unitType) {
-				return { unitType: unitType, name: categoriesById[unitType] };
+				return categoriesById[unitType];
 			});
+
+			// ordering
 			categories.sort(function (a, b) {
+				if (b.count !== a.count) {
+					return b.count - a.count;
+				}
 				return a.name.localeCompare(b.name);
 			});
 
@@ -526,7 +607,7 @@
 				$btn.type = 'button';
 				$btn.className = 'pvz-skins-category-btn' + (currentCategory === category.unitType ? ' active' : '');
 				$btn.textContent = category.name;
-				$btn.title = category.name;
+				$btn.title = category.name + ' (' + category.count + ' skin' + (category.count === 1 ? '' : 's') + ')';
 				$btn.addEventListener('click', function () {
 					setCategory(category.unitType);
 				});
@@ -557,13 +638,36 @@
 
 		function setTab(tab) {
 			currentTab = tab;
+			// more more cats
+			renderSidebar();
 			$tabs.forEach(function ($tab) {
 				$tab.classList.toggle('active', $tab.dataset.tab === tab);
 			});
 			renderCurrentTab();
 		}
 
+		function ensureCurrentCategoryExists() {
+			if (currentCategory === null) return;
+
+			var exists = cachedSkins.some(function (skin) {
+				if (skin.unitType !== currentCategory) return false;
+
+				if (currentTab === 'inventory') {
+					return !!skin.owned;
+				}
+				if (currentTab === 'limited') {
+					return skin.availability === 'limited' && skin.purchasable;
+				}
+				return skin.availability !== 'limited';
+			});
+
+			if (!exists) {
+				currentCategory = null;
+			}
+		}
+
 		function renderCurrentTab() {
+			ensureCurrentCategoryExists();
 			var skins = cachedSkins.slice();
 
 			if (currentCategory !== null) {
@@ -628,9 +732,11 @@
 				var $subtitle = document.createElement('p');
 				$subtitle.className = 'pvz-skin-subtitle';
 				var subtitleText = document.createElement('span');
-				var subtitleLabel = 'For ' + (skin.unitTypeName || 'Unknown');
-				if (skin.description) {
-					subtitleLabel += ' - ' + skin.description;
+				var unitName = getUnitName(skin) || 'Unknown';
+				var unitDescription = getUnitDescription(skin);
+				var subtitleLabel = 'For ' + unitName;
+				if (unitDescription) {
+					subtitleLabel += ' - ' + unitDescription;
 				}
 				subtitleText.textContent = subtitleLabel;
 				$subtitle.appendChild(subtitleText);
@@ -722,6 +828,17 @@
 			$list.appendChild($error);
 		}
 
+		function updateExternalGemCounters(gems) {
+			var value = Number(gems);
+			if (!Number.isFinite(value)) return;
+
+			// The main menu's gem-counter.ejs listens for this event and updates
+			// its exact #gc-value element immediately.
+			document.dispatchEvent(new CustomEvent('pvz:gems-updated', {
+				detail: { gems: value }
+			}));
+		}
+
 		function loadSkins() {
 			Promise.all([
 				authedFetch('/api/skins'),
@@ -732,9 +849,12 @@
 			.then(function (results) {
 				var skinsRes = results[0] || {};
 				var playerDoc = results[1] && results[1].playerDoc;
-				$gemsCount.textContent = (playerDoc && playerDoc.gems) || 0;
+				var currentGems = Number((playerDoc && playerDoc.gems) || 0);
+				$gemsCount.textContent = currentGems;
+				updateExternalGemCounters(currentGems);
 				cachedSkins = skinsRes.skins || [];
 				cachedEquippedSkins = skinsRes.equippedSkins || {};
+				ensureCurrentCategoryExists();
 				renderSidebar();
 				updateLimitedTab();
 				renderCurrentTab();
@@ -773,8 +893,20 @@
 				method: 'POST',
 				body: JSON.stringify({ skinId: pending.skin.id })
 			})
-			.then(function () {
+			.then(function (result) {
 				closePurchaseConfirmation();
+
+				// /api/skins/buy returns the player's new gem balance in
+				// the purchase result. Use it immediately so the menu counter
+				// changes at the same moment as the skin-store counter.
+				if (result && result.gems !== undefined) {
+					var newGems = Number(result.gems);
+					if (Number.isFinite(newGems)) {
+						$gemsCount.textContent = newGems;
+						updateExternalGemCounters(newGems);
+					}
+				}
+
 				loadSkins();
 			})
 			.catch(function (err) {
