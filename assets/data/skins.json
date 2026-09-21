@@ -138,6 +138,32 @@
 			"sale": null
 		},
 		{
+			"id": "pickled-skin",
+			"name": "Pickled Pepper",
+			"unitType": "KDAIM13aHU",
+			"unitTypeName": "Jalapeno - AHAHAHAHA!!! My chic outfit is SO MUCH BETTER than that silly Jalapeno's!",
+			"image": "assets/skins/JalapenoSkin.png",
+			"price": 20,
+			"availability": "always",
+			"availableFrom": null,
+			"availableUntil": null,
+			"excludeFromGlobalSale": false,
+			"sale": null
+		},
+		{
+			"id": "cherry-apple-skin",
+			"name": "Apple Bomb",
+			"unitType": "HXY6zzBGER",
+			"unitTypeName": "Cherry Bomb - 'You know,' the Apple Bomb remarks, 'I heard that snarky guys live less.' ",
+			"image": "assets/skins/CherryBombSkin.png",
+			"price": 20,
+			"availability": "always",
+			"availableFrom": null,
+			"availableUntil": null,
+			"excludeFromGlobalSale": false,
+			"sale": null
+		},
+		{
 			"id": "browncoat-hypnotized-human",
 			"name": "Regular Ol' Human",
 			"unitType": "o2hvbfE07a",
