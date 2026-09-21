@@ -18,7 +18,7 @@ class PhaserFloatingText extends Phaser.GameObjects.BitmapText {
 			data.y,
 			BitmapFontManager.font(
 				scene,
-				'BriannesHand',
+				'Verdana',
 				true,
 				taro.game.data.settings.addStrokeToNameAndAttributes !== false,
 				data.color || '#FFFFFF'
