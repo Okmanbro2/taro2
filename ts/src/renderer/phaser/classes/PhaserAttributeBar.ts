@@ -54,7 +54,7 @@ class PhaserAttributeBar extends Phaser.GameObjects.Container {
 		const text = (this.bitmapText = scene.add.bitmapText(
 			0,
 			0,
-			BitmapFontManager.font(scene, 'Arial', true, false, '#000000')
+			BitmapFontManager.font(scene, 'BriannesHand', true, false, '#000000')
 		));
 		text.setCenterAlign();
 		text.setFontSize(14);
