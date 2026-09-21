@@ -122,6 +122,7 @@ class BitmapFontManager {
 				// solid-black silhouette of the glyph, same alpha shape as the fill
 				const silhouette = Phaser.Display.Canvas.CanvasPool.create2D(null, w, h);
 				const silhouetteCtx = silhouette.getContext('2d');
+				silhouetteCtx.clearRect(0, 0, w, h); // pooled canvas may hold leftover content from a previous use - must clear before drawing into it, same as tempCanvas above
 				silhouetteCtx.drawImage(sourceFillImage, 0, 0, w, h);
 				silhouetteCtx.globalCompositeOperation = 'source-in';
 				silhouetteCtx.fillStyle = '#000000';
