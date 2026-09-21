@@ -3,6 +3,13 @@ type Font = 'Arial' | 'Verdana' | 'BriannesHand';
 class BitmapFontManager {
 	private static REPLACEMENT_CHAR = String.fromCharCode(65533);
 
+	// Fonts where "Bold" is registered against the exact same source PNG/XML
+	// as the regular weight (see preload() below) because no hand-drawn bold
+	// variant exists. For these, add() dilates the glyph silhouette by a
+	// couple of pixels before filling it, to approximate a bold weight
+	// instead of silently rendering identical-looking "bold" text.
+	private static FAUX_BOLD_FONTS: Font[] = ['BriannesHand'];
+
 	static preload(scene: Phaser.Scene): void {
 		const load = scene.load;
 
@@ -71,7 +78,30 @@ class BitmapFontManager {
 		canvas.height = h;
 
 		const ctx = canvas.getContext('2d');
-		ctx.drawImage(sourceFillImage, 0, 0, w, h);
+
+		if (bold && this.FAUX_BOLD_FONTS.includes(font)) {
+			// No real bold glyph atlas exists for this font - approximate one by
+			// stamping the regular glyphs at a ring of 1px offsets so overlapping
+			// edges accumulate opacity and the silhouette reads as thicker, then
+			// fill that dilated shape below exactly like a real bold source would be.
+			const dilated = Phaser.Display.Canvas.CanvasPool.create2D(null, w, h);
+			const dilatedCtx = dilated.getContext('2d');
+			dilatedCtx.clearRect(0, 0, w, h);
+
+			const offsets: [number, number][] = [
+				[-1, 0], [1, 0], [0, -1], [0, 1],
+				[-1, -1], [1, -1], [-1, 1], [1, 1],
+			];
+			for (const [dx, dy] of offsets) {
+				dilatedCtx.drawImage(sourceFillImage, dx, dy, w, h);
+			}
+			dilatedCtx.drawImage(sourceFillImage, 0, 0, w, h);
+
+			ctx.drawImage(dilated, 0, 0, w, h);
+			Phaser.Display.Canvas.CanvasPool.remove(dilated);
+		} else {
+			ctx.drawImage(sourceFillImage, 0, 0, w, h);
+		}
 
 		ctx.globalCompositeOperation = 'source-in';
 		ctx.fillStyle = color;
