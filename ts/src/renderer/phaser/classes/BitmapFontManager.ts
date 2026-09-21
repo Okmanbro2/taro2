@@ -1,4 +1,4 @@
-type Font = 'Arial' | 'Verdana';
+type Font = 'Arial' | 'Verdana' | 'BriannesHand';
 
 class BitmapFontManager {
 	private static REPLACEMENT_CHAR = String.fromCharCode(65533);
@@ -13,6 +13,15 @@ class BitmapFontManager {
 		load.image('VerdanaBoldStroke#FFFFFF', '/assets/fonts/VerdanaBoldStroke.png');
 
 		load.bitmapFont('ArialBold#FFFFFF', '/assets/fonts/ArialBold.png', '/assets/fonts/ArialBold.xml');
+
+		// Registered under the "...Bold#FFFFFF" slot even though there's only
+		// one real weight of this font - both call sites that use it
+		// (PhaserFloatingText, PhaserAttributeBar) already pass bold: true,
+		// so this avoids having to touch either call site's parameters, just
+		// the font name string. No stroke texture provided yet - see the
+		// graceful fallback in add() below, which skips the stroke rather
+		// than throwing if BriannesHandBoldStroke#FFFFFF was never loaded.
+		load.bitmapFont('BriannesHandBold#FFFFFF', '/assets/fonts/BriannesHand.png', '/assets/fonts/BriannesHand.xml');
 	}
 
 	static create(scene: Phaser.Scene): void {
@@ -72,24 +81,31 @@ class BitmapFontManager {
 		if (stroke) {
 			const sourceStrokeKey = `${font + (bold ? 'Bold' : '') + (stroke ? 'Stroke' : '')}#FFFFFF`;
 
-			const sourceStrokeData = bitmapCache.get(sourceStrokeKey);
-			const sourceFillTexture = textures.get(sourceStrokeData.texture);
-			const sourceStrokeImage = sourceFillTexture.getSourceImage() as HTMLImageElement;
+			// Not every font has a matching stroke-outline texture loaded (e.g.
+			// BriannesHand doesn't yet) - fall back to an unstroked render
+			// rather than crashing on a cache miss.
+			if (bitmapCache.has(sourceStrokeKey)) {
+				const sourceStrokeData = bitmapCache.get(sourceStrokeKey);
+				const sourceFillTexture = textures.get(sourceStrokeData.texture);
+				const sourceStrokeImage = sourceFillTexture.getSourceImage() as HTMLImageElement;
 
-			const tempCanvas = Phaser.Display.Canvas.CanvasPool.create2D(null, w, h);
+				const tempCanvas = Phaser.Display.Canvas.CanvasPool.create2D(null, w, h);
 
-			const tempCtx = tempCanvas.getContext('2d');
-			tempCtx.clearRect(0, 0, w, h);
-			tempCtx.drawImage(canvas, 0, 0, w, h);
+				const tempCtx = tempCanvas.getContext('2d');
+				tempCtx.clearRect(0, 0, w, h);
+				tempCtx.drawImage(canvas, 0, 0, w, h);
 
-			ctx.drawImage(sourceStrokeImage, 0, 0, w, h);
-			ctx.globalCompositeOperation = 'source-in';
-			ctx.fillStyle = '#000';
-			ctx.fillRect(0, 0, w, h);
-			ctx.globalCompositeOperation = 'source-over'; // default
-			ctx.drawImage(tempCanvas, 0, 0, w, h);
+				ctx.drawImage(sourceStrokeImage, 0, 0, w, h);
+				ctx.globalCompositeOperation = 'source-in';
+				ctx.fillStyle = '#000';
+				ctx.fillRect(0, 0, w, h);
+				ctx.globalCompositeOperation = 'source-over'; // default
+				ctx.drawImage(tempCanvas, 0, 0, w, h);
 
-			Phaser.Display.Canvas.CanvasPool.remove(tempCanvas);
+				Phaser.Display.Canvas.CanvasPool.remove(tempCanvas);
+			} else {
+				console.warn(`BitmapFontManager: no stroke texture registered for "${sourceStrokeKey}" - rendering "${font}" without a stroke.`);
+			}
 		}
 
 		textures.addCanvas(key, canvas);
