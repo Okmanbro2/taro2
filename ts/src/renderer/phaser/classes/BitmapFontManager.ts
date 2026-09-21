@@ -120,9 +120,20 @@ class BitmapFontManager {
 				tempCtx.drawImage(canvas, 0, 0, w, h); // preserve the colored fill drawn above
 
 				// solid-black silhouette of the glyph, same alpha shape as the fill
-				const silhouette = Phaser.Display.Canvas.CanvasPool.create2D(null, w, h);
+				// A plain, independent canvas here - not a second CanvasPool
+				// request. The pool is a size-keyed pool of reused canvases; the
+				// original code above only ever needed one pooled scratch canvas
+				// at a time, but this branch needs two live simultaneously
+				// (tempCanvas holding the fill, silhouette being built separately)
+				// before either is released. If the pool hands back the same
+				// recycled canvas for two same-sized requests in a row, tempCanvas
+				// and silhouette would end up being the same canvas - clearing and
+				// drawing into silhouette would then wipe out the fill just saved
+				// into tempCanvas, and everything downstream ends up black.
+				const silhouette = document.createElement('canvas');
+				silhouette.width = w;
+				silhouette.height = h;
 				const silhouetteCtx = silhouette.getContext('2d');
-				silhouetteCtx.clearRect(0, 0, w, h); // pooled canvas may hold leftover content from a previous use - must clear before drawing into it, same as tempCanvas above
 				silhouetteCtx.drawImage(sourceFillImage, 0, 0, w, h);
 				silhouetteCtx.globalCompositeOperation = 'source-in';
 				silhouetteCtx.fillStyle = '#000000';
@@ -142,7 +153,6 @@ class BitmapFontManager {
 				ctx.drawImage(tempCanvas, 0, 0, w, h); // real colored fill on top, centered
 
 				Phaser.Display.Canvas.CanvasPool.remove(tempCanvas);
-				Phaser.Display.Canvas.CanvasPool.remove(silhouette);
 			}
 		}
 
