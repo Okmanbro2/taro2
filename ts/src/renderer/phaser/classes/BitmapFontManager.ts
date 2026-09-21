@@ -141,7 +141,7 @@ class BitmapFontManager {
 				silhouetteCtx.globalCompositeOperation = 'source-over';
 
 				ctx.clearRect(0, 0, w, h);
-				const outlineWidth = 2; // px, in bitmap-font source-image space
+				const outlineWidth = 6; // px, in bitmap-font source-image space
 				for (let ox = -outlineWidth; ox <= outlineWidth; ox++) {
 					for (let oy = -outlineWidth; oy <= outlineWidth; oy++) {
 						if (ox === 0 && oy === 0) continue;
