@@ -1,4 +1,4 @@
-type Font = 'Arial' | 'Verdana' | 'BriannesHand';
+type Font = 'Arial' | 'Verdana';
 
 class BitmapFontManager {
 	private static REPLACEMENT_CHAR = String.fromCharCode(65533);
@@ -13,15 +13,6 @@ class BitmapFontManager {
 		load.image('VerdanaBoldStroke#FFFFFF', '/assets/fonts/VerdanaBoldStroke.png');
 
 		load.bitmapFont('ArialBold#FFFFFF', '/assets/fonts/ArialBold.png', '/assets/fonts/ArialBold.xml');
-
-		// Registered under the "...Bold#FFFFFF" slot even though there's only
-		// one real weight of this font - both call sites that use it
-		// (PhaserFloatingText, PhaserAttributeBar) already pass bold: true,
-		// so this avoids having to touch either call site's parameters, just
-		// the font name string. No stroke texture provided yet - see the
-		// graceful fallback in add() below, which skips the stroke rather
-		// than throwing if BriannesHandBoldStroke#FFFFFF was never loaded.
-		load.bitmapFont('BriannesHandBold#FFFFFF', '/assets/fonts/BriannesHand.png', '/assets/fonts/BriannesHand.xml');
 	}
 
 	static create(scene: Phaser.Scene): void {
@@ -81,79 +72,24 @@ class BitmapFontManager {
 		if (stroke) {
 			const sourceStrokeKey = `${font + (bold ? 'Bold' : '') + (stroke ? 'Stroke' : '')}#FFFFFF`;
 
-			// Not every font has a matching stroke-outline texture loaded (e.g.
-			// BriannesHand doesn't yet) - fall back to an unstroked render
-			// rather than crashing on a cache miss.
-			if (bitmapCache.has(sourceStrokeKey)) {
-				const sourceStrokeData = bitmapCache.get(sourceStrokeKey);
-				const sourceFillTexture = textures.get(sourceStrokeData.texture);
-				const sourceStrokeImage = sourceFillTexture.getSourceImage() as HTMLImageElement;
+			const sourceStrokeData = bitmapCache.get(sourceStrokeKey);
+			const sourceFillTexture = textures.get(sourceStrokeData.texture);
+			const sourceStrokeImage = sourceFillTexture.getSourceImage() as HTMLImageElement;
 
-				const tempCanvas = Phaser.Display.Canvas.CanvasPool.create2D(null, w, h);
+			const tempCanvas = Phaser.Display.Canvas.CanvasPool.create2D(null, w, h);
 
-				const tempCtx = tempCanvas.getContext('2d');
-				tempCtx.clearRect(0, 0, w, h);
-				tempCtx.drawImage(canvas, 0, 0, w, h);
+			const tempCtx = tempCanvas.getContext('2d');
+			tempCtx.clearRect(0, 0, w, h);
+			tempCtx.drawImage(canvas, 0, 0, w, h);
 
-				ctx.drawImage(sourceStrokeImage, 0, 0, w, h);
-				ctx.globalCompositeOperation = 'source-in';
-				ctx.fillStyle = '#000';
-				ctx.fillRect(0, 0, w, h);
-				ctx.globalCompositeOperation = 'source-over'; // default
-				ctx.drawImage(tempCanvas, 0, 0, w, h);
+			ctx.drawImage(sourceStrokeImage, 0, 0, w, h);
+			ctx.globalCompositeOperation = 'source-in';
+			ctx.fillStyle = '#000';
+			ctx.fillRect(0, 0, w, h);
+			ctx.globalCompositeOperation = 'source-over'; // default
+			ctx.drawImage(tempCanvas, 0, 0, w, h);
 
-				Phaser.Display.Canvas.CanvasPool.remove(tempCanvas);
-			} else {
-				// No pre-made outline texture exists for this font/weight (true
-				// today for BriannesHand - see the loader comment above). Rather
-				// than skip the outline entirely, synthesize one from the glyph's
-				// own shape: stamp a solid-black silhouette of the glyph at a
-				// ring of small offsets around its true position (building up a
-				// black halo), then draw the real colored fill on top, centered.
-				// This is the standard "poor man's font outline" trick for when
-				// you don't have an actual outline-baked texture to work with -
-				// same end layering as the real-stroke branch above, just with a
-				// generated silhouette standing in for a hand-made one.
-				const tempCanvas = Phaser.Display.Canvas.CanvasPool.create2D(null, w, h);
-				const tempCtx = tempCanvas.getContext('2d');
-				tempCtx.clearRect(0, 0, w, h);
-				tempCtx.drawImage(canvas, 0, 0, w, h); // preserve the colored fill drawn above
-
-				// solid-black silhouette of the glyph, same alpha shape as the fill
-				// A plain, independent canvas here - not a second CanvasPool
-				// request. The pool is a size-keyed pool of reused canvases; the
-				// original code above only ever needed one pooled scratch canvas
-				// at a time, but this branch needs two live simultaneously
-				// (tempCanvas holding the fill, silhouette being built separately)
-				// before either is released. If the pool hands back the same
-				// recycled canvas for two same-sized requests in a row, tempCanvas
-				// and silhouette would end up being the same canvas - clearing and
-				// drawing into silhouette would then wipe out the fill just saved
-				// into tempCanvas, and everything downstream ends up black.
-				const silhouette = document.createElement('canvas');
-				silhouette.width = w;
-				silhouette.height = h;
-				const silhouetteCtx = silhouette.getContext('2d');
-				silhouetteCtx.drawImage(sourceFillImage, 0, 0, w, h);
-				silhouetteCtx.globalCompositeOperation = 'source-in';
-				silhouetteCtx.fillStyle = '#000000';
-				silhouetteCtx.fillRect(0, 0, w, h);
-				silhouetteCtx.globalCompositeOperation = 'source-over';
-
-				ctx.clearRect(0, 0, w, h);
-				const outlineWidth = 6; // px, in bitmap-font source-image space
-				for (let ox = -outlineWidth; ox <= outlineWidth; ox++) {
-					for (let oy = -outlineWidth; oy <= outlineWidth; oy++) {
-						if (ox === 0 && oy === 0) continue;
-						// circular kernel (skip the far corners) for a smoother, less blocky outline
-						if (ox * ox + oy * oy > outlineWidth * outlineWidth + 1) continue;
-						ctx.drawImage(silhouette, ox, oy);
-					}
-				}
-				ctx.drawImage(tempCanvas, 0, 0, w, h); // real colored fill on top, centered
-
-				Phaser.Display.Canvas.CanvasPool.remove(tempCanvas);
-			}
+			Phaser.Display.Canvas.CanvasPool.remove(tempCanvas);
 		}
 
 		textures.addCanvas(key, canvas);
