@@ -104,7 +104,44 @@ class BitmapFontManager {
 
 				Phaser.Display.Canvas.CanvasPool.remove(tempCanvas);
 			} else {
-				console.warn(`BitmapFontManager: no stroke texture registered for "${sourceStrokeKey}" - rendering "${font}" without a stroke.`);
+				// No pre-made outline texture exists for this font/weight (true
+				// today for BriannesHand - see the loader comment above). Rather
+				// than skip the outline entirely, synthesize one from the glyph's
+				// own shape: stamp a solid-black silhouette of the glyph at a
+				// ring of small offsets around its true position (building up a
+				// black halo), then draw the real colored fill on top, centered.
+				// This is the standard "poor man's font outline" trick for when
+				// you don't have an actual outline-baked texture to work with -
+				// same end layering as the real-stroke branch above, just with a
+				// generated silhouette standing in for a hand-made one.
+				const tempCanvas = Phaser.Display.Canvas.CanvasPool.create2D(null, w, h);
+				const tempCtx = tempCanvas.getContext('2d');
+				tempCtx.clearRect(0, 0, w, h);
+				tempCtx.drawImage(canvas, 0, 0, w, h); // preserve the colored fill drawn above
+
+				// solid-black silhouette of the glyph, same alpha shape as the fill
+				const silhouette = Phaser.Display.Canvas.CanvasPool.create2D(null, w, h);
+				const silhouetteCtx = silhouette.getContext('2d');
+				silhouetteCtx.drawImage(sourceFillImage, 0, 0, w, h);
+				silhouetteCtx.globalCompositeOperation = 'source-in';
+				silhouetteCtx.fillStyle = '#000000';
+				silhouetteCtx.fillRect(0, 0, w, h);
+				silhouetteCtx.globalCompositeOperation = 'source-over';
+
+				ctx.clearRect(0, 0, w, h);
+				const outlineWidth = 2; // px, in bitmap-font source-image space
+				for (let ox = -outlineWidth; ox <= outlineWidth; ox++) {
+					for (let oy = -outlineWidth; oy <= outlineWidth; oy++) {
+						if (ox === 0 && oy === 0) continue;
+						// circular kernel (skip the far corners) for a smoother, less blocky outline
+						if (ox * ox + oy * oy > outlineWidth * outlineWidth + 1) continue;
+						ctx.drawImage(silhouette, ox, oy);
+					}
+				}
+				ctx.drawImage(tempCanvas, 0, 0, w, h); // real colored fill on top, centered
+
+				Phaser.Display.Canvas.CanvasPool.remove(tempCanvas);
+				Phaser.Display.Canvas.CanvasPool.remove(silhouette);
 			}
 		}
 
