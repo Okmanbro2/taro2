@@ -6,6 +6,7 @@ The Taro Engine was abandoned in late 2024 as MODD.IO transitioned into becoming
 - Optimizations to the engine's core
 - Separate account system
 - And more ...
+### NOTE! This will <u>NOT</u> work with your game. I personally tuned the engine to fit Plants vs. Zombies: Roam 2. If you want to try and make a standalone game yourself, I used Pineapplebrain's taro2 fork!
 ## Running the game
 
 Make sure you have [Node 16](https://nodejs.org) or later.
