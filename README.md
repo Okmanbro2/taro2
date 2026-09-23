@@ -29,10 +29,7 @@ You can now play the game at http://localhost:8080
 
 ## How do I create a new game from scratch?
 
-Moddio games are created & edited using Moddio Game Editor available at [https://www.modd.io](https://www.modd.io).
-To learn how to use the game editor, visit [https://learn.modd.io](https://learn.modd.io).
-
-After creating your game, you can export the `game.json` file for use in your local installation. To do this, navigate to `Menu` in the Moddio Game Editor and click `Export Game`.
+Along with MODD, the editor is also in shambles. I am currently working on a new editor, which will be public for all - you can open it at https://okmanbro2.github.io/taro2-makeshift-editor/ - it frequently sees updates.
 
 <img src="./assets/images/gamejson2.png" width="600" alt="How to get game json in game's in-game editor">
 
