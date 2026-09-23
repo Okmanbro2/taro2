@@ -1,13 +1,13 @@
 {
-	"version": "3.6.2",
+	"version": "3.6.3",
 	"entries": [
+		{
+			"title": "Connection Lost Messages Updated",
+			"description": "Updated connection loss messages."
+		},
 		{
 			"title": "Chat Upgrades Galore",
 			"description": "Upgraded the chat - increased character limits and added a proper filter."
-		},
-		{
-			"title": "Even More Bugs Are Squashed",
-			"description": "Fixed more bugs, I really hate bugs."
 		},
 		{
 			"title": "New Content Soon!",
