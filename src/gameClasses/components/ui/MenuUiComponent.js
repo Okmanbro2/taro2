@@ -838,15 +838,15 @@ var MenuUiComponent = TaroEntity.extend({
 			return;
 		}
 
-		const failedConnectReason = 'Error trying to contact server. Please refresh this page or visit our homepage.';
-		const disconnectReason = 'Lost connection to the game server. Please refresh this page or visit our homepage.';
+		const failedConnectReason = 'There was an error connecting to the game server - do try again or tell a developer in our Discord server!';
+		const disconnectReason = 'You lost connection to the game server! Usually, this is an automatic procedure for an update to be live - expect a refresh in a few seconds! Otherwise, check your connection.';
 
 		message = message || (taro.game?.hasStarted ? disconnectReason : failedConnectReason);
 
 		const mustRejoinReasons = [
-			'Server not accepting players, refresh to join another server.',
-			'server not accepting connections',
-			'Sorry, the server you are trying to join is currently full. Please try again later or join a different server to play this game.',
+			'This server is not accepting any new players, try joining another server!',
+			'This server is not taking any connections, sorry!',
+			'Sorry, the server you are trying to join is currently full! Please try again later or join a different server to play!',
 		];
 
 		const autoRejoinReasons = [
