@@ -1,3 +1,5 @@
+===== server.js =====
+
 const express = require('express');
 const helmet = require('helmet');
 const path = require('path');
@@ -517,6 +519,19 @@ var Server = TaroClass.extend({
 			}
 			try {
 				await equipSkinForUnitType(req.uid, unitType, skinId);
+				return res.json({ success: true });
+			} catch (err) {
+				return res.status(400).json({ error: err.message });
+			}
+		});
+
+		app.post('/api/skins/unequip', requireAuth, async (req, res) => {
+			const unitType = (req.body.unitType || '').trim();
+			if (!unitType) {
+				return res.status(400).json({ error: 'missing unitType' });
+			}
+			try {
+				await equipSkinForUnitType(req.uid, unitType, null);
 				return res.json({ success: true });
 			} catch (err) {
 				return res.status(400).json({ error: err.message });
