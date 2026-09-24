@@ -21,6 +21,19 @@
 			"sale": null
 		},
 		{
+			"id": "princess-sunflower",
+			"name": "Sunflower Princess",
+			"unitType": "wzlhM8hsRD",
+			"unitTypeName": "Sunflower - When a Sunflower is set to become a Queen, they gotta be a princess first.",
+			"image": "assets/skins/SunflowerSkin.png",
+			"price": 30,
+			"availability": "always",
+			"availableFrom": null,
+			"availableUntil": null,
+			"excludeFromGlobalSale": false,
+			"sale": null
+		},
+		{
 			"id": "diy-peashooter",
 			"name": "Homemade Peashooter",
 			"unitType": "CbHUJI1d2B",
@@ -131,6 +144,32 @@
 			"unitTypeName": "Twin Sunflower - It was a crazed night of forbidden science that brought Twin Marigold into existence. Thunder crashed over .. this seems familiar.",
 			"image": "assets/skins/MarigoldSkin.png",
 			"price": 30,
+			"availability": "always",
+			"availableFrom": null,
+			"availableUntil": null,
+			"excludeFromGlobalSale": false,
+			"sale": null
+		},
+		{
+			"id": "queen-cornflower",
+			"name": "Queen Cornflower",
+			"unitType": "tUHtjVsFuL",
+			"unitTypeName": "Sunflower Queen - I think this Queen had a bit too much protocyanin.",
+			"image": "assets/skins/QueenSkin.png",
+			"price": 100,
+			"availability": "always",
+			"availableFrom": null,
+			"availableUntil": null,
+			"excludeFromGlobalSale": false,
+			"sale": null
+		},
+		{
+			"id": "hypno-glasses",
+			"name": "Punk'd-Up Hypno Flower",
+			"unitType": "ywUnR41v79",
+			"unitTypeName": "Royal Hypno Flower - 'Yes,' says the Royal Hypnoflower- 'I believe I look more .. rad? Yes, rad with these on'.",
+			"image": "assets/skins/HypnoSkin.png",
+			"price": 100,
 			"availability": "always",
 			"availableFrom": null,
 			"availableUntil": null,
