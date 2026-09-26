@@ -43,7 +43,7 @@ const ATTR = {
 	// set by the global "unit's attribute is 0" script when the Yeti Zombie
 	// (ba607jTTAi) dies to a human player - and i can't believe I'm saying this but deliberately NOT the Fake Yeti
 	// Zombie (3bEMMPjlgN), which must never count toward this badge
-	YETI_KILL: 'yTk4Rn8vQz',
+	YETI_KILL: 'VYbHrJy5Si',
 	// already set in-game by Senator Zomboss's "dead" script, so this one
 	// needed no game-side change - just the rule below
 	CRAZY_MODE_WON: 'n1BUlF5Jqz',
